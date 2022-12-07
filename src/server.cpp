@@ -6,7 +6,7 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/07 11:57:21 by jgourlin          #+#    #+#             */
-/*   Updated: 2022/12/07 16:40:27 by jgourlin         ###   ########.fr       */
+/*   Updated: 2022/12/07 17:38:55 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,15 +17,17 @@
 /*******CONSTRUCTOR*******/
 /*************************/
 
-server::server(char *port, char *password): _port(port),
+server::server(char *port, char *password):
 _password(password),
+_port(port),
 _node("127.0.0.1"),
 _nb_client(0)
 {
     _hints.ai_family = AF_INET;
     _hints.ai_socktype = SOCK_STREAM;
     _hints.ai_protocol = 0;
-
+    (void)_password;
+    (void)_nb_client;
     _Init_server();
     //socket creer et server en ecoute
     
@@ -46,7 +48,7 @@ server::~server()
 
 int    server::_Init_server()
 {
-    if (!getaddrinfo(_node, _port, &_hints, &_addrinfo))
+    if (getaddrinfo(_node, _port, &_hints, &_addrinfo))
     {
         std::cout << "Error: getaddrinfo" << std::endl;
         return (-1);
@@ -76,6 +78,7 @@ int    server::_Init_server()
         freeaddrinfo(_addrinfo);
         return (-4);
     }
+    return (0);
 }
 
 /*************************/
@@ -86,6 +89,25 @@ void    server::_Infinit_while()
 {
     // Gerer l'ajout d'USER
     // Gerer les commandes des USERS
-    fcntl(_socket_serv, F_SETFL, O_NONBLOCK); // pour qu'accept ne soit pas bloquant
     
+    //fcntl(_socket_serv, F_SETFL, O_NONBLOCK); // pour qu'accept ne soit pas bloquant
+    struct pollfd fd_poll[3];
+    fd_poll[0].fd = _socket_serv;
+    fd_poll[0].revents = 0;
+    fd_poll[0].events = POLLIN;
+
+
+    while (1)
+    {
+        poll(fd_poll, _socket_serv + 2, -1);
+        if (fd_poll[0].revents & POLLIN)
+        {
+            std::cout << "ALPHA" << std::endl;
+            
+        }
+    }
+
+    // end penser a free
+    // ajouter close toutes les socket
+    freeaddrinfo(_addrinfo);
 }

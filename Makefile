@@ -27,8 +27,8 @@ CLASS = $(addprefix $(CLASS_PATH)/, $(CFILES))
 #    Files
 SRCS_PATH = src
 
-FILES = main.cpp #\
-		#user.cpp server.cpp
+FILES = main.cpp \
+		user.cpp server.cpp
 
 SRCS = $(addprefix $(SRCS_PATH)/, $(FILES))
 

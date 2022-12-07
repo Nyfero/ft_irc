@@ -6,12 +6,13 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/06 06:59:27 by jgourlin          #+#    #+#             */
-/*   Updated: 2022/12/07 16:40:14 by jgourlin         ###   ########.fr       */
+/*   Updated: 2022/12/07 17:16:39 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../class/utils.hpp"
 #include <unistd.h>
+# include "../class/server.hpp"
 
 int ft_listen(int socket, int argv2)
 {
@@ -31,6 +32,11 @@ int main(int argc, char **argv)
     (void)argc;
     (void)argv;
     int socket_cli;
+    if (argc == 3)
+    {
+        server serv(argv[1], argv[2]);
+        return (2);
+    }
     if (argc != 2)
     {
         std::cout << "need 1 argument" << std::endl;

@@ -6,13 +6,13 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/07 12:02:46 by jgourlin          #+#    #+#             */
-/*   Updated: 2022/12/07 16:32:31 by jgourlin         ###   ########.fr       */
+/*   Updated: 2022/12/07 17:11:21 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-# define MAX_LISTEN = 42
+# define MAX_LISTEN 42
 
 class server
 {
@@ -30,7 +30,7 @@ class server
         int _socket_serv;
         
         unsigned int    _nb_client;
-        // liste user
+        // liste user -> vector map ou je ne sais quoi
         // liste channel
 
 
