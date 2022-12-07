@@ -16,9 +16,6 @@ void			srv_create(t_env *e, int port)
   sin.sin_family = AF_INET;
   sin.sin_addr.s_addr = INADDR_ANY;
   sin.sin_port = htons(port);
-
-  printf("protocol name = %s\n",  pe->p_name);
-
   X(-1, bind(s, (struct sockaddr*)&sin, sizeof(sin)), "bind");
   X(-1, listen(s, 42), "listen");
   e->fds[s].type = FD_SERV;

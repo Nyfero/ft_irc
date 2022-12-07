@@ -6,11 +6,12 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/06 06:59:27 by jgourlin          #+#    #+#             */
-/*   Updated: 2022/12/07 12:35:24 by jgourlin         ###   ########.fr       */
+/*   Updated: 2022/12/07 16:40:14 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../class/utils.hpp"
+#include <unistd.h>
 
 int ft_listen(int socket, int argv2)
 {
@@ -106,6 +107,7 @@ int main(int argc, char **argv)
 
 // Passage en mode non bloquant et seul utilisation autorise par le sujet
    // fcntl(socket_serv, F_SETFL, O_NONBLOCK);
+   // fcntl(socket_serv, F_SETFL, O_NONBLOCK);
 
 // accept
 // Permet de recuperer le socket du client, c'est par ce dernier qu'on fera les recv/send || read/write
@@ -123,10 +125,6 @@ int main(int argc, char **argv)
     }
     else
     {
-        char ip[INET_ADDRSTRLEN];
-	    inet_ntop(AF_INET, &addr_cli, ip, INET_ADDRSTRLEN);
-        std::cout << "Connexion de " << ip << std::endl;
-
         std:: cout << "accept: OK" << std::endl;
         std::cout << "socket_clit :" << socket_cli << std::endl << "socket_serveur :" << socket_serv << std::endl;
 
@@ -147,38 +145,45 @@ int main(int argc, char **argv)
 // nous gérons donc ce cas et donc nous supprimons notre client de notre tableau tout en notifiant aux autres 
 // clients sa déconnexion.
 
-        struct pollfd   fd_poll;
-        fd_poll.fd = socket_serv;
-        fd_poll.revents = 0;
-        fd_poll.events = POLLIN;
+        struct pollfd fd_poll[3];
+        fd_poll[0].fd = socket_serv;
+        fd_poll[0].revents = 0;
+        fd_poll[0].events = POLLOUT;
+
+        fd_poll[1].fd = socket_cli;
+        fd_poll[1].revents = 0;
+        fd_poll[1].events = POLLIN;
+
+        fd_poll[2].fd = STDIN_FILENO;
+        fd_poll[2].revents = 0;
+        fd_poll[2].events = POLLIN;
 
         int tmp;
         char recu[100];
+        int end = 0;
         int cond = 1;
+        int count = 0;
+
         while (cond)
         {
-            tmp = poll(&fd_poll, socket_cli, -1);
-            if (POLLHUP)
+            tmp = poll(fd_poll, 4, -1);
+            if (fd_poll[1].revents)
             {
-                cond = 0;
-                std::cout << "client deconnecter" << std::endl;
-            }
-            else if (POLLIN)
-            {
-                recv(socket_cli, recu, 99, 0);
-                std::cout << recu << std::endl;
+                end = recv(socket_cli, recu, 99, 0);
+                recu[end] = 0;
+                std::cout << "client send message: " << recu << std::endl;
                 send(socket_cli, "Merci du message\n\r", sizeof("Merci du message\n\r"), 0);
+                if (recu[0] == '8')
+                    cond = 0;
             }
-            // std::cout << "tmp: " << tmp << std::endl;
-
-            // ssize_t size_recv = 1;
-            // while (size_recv > 0)
-            // {
-            //     size_recv = recv(socket_cli, recu, 1, 0);
-            //     std::cout <<recu;
-            //     // std::cout << size_recv;
-            // }
-            // std::cout << std::endl;
+            if (fd_poll[2].revents)
+            {   
+                end = recv(socket_cli, recu, 99, 0);
+                recu[end] = 0;
+                cond = 0;
+            }
+            std::cout << count++ << "-ret poll: " << tmp << std::endl;
+            sleep(1);
 
         }
 
@@ -193,6 +198,7 @@ int main(int argc, char **argv)
     else
         std::cout << "Socket close" << std::endl;
     freeaddrinfo(res_addrinfo);
+    std::cout << "END" << std::endl;
 
     return (0);
 }
