@@ -8,6 +8,8 @@
 # include <arpa/inet.h>
 # include <netdb.h>
 # include <string.h>
+# include <poll.h>
+
 // int socket(int domain, int type, int protocol);
 // int setsockopt(int socket, int level, int option_name, const void *option_value, socklen_t option_len);
 // int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
@@ -35,4 +37,10 @@
 //     struct sockaddr *ai_addr;
 //     char            *ai_canonname;
 //     struct addrinfo *ai_next;
+// };
+
+// struct pollfd {
+//     int   fd;         /* Descripteur de fichier */
+//     short events;     /* Événements attendus    */
+//     short revents;    /* Événements détectés    */
 // };

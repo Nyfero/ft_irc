@@ -27,12 +27,13 @@ CLASS = $(addprefix $(CLASS_PATH)/, $(CFILES))
 #    Files
 SRCS_PATH = src
 
-FILES = main.cpp
+FILES = main.cpp #\
+		#user.cpp server.cpp
 
 SRCS = $(addprefix $(SRCS_PATH)/, $(FILES))
 
 #    Compilation
-NAME = ft_irc_jgourlin
+NAME = ft_irc
 
 CXX = clang++
 
