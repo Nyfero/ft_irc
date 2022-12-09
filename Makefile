@@ -33,7 +33,7 @@ FILES = main.cpp \
 SRCS = $(addprefix $(SRCS_PATH)/, $(FILES))
 
 #    Compilation
-NAME = ft_irc
+NAME = ircserv
 
 CXX = clang++
 
