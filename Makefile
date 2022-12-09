@@ -48,8 +48,6 @@ OBJS =     $(patsubst $(SRCS_PATH)%.cpp,    $(OBJS_PATH)%.o,    $(SRCS))
 #    Rules
 all: $(NAME)
 
-
-
 $(NAME): $(OBJS_PATH) $(OBJS) $(CLASS)
 	@ echo "$(BLUE)\n         ***Make $(NAME) ***\n$(END)"
 	$(HIDE) $(CXX) $(CFLAGS) $(OBJS) -o $(NAME)
@@ -64,12 +62,10 @@ $(OBJS_PATH)%.o: $(SRCS_PATH)%.cpp $(CLASS) Makefile
 
 clean:
 	$(HIDE) $(RM) $(OBJS_PATH)
-	$(HIDE) $(RM) $(STD_OBJS_PATH)
 	@ echo "$(PURPLE)\n        *** Clean objects ***\n$(END)"
 
 fclean: clean
 	$(HIDE) $(RM) $(NAME)
-	$(HIDE) $(RM) $(STD_NAME)
 	@ echo "$(RED)\n        *** Remove $(NAME) ***\n$(END)"
 
 re: fclean all
