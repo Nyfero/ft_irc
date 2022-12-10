@@ -6,7 +6,7 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/07 11:57:21 by jgourlin          #+#    #+#             */
-/*   Updated: 2022/12/09 14:24:57 by jgourlin         ###   ########.fr       */
+/*   Updated: 2022/12/10 12:42:25 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,14 +135,16 @@ void    server::_Infinit_while()
         // check tous les fds
         while (it != _fds.end())
         {
-            std::cout << "it->fd: " << it->fd<< std::endl;
+            std::cout << "it->fd: " << it->fd<< " revents: " << it->revents << std::endl;
+            
             // la deco ne fonctionne pas pour le moment: n'entre pas donc le vector n'est pas changer
-            // if (it->revents & POLLHUP) // deconnexion
-            // {
-            //     std::cout << "*******DECO FD********" << std::endl; 
-            //     _Remove_user(it);
-            // }
-            if (it->revents & POLLIN) // données en attente de lecture...
+            if (it->revents == 17) // deconnexion
+            {
+                std::cout << "*******DECO FD********" << std::endl; 
+                _Remove_user(it);
+                break;
+            }
+            if (it->revents == POLLIN) // données en attente de lecture...
             {
                 std::cout << "POLL revents fd:" << it->fd << std::endl;
                 if (it->fd == _socket_serv) // sur la socket server
@@ -151,8 +153,9 @@ void    server::_Infinit_while()
                     // modif du vector -> unvalid read/  Conditional jump
                     // Besoin de redefnir it = begin check si begin < it < end
                     // ou break et recommencer la boucle
-                    if (it < _fds.begin() || it >= _fds.end())
-                        it = _fds.begin();
+                    // if (it < _fds.begin() || it >= _fds.end())
+                    //     it = _fds.begin();
+                    break;
                 }
                 else // depuis un client
                 {
@@ -258,7 +261,9 @@ int server::_Input_cli(int fd)
     char    res[50];
     int     ret;
 
-    ret = recv(fd, res, 49, MSG_DONTWAIT);
+    // mettre gnl ici
+    ret = recv(fd, res, 49, 0);
+
     if (ret >= 0)
     {
         res[ret] = 0;
