@@ -6,7 +6,7 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/07 11:57:21 by jgourlin          #+#    #+#             */
-/*   Updated: 2022/12/10 12:42:25 by jgourlin         ###   ########.fr       */
+/*   Updated: 2022/12/11 18:04:15 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -258,19 +258,20 @@ void    server::_Remove_user(std::vector<pollfd>::iterator pos)
 int server::_Input_cli(int fd)
 {
     std::cout << "*** _Input_cli: " << fd << "***" << std::endl;
-    char    res[50];
-    int     ret;
+    char        inpt[50];
+    int         ret = -1;
+    std::string res;
 
     // mettre gnl ici
-    ret = recv(fd, res, 49, 0);
-
-    if (ret >= 0)
+    while (res.find("\n", 0) == std::string::npos) // res n'a pas de \n
     {
-        res[ret] = 0;
-        std::cout << "ret:" << ret << " message recu: "<< res << std::endl;
+        ret = recv(fd, inpt, 49, 0);
+        inpt[ret] = 0;
+        std::cout << "ret:" << ret << " message recu: "<< inpt << std::endl;
+        res.append(inpt);
     }
-    else
-        std::cout << "ret:" << std::endl;
+    std::cout << "ret:" << std::endl;
+    std::cout << res << std::endl;
 
     return (0);
 }
