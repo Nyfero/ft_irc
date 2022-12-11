@@ -6,7 +6,7 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/07 12:02:46 by jgourlin          #+#    #+#             */
-/*   Updated: 2022/12/09 14:19:28 by jgourlin         ###   ########.fr       */
+/*   Updated: 2022/12/11 18:10:32 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ class server
 
         /* DVERS */  
         int     _Input_cli(int fd);
+        int     _Output_cli(int fd, std::string msg);
 
     public:
 

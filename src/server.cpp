@@ -6,7 +6,7 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/07 11:57:21 by jgourlin          #+#    #+#             */
-/*   Updated: 2022/12/11 18:04:15 by jgourlin         ###   ########.fr       */
+/*   Updated: 2022/12/11 18:11:50 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -259,7 +259,7 @@ int server::_Input_cli(int fd)
 {
     std::cout << "*** _Input_cli: " << fd << "***" << std::endl;
     char        inpt[50];
-    int         ret = -1;
+    ssize_t         ret = -1;
     std::string res;
 
     // mettre gnl ici
@@ -272,6 +272,18 @@ int server::_Input_cli(int fd)
     }
     std::cout << "ret:" << std::endl;
     std::cout << res << std::endl;
+
+    // a suppr 
+    _Output_cli(fd, "Message bien recu, aurevoir \n\r");
+    return (0);
+}
+
+int server::_Output_cli(int fd, std::string msg)
+{
+    std::cout << "*** _Output_cli: " << fd << "***" << std::endl;
+    ssize_t ret;
+
+    ret = send(fd, msg.c_str(), msg.size(), 0);
 
     return (0);
 }
