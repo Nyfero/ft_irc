@@ -6,7 +6,7 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/07 12:01:47 by jgourlin          #+#    #+#             */
-/*   Updated: 2022/12/09 14:02:38 by jgourlin         ###   ########.fr       */
+/*   Updated: 2022/12/12 13:27:58 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ class user
         struct pollfd   _fd_poll; // peut etre enlever et juste garder socket
 
     public:
+        std::string str;
 
         /*********************/
         /**** CONSTRUCTOR ****/

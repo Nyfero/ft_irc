@@ -6,7 +6,7 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/07 11:57:21 by jgourlin          #+#    #+#             */
-/*   Updated: 2022/12/11 18:11:50 by jgourlin         ###   ########.fr       */
+/*   Updated: 2022/12/12 13:46:53 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -251,6 +251,20 @@ void    server::_Remove_user(std::vector<pollfd>::iterator pos)
     delete tmp;
 }
 
+/******************/
+/**** GET USER ****/
+/******************/
+
+user   *server::_Get_userbyfd(int fd)
+{
+    std::vector<user *>::iterator   it;
+
+    for (unsigned int i = 0; i < _user.size(); i++)
+        if (_user[i]->Get_fd() == fd)
+            return (_user[i]);
+    return (NULL);
+}
+
 /****************/
 /**** DIVERS ****/
 /****************/
@@ -260,21 +274,19 @@ int server::_Input_cli(int fd)
     std::cout << "*** _Input_cli: " << fd << "***" << std::endl;
     char        inpt[50];
     ssize_t         ret = -1;
-    std::string res;
 
-    // mettre gnl ici
-    while (res.find("\n", 0) == std::string::npos) // res n'a pas de \n
+    user    *test = _Get_userbyfd(fd);
+    if ((ret = recv(fd, inpt, 49, 0)) == -1)
+        return (-1);
+    inpt[ret] = 0;
+
+    test->str.append(inpt);
+    if (test->str.find("\n", 0) != std::string::npos) // ligne complete -> traite -> delete
     {
-        ret = recv(fd, inpt, 49, 0);
-        inpt[ret] = 0;
-        std::cout << "ret:" << ret << " message recu: "<< inpt << std::endl;
-        res.append(inpt);
+        std::cout << "   res:" << test->str; // Just to show in server terminal
+        // Use line
+        test->str.clear();// delete
     }
-    std::cout << "ret:" << std::endl;
-    std::cout << res << std::endl;
-
-    // a suppr 
-    _Output_cli(fd, "Message bien recu, aurevoir \n\r");
     return (0);
 }
 
@@ -283,6 +295,7 @@ int server::_Output_cli(int fd, std::string msg)
     std::cout << "*** _Output_cli: " << fd << "***" << std::endl;
     ssize_t ret;
 
+    msg.append("\r\n"); // voir si on ajoute ici ou dans les cmd de bases
     ret = send(fd, msg.c_str(), msg.size(), 0);
 
     return (0);

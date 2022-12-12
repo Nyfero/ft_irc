@@ -6,7 +6,7 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/07 12:02:46 by jgourlin          #+#    #+#             */
-/*   Updated: 2022/12/11 18:10:32 by jgourlin         ###   ########.fr       */
+/*   Updated: 2022/12/12 13:01:07 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 # include <vector>
 # include "user.hpp"
 
-# define MAX_LISTEN 42
+# define MAX_LISTEN 2
 
 class server
 {
@@ -54,6 +54,9 @@ class server
         void    _Add_user();
         void    _Remove_user(std::vector<user*>::iterator pos);
         void    _Remove_user(std::vector<pollfd>::iterator pos);
+
+        /* GET USER */
+        user   *_Get_userbyfd(int fd);
 
         /* DVERS */  
         int     _Input_cli(int fd);
