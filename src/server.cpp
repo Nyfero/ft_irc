@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   server.cpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/12/07 11:57:21 by jgourlin          #+#    #+#             */
-/*   Updated: 2022/12/12 13:46:53 by jgourlin         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 # include "../class/utils.hpp"
 # include "../class/server.hpp"
 
@@ -58,18 +46,18 @@ _socket_serv(-1)
     
 }
 
-/**************************/
-/******DESCONSTRUCTOR******/
-/**************************/
+/************************/
+/****** DESTRUCTOR ******/
+/************************/
 
 server::~server()
 {
     std::cout << "DESTRUCTOR SERVER" << std::endl;
 }
 
-/*************************/
-/********INIT_SERV********/
-/*************************/
+/***************************/
+/******** INIT_SERV ********/
+/***************************/
 
 int    server::_Init_server()
 {
@@ -265,6 +253,34 @@ user   *server::_Get_userbyfd(int fd)
     return (NULL);
 }
 
+/*********************/
+/**** MOD CHANNEL ****/
+/*********************/
+
+
+// remplacer par JOIN ?
+void    server::_Add_channel(std::string name, user creator)
+{
+    std::cout << "*** _Add_channel ***" << std::endl;
+
+    // check name channel valide
+    // check pas de doublon de channel
+
+    _channel.push_back(new channel(name, creator));
+
+}
+
+void    server::_Remove_channel(channel *chan) // voire si passe les name ou channel*
+{
+    std::cout << "*** _Remove_channel ***" << std::endl;
+
+    // retirer tous les user du channel && retirer ce channel des vector user._channel
+    //
+
+
+    delete chan;
+}
+
 /****************/
 /**** DIVERS ****/
 /****************/
@@ -280,6 +296,8 @@ int server::_Input_cli(int fd)
         return (-1);
     inpt[ret] = 0;
 
+    std::cout << std::endl << "///" << inpt << "///" << std::endl;
+
     test->str.append(inpt);
     if (test->str.find("\n", 0) != std::string::npos) // ligne complete -> traite -> delete
     {
@@ -287,6 +305,7 @@ int server::_Input_cli(int fd)
         // Use line
         test->str.clear();// delete
     }
+    std::cout << "*** _END inpt"  << std::endl;
     return (0);
 }
 

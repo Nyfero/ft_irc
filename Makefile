@@ -20,7 +20,7 @@ endif
 #    Includes
 CLASS_PATH = class
 
-CFILES =	utils.hpp
+CFILES =	utils.hpp server.hpp user.hpp channel.hpp
 
 CLASS = $(addprefix $(CLASS_PATH)/, $(CFILES))
 
@@ -28,7 +28,7 @@ CLASS = $(addprefix $(CLASS_PATH)/, $(CFILES))
 SRCS_PATH = src
 
 FILES = main.cpp \
-		user.cpp server.cpp
+		user.cpp server.cpp channel.cpp
 
 SRCS = $(addprefix $(SRCS_PATH)/, $(FILES))
 

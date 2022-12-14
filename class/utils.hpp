@@ -10,6 +10,14 @@
 # include <string.h>
 # include <poll.h>
 # include <unistd.h>
+# include <vector>
+
+# include "user.hpp"
+# include "channel.hpp"
+
+
+// # include "channel.hpp"
+// # include "user.hpp"
 
 // int socket(int domain, int type, int protocol);
 // int setsockopt(int socket, int level, int option_name, const void *option_value, socklen_t option_len);
