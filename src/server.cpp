@@ -6,7 +6,7 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/07 11:57:21 by jgourlin          #+#    #+#             */
-/*   Updated: 2022/12/09 14:24:57 by jgourlin         ###   ########.fr       */
+/*   Updated: 2022/12/12 13:46:53 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,14 +135,16 @@ void    server::_Infinit_while()
         // check tous les fds
         while (it != _fds.end())
         {
-            std::cout << "it->fd: " << it->fd<< std::endl;
+            std::cout << "it->fd: " << it->fd<< " revents: " << it->revents << std::endl;
+            
             // la deco ne fonctionne pas pour le moment: n'entre pas donc le vector n'est pas changer
-            // if (it->revents & POLLHUP) // deconnexion
-            // {
-            //     std::cout << "*******DECO FD********" << std::endl; 
-            //     _Remove_user(it);
-            // }
-            if (it->revents & POLLIN) // données en attente de lecture...
+            if (it->revents == 17) // deconnexion
+            {
+                std::cout << "*******DECO FD********" << std::endl; 
+                _Remove_user(it);
+                break;
+            }
+            if (it->revents == POLLIN) // données en attente de lecture...
             {
                 std::cout << "POLL revents fd:" << it->fd << std::endl;
                 if (it->fd == _socket_serv) // sur la socket server
@@ -151,8 +153,9 @@ void    server::_Infinit_while()
                     // modif du vector -> unvalid read/  Conditional jump
                     // Besoin de redefnir it = begin check si begin < it < end
                     // ou break et recommencer la boucle
-                    if (it < _fds.begin() || it >= _fds.end())
-                        it = _fds.begin();
+                    // if (it < _fds.begin() || it >= _fds.end())
+                    //     it = _fds.begin();
+                    break;
                 }
                 else // depuis un client
                 {
@@ -248,6 +251,20 @@ void    server::_Remove_user(std::vector<pollfd>::iterator pos)
     delete tmp;
 }
 
+/******************/
+/**** GET USER ****/
+/******************/
+
+user   *server::_Get_userbyfd(int fd)
+{
+    std::vector<user *>::iterator   it;
+
+    for (unsigned int i = 0; i < _user.size(); i++)
+        if (_user[i]->Get_fd() == fd)
+            return (_user[i]);
+    return (NULL);
+}
+
 /****************/
 /**** DIVERS ****/
 /****************/
@@ -255,17 +272,31 @@ void    server::_Remove_user(std::vector<pollfd>::iterator pos)
 int server::_Input_cli(int fd)
 {
     std::cout << "*** _Input_cli: " << fd << "***" << std::endl;
-    char    res[50];
-    int     ret;
+    char        inpt[50];
+    ssize_t         ret = -1;
 
-    ret = recv(fd, res, 49, MSG_DONTWAIT);
-    if (ret >= 0)
+    user    *test = _Get_userbyfd(fd);
+    if ((ret = recv(fd, inpt, 49, 0)) == -1)
+        return (-1);
+    inpt[ret] = 0;
+
+    test->str.append(inpt);
+    if (test->str.find("\n", 0) != std::string::npos) // ligne complete -> traite -> delete
     {
-        res[ret] = 0;
-        std::cout << "ret:" << ret << " message recu: "<< res << std::endl;
+        std::cout << "   res:" << test->str; // Just to show in server terminal
+        // Use line
+        test->str.clear();// delete
     }
-    else
-        std::cout << "ret:" << std::endl;
+    return (0);
+}
+
+int server::_Output_cli(int fd, std::string msg)
+{
+    std::cout << "*** _Output_cli: " << fd << "***" << std::endl;
+    ssize_t ret;
+
+    msg.append("\r\n"); // voir si on ajoute ici ou dans les cmd de bases
+    ret = send(fd, msg.c_str(), msg.size(), 0);
 
     return (0);
 }
