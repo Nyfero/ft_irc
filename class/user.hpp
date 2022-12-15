@@ -1,18 +1,8 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   user.hpp                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/12/07 12:01:47 by jgourlin          #+#    #+#             */
-/*   Updated: 2022/12/12 13:27:58 by jgourlin         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 # pragma once
 
 # include "utils.hpp"
+
+class channel;
 
 class user
 {
@@ -20,9 +10,14 @@ class user
         // int _socket_cli;
         struct addrinfo _addrinfo_cli;
         struct pollfd   _fd_poll; // peut etre enlever et juste garder socket
+        
+        // nom channel auxquels user appartient -> check avec vector<channel> de user
+        std::vector<channel *> _channel;
 
     public:
         std::string str;
+
+        // channel _channel;
 
         /*********************/
         /**** CONSTRUCTOR ****/
@@ -47,5 +42,12 @@ class user
         /********************/
 
         int Get_fd();
+
+        /**************/
+        /****  MOD ****/
+        /**************/
+
+        int Add_channel(channel chan);
+        int Remove_Channel(channel chan);
 
 };

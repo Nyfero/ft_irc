@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   server.cpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/12/07 11:57:21 by jgourlin          #+#    #+#             */
-/*   Updated: 2022/12/12 13:46:53 by jgourlin         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 # include "../class/utils.hpp"
 # include "../class/server.hpp"
 
@@ -24,7 +12,8 @@ _addrinfo(NULL),
 _password(password),
 _port(port),
 _node("127.0.0.1"),
-_socket_serv(-1)
+_socket_serv(-1),
+_stop(1)
 {
     int res;
 
@@ -43,10 +32,9 @@ _socket_serv(-1)
     _hints.ai_next = NULL;
 
     (void)_password;
-    if ((res = _Init_server()) < 0)
+    if ((res = _Init_server()) < 0 )
     {
-        std::cout << "Error Init server:" << res << std::endl;
-        
+        std::cout << "Error Init server:" << res << std::endl; 
     }
     else
     {
@@ -58,18 +46,18 @@ _socket_serv(-1)
     
 }
 
-/**************************/
-/******DESCONSTRUCTOR******/
-/**************************/
+/************************/
+/****** DESTRUCTOR ******/
+/************************/
 
 server::~server()
 {
     std::cout << "DESTRUCTOR SERVER" << std::endl;
 }
 
-/*************************/
-/********INIT_SERV********/
-/*************************/
+/***************************/
+/******** INIT_SERV ********/
+/***************************/
 
 int    server::_Init_server()
 {
@@ -136,9 +124,11 @@ void    server::_Infinit_while()
         while (it != _fds.end())
         {
             std::cout << "it->fd: " << it->fd<< " revents: " << it->revents << std::endl;
+
+            std::cout << "POLLIN =" << POLLIN << std::endl;
+            std::cout << "POLLHUP =" << POLLHUP << std::endl;
             
-            // la deco ne fonctionne pas pour le moment: n'entre pas donc le vector n'est pas changer
-            if (it->revents == 17) // deconnexion
+            if (it->revents == POLLHUP) // deconnexion
             {
                 std::cout << "*******DECO FD********" << std::endl; 
                 _Remove_user(it);
@@ -265,13 +255,41 @@ user   *server::_Get_userbyfd(int fd)
     return (NULL);
 }
 
+/*********************/
+/**** MOD CHANNEL ****/
+/*********************/
+
+
+// remplacer par JOIN ?
+void    server::_Add_channel(std::string name, user creator)
+{
+    std::cout << "*** _Add_channel ***" << std::endl;
+
+    // check name channel valide
+    // check pas de doublon de channel
+
+    _channel.push_back(new channel(name, creator));
+
+}
+
+void    server::_Remove_channel(channel *chan) // voire si passe les name ou channel*
+{
+    std::cout << "*** _Remove_channel ***" << std::endl;
+
+    // retirer tous les user du channel && retirer ce channel des vector user._channel
+    //
+
+
+    delete chan;
+}
+
 /****************/
 /**** DIVERS ****/
 /****************/
 
 int server::_Input_cli(int fd)
 {
-    std::cout << "*** _Input_cli: " << fd << "***" << std::endl;
+        std::cout << "*** _Input_cli: " << fd << "***" << std::endl;
     char        inpt[50];
     ssize_t         ret = -1;
 
@@ -280,6 +298,8 @@ int server::_Input_cli(int fd)
         return (-1);
     inpt[ret] = 0;
 
+    std::cout << std::endl << "///" << inpt << "///" << std::endl;
+
     test->str.append(inpt);
     if (test->str.find("\n", 0) != std::string::npos) // ligne complete -> traite -> delete
     {
@@ -287,6 +307,7 @@ int server::_Input_cli(int fd)
         // Use line
         test->str.clear();// delete
     }
+    std::cout << "*** _END inpt"  << std::endl;
     return (0);
 }
 

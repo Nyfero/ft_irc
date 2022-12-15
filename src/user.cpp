@@ -1,17 +1,11 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   user.cpp                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/12/07 11:57:18 by jgourlin          #+#    #+#             */
-/*   Updated: 2022/12/09 14:00:23 by jgourlin         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 # include "../class/utils.hpp"
 # include "../class/user.hpp"
+
+/*********************/
+/**** CONSTRUCTOR ****/
+/*********************/
 
 user::user(){}
 
@@ -26,13 +20,42 @@ _addrinfo_cli(info)
     std::cout << "User create: " << _fd_poll.fd << std::endl;
 }
 
+/********************/
+/**** DESTRUCTOR ****/
+/********************/
+
 user::~user()
 {
     std::cout << "User destroy: " << _fd_poll.fd << std::endl;
     close(_fd_poll.fd);
 }
 
+/********************/
+/***** OPERATOR *****/
+/********************/
+
+/********************/
+/***** ACCESSOR *****/
+/********************/
+
 int user::Get_fd(){
     return (this->_fd_poll.fd);
 }
 
+/**************/
+/****  MOD ****/
+/**************/
+
+int user::Add_channel(channel chan)
+{
+     std::cout << "/*** USER::ADD_CHANNEL ***/"<< std::endl; 
+     (void)chan;
+     return (0);
+}
+
+int user::Remove_Channel(channel chan)
+{
+    std::cout << "/*** USER::REMOVE_CHANNEL ***/"<< std::endl;
+    (void)chan;
+    return (0);
+}
