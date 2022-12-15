@@ -1,6 +1,8 @@
 # include "../class/utils.hpp"
 # include "../class/server.hpp"
 
+bool g_stop;
+
 /*************************/
 /*******CONSTRUCTOR*******/
 /*************************/
@@ -12,10 +14,10 @@ _addrinfo(NULL),
 _password(password),
 _port(port),
 _node("127.0.0.1"),
-_socket_serv(-1),
-_stop(1)
+_socket_serv(-1)
 {
     int res;
+    g_stop = 1;
 
     std::cout << "*** server Constructor ***" << std::endl;
     // _hints.ai_family = AF_INET;
@@ -114,7 +116,7 @@ void    server::_Infinit_while()
 
     int tmp = 0;
     _fds.push_back(_fdpf);
-    while (tmp < 8)
+    while (tmp < 8 && g_stop)
     {
         // poll(tab pollfd, size tab, timer)
         poll(_fds.data(), _fds.size(), -1);
@@ -128,13 +130,13 @@ void    server::_Infinit_while()
             std::cout << "POLLIN =" << POLLIN << std::endl;
             std::cout << "POLLHUP =" << POLLHUP << std::endl;
             
-            if (it->revents == POLLHUP) // deconnexion
+            if (it->revents & POLLHUP) // deconnexion
             {
                 std::cout << "*******DECO FD********" << std::endl; 
                 _Remove_user(it);
                 break;
             }
-            if (it->revents == POLLIN) // données en attente de lecture...
+            if (it->revents & POLLIN) // données en attente de lecture...
             {
                 std::cout << "POLL revents fd:" << it->fd << std::endl;
                 if (it->fd == _socket_serv) // sur la socket server

@@ -7,7 +7,6 @@ class user;
 class channel
 {
     private:
-        bool    _stop;
         std::string         _name;
         std::vector<user *> _user;
         std::vector<user *> _op;

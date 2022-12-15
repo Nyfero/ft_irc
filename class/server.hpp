@@ -6,8 +6,6 @@
 
 # define MAX_LISTEN 2
 
-bool    _stop;
-
 class server
 {
 

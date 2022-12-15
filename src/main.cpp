@@ -6,17 +6,19 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/09 08:29:18 by jgourlin          #+#    #+#             */
-/*   Updated: 2022/12/15 15:25:23 by jgourlin         ###   ########.fr       */
+/*   Updated: 2022/12/15 19:37:43 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../class/utils.hpp"
 # include "../class/server.hpp"
 
+extern bool g_stop;
+
 void    Sig(int sig)
 {
     (void) sig;
-    _stop = 0;
+    g_stop = 0;
 }
 
 int ft_parsing(char *port)
