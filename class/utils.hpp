@@ -11,6 +11,7 @@
 # include <poll.h>
 # include <unistd.h>
 # include <vector>
+# include <csignal>
 
 # include "user.hpp"
 # include "channel.hpp"

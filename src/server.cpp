@@ -12,7 +12,8 @@ _addrinfo(NULL),
 _password(password),
 _port(port),
 _node("127.0.0.1"),
-_socket_serv(-1)
+_socket_serv(-1),
+_stop(1)
 {
     int res;
 
@@ -31,10 +32,9 @@ _socket_serv(-1)
     _hints.ai_next = NULL;
 
     (void)_password;
-    if ((res = _Init_server()) < 0)
+    if ((res = _Init_server()) < 0 )
     {
-        std::cout << "Error Init server:" << res << std::endl;
-        
+        std::cout << "Error Init server:" << res << std::endl; 
     }
     else
     {
@@ -124,9 +124,11 @@ void    server::_Infinit_while()
         while (it != _fds.end())
         {
             std::cout << "it->fd: " << it->fd<< " revents: " << it->revents << std::endl;
+
+            std::cout << "POLLIN =" << POLLIN << std::endl;
+            std::cout << "POLLHUP =" << POLLHUP << std::endl;
             
-            // la deco ne fonctionne pas pour le moment: n'entre pas donc le vector n'est pas changer
-            if (it->revents == 17) // deconnexion
+            if (it->revents == POLLHUP) // deconnexion
             {
                 std::cout << "*******DECO FD********" << std::endl; 
                 _Remove_user(it);
@@ -287,7 +289,7 @@ void    server::_Remove_channel(channel *chan) // voire si passe les name ou cha
 
 int server::_Input_cli(int fd)
 {
-    std::cout << "*** _Input_cli: " << fd << "***" << std::endl;
+        std::cout << "*** _Input_cli: " << fd << "***" << std::endl;
     char        inpt[50];
     ssize_t         ret = -1;
 
