@@ -7,9 +7,18 @@
 # include <fcntl.h>
 # include <arpa/inet.h>
 # include <netdb.h>
+# include <cstdlib>
 # include <string.h>
 # include <poll.h>
 # include <unistd.h>
+
+# include <vector>
+# include "user.hpp"
+# include "server.hpp"
+# include "command.hpp"
+
+int     parsing(int argc, char **argv);
+bool    isNumber(const std::string& s);
 
 // int socket(int domain, int type, int protocol);
 // int setsockopt(int socket, int level, int option_name, const void *option_value, socklen_t option_len);
