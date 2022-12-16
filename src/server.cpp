@@ -292,7 +292,7 @@ int server::_Input_cli(std::vector<pollfd>::iterator it)
     int         fd = it->fd;
     char        inpt[SIZE_INPT];
     ssize_t     ret = -1;
-    std::string tmp;
+    std::string res;
     size_t      found;
 
     user    *test = _Get_userbyfd(fd);
@@ -305,8 +305,6 @@ int server::_Input_cli(std::vector<pollfd>::iterator it)
     }
     inpt[ret] = 0;
 
-    //std::cout << std::endl << "///" << inpt << "///" << std::endl;
-
     // append inpt dans srt de user
     test->str.append(inpt);
     while ((found = test->str.find("\n", 0)) != std::string::npos) // ligne complete -> traite -> delete
@@ -314,12 +312,12 @@ int server::_Input_cli(std::vector<pollfd>::iterator it)
         std::cout << "  b_str:" << test->str << std::endl; // Just to show in server terminal
         
         
-        tmp = test->str.substr(0, found); // get first line in tmp
+        res = test->str.substr(0, found); // get first line in res
         test->str.erase(0, found + 1); // get after first line in str
         
         std::cout  <<"  e_str:" << test->str << std::endl;
-        std::cout << "    tmp:" << tmp << std::endl;
-        // Use line
+        std::cout << "    res:" << res << std::endl;
+        // Use line ex: USE_CMD(res)
     }
     std::cout << "*** _END inpt"  << std::endl;
     return (0);
