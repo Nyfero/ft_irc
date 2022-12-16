@@ -5,6 +5,9 @@
 
 # include "utils.hpp"
 
+class user;
+class channel;
+
 class command {
 
     private:
@@ -15,6 +18,10 @@ class command {
         std::string arg;
 
     public:
+        void    Enter(user* user, std::string str);
+        void    join(user *user, std::string chan, std::string key);
+        void    join(user *user, std::string chan);
+        void    join(user *user);
 
     
 

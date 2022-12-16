@@ -46,16 +46,34 @@ int user::Get_fd(){
 /****  MOD ****/
 /**************/
 
-int user::Add_channel(channel chan)
+int user::Add_channel(channel *chan)
 {
      std::cout << "/*** USER::ADD_CHANNEL ***/"<< std::endl; 
      (void)chan;
+     _channel.push_back(chan);
      return (0);
 }
 
-int user::Remove_Channel(channel chan)
+int user::Remove_Channel(channel *chan)
 {
     std::cout << "/*** USER::REMOVE_CHANNEL ***/"<< std::endl;
     (void)chan;
+    std::vector<channel *>::iterator it, ite = _channel.end();
+    unsigned int    i = 0;
+
+    for (it = _channel.begin(); it != ite; it++)
+    {
+        if (_channel[i]->Get_name() == chan->Get_name())
+        {
+            std::cout << "channel found" << std::endl;
+            _channel.erase(it);
+            break;
+        }
+        i++;
+    }
+    if (it == ite)
+    {
+        std::cout << "channel not found" << std::endl;
+    }
     return (0);
 }

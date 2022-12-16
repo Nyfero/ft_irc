@@ -17,7 +17,7 @@ class server
         struct pollfd   _fdpf;
         
 
-        char    *_password;
+        char    *_password; // mettre dans une string ?
         const char  *_port;
         const char  *_node;
 
@@ -52,7 +52,7 @@ class server
         
         
         /* MOD CHANNEL */
-        void    _Add_channel(std::string name, user creator);
+        void    _Add_channel(std::string name, user *creator);
         void    _Remove_channel(channel *chan);
 
 
@@ -79,4 +79,12 @@ class server
         /***** OPERATOR *****/
         /********************/
         // operator =
+
+        void    Enter(user* user, std::string str);
+        void    join(user *user, std::string chan, std::string key);
+        void    join(user *user, std::string chan);
+        void    join(user *user);
+        void    pass(user *user, std::string pass);
+        void    nick(user *user, std::string nick);
+
 };

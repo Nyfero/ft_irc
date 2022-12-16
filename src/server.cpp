@@ -260,7 +260,7 @@ user   *server::_Get_userbyfd(int fd)
 
 
 // remplacer par JOIN ?
-void    server::_Add_channel(std::string name, user creator)
+void    server::_Add_channel(std::string name, user *creator)
 {
     std::cout << "*** _Add_channel ***" << std::endl;
 
@@ -315,9 +315,13 @@ int server::_Input_cli(std::vector<pollfd>::iterator it)
         res = test->str.substr(0, found); // get first line in res
         test->str.erase(0, found + 1); // get after first line in str
         
-        std::cout  <<"  e_str:" << test->str << std::endl;
-        std::cout << "    res:" << res << std::endl;
-        // Use line ex: USE_CMD(res)
+        // std::cout  <<"  e_str:" << test->str << std::endl;
+        // std::cout << "    res:" << res << std::endl;
+
+        // Use line ex: USE_CMD(user &client, std::string line)
+        Enter(test, res);
+        // client = test -> cellu qui lance la command
+        // line = res -> command a traiter
     }
     std::cout << "*** _END inpt"  << std::endl;
     return (0);

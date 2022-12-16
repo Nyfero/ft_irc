@@ -6,7 +6,7 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/09 08:29:18 by jgourlin          #+#    #+#             */
-/*   Updated: 2022/12/16 17:51:30 by jgourlin         ###   ########.fr       */
+/*   Updated: 2022/12/16 19:10:41 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,9 +26,9 @@ int main(int argc, char **argv)
     if (parsing(argc, argv))
         return 1;
     signal(SIGINT, Sig);
-    // else
+    //else
     // {
-    //     server  test(argv[1], argv[2]);
+         server  test(argv[1], argv[2]);
     // }
 
     

@@ -13,6 +13,9 @@ class user
         
         // nom channel auxquels user appartient -> check avec vector<channel> de user
         std::vector<channel *> _channel;
+        
+        std::string _nickname;
+        std::string _username;
 
     public:
         std::string str;
@@ -47,7 +50,7 @@ class user
         /****  MOD ****/
         /**************/
 
-        int Add_channel(channel chan);
-        int Remove_Channel(channel chan);
+        int Add_channel(channel *chan);
+        int Remove_Channel(channel *chan);
 
 };
