@@ -3,6 +3,7 @@
 # include "utils.hpp"
 
 # define MAX_LISTEN 2
+# define SIZE_INPT 50
 
 class server
 {
@@ -24,8 +25,11 @@ class server
         //unsigned int    _nb_client; (size vector)
         // liste user -> vector
         std::vector<user*>   _user;
+        std::vector<channel*>   _channel;
 
         std::vector<pollfd>   _fds;
+
+        
 
         // faire tab pollfd -> vector ?
         // tab user -> map ?
@@ -42,11 +46,18 @@ class server
         void    _Remove_user(std::vector<user*>::iterator pos);
         void    _Remove_user(std::vector<pollfd>::iterator pos);
 
+
         /* GET USER */
         user   *_Get_userbyfd(int fd);
+        
+        
+        /* MOD CHANNEL */
+        void    _Add_channel(std::string name, user creator);
+        void    _Remove_channel(channel *chan);
+
 
         /* DVERS */  
-        int     _Input_cli(int fd);
+        int     _Input_cli(std::vector<pollfd>::iterator it);
         int     _Output_cli(int fd, std::string msg);
 
     public:

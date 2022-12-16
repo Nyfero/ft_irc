@@ -1,5 +1,7 @@
 # include "../class/utils.hpp"
 
+bool g_stop;
+
 /*************************/
 /*******CONSTRUCTOR*******/
 /*************************/
@@ -14,6 +16,7 @@ _node("127.0.0.1"),
 _socket_serv(-1)
 {
     int res;
+    g_stop = 1;
 
     std::cout << "*** server Constructor ***" << std::endl;
     // _hints.ai_family = AF_INET;
@@ -30,10 +33,9 @@ _socket_serv(-1)
     _hints.ai_next = NULL;
 
     (void)_password;
-    if ((res = _Init_server()) < 0)
+    if ((res = _Init_server()) < 0 )
     {
-        std::cout << "Error Init server:" << res << std::endl;
-        
+        std::cout << "Error Init server:" << res << std::endl; 
     }
     else
     {
@@ -45,18 +47,18 @@ _socket_serv(-1)
     
 }
 
-/**************************/
-/******DESCONSTRUCTOR******/
-/**************************/
+/************************/
+/****** DESTRUCTOR ******/
+/************************/
 
 server::~server()
 {
     std::cout << "DESTRUCTOR SERVER" << std::endl;
 }
 
-/*************************/
-/********INIT_SERV********/
-/*************************/
+/***************************/
+/******** INIT_SERV ********/
+/***************************/
 
 int    server::_Init_server()
 {
@@ -111,9 +113,10 @@ void    server::_Infinit_while()
     
     fcntl(_socket_serv, F_SETFL, O_NONBLOCK); // pour qu'accept ne soit pas bloquant
 
-    int tmp = 0;
     _fds.push_back(_fdpf);
-    while (tmp < 8)
+
+    int limit = 0;
+    while (g_stop && limit <= 10)
     {
         // poll(tab pollfd, size tab, timer)
         poll(_fds.data(), _fds.size(), -1);
@@ -124,36 +127,31 @@ void    server::_Infinit_while()
         {
             std::cout << "it->fd: " << it->fd<< " revents: " << it->revents << std::endl;
             
-            // la deco ne fonctionne pas pour le moment: n'entre pas donc le vector n'est pas changer
-            if (it->revents == 17) // deconnexion
+            if (it->revents & POLLHUP) // deconnexion
             {
                 std::cout << "*******DECO FD********" << std::endl; 
                 _Remove_user(it);
                 break;
             }
-            if (it->revents == POLLIN) // données en attente de lecture...
+            if (it->revents & POLLIN) // données en attente de lecture...
             {
                 std::cout << "POLL revents fd:" << it->fd << std::endl;
                 if (it->fd == _socket_serv) // sur la socket server
                 {
                     _Add_user();
-                    // modif du vector -> unvalid read/  Conditional jump
-                    // Besoin de redefnir it = begin check si begin < it < end
-                    // ou break et recommencer la boucle
-                    // if (it < _fds.begin() || it >= _fds.end())
-                    //     it = _fds.begin();
                     break;
                 }
                 else // depuis un client
                 {
-                    _Input_cli(it->fd);
+                    if (_Input_cli(it) == -2)
+                        break;
                 }
             }
             it++;
         }
         std::cout << "fds: size: " << _fds.size() << std::endl;
         sleep(1);
-        tmp++;
+        limit++;
     }
     std::vector<user*>::iterator ituser;
     for (ituser = _user.begin(); ituser != _user.end(); ituser = _user.begin())
@@ -215,6 +213,8 @@ void    server::_Remove_user(std::vector<user*>::iterator pos)
             break;
 
     std::cout << "*** _Remove_User pos ***" << std::endl;
+    std::cout << "*** _FD = " << tmp->Get_fd() << "***" << std::endl;
+    close (tmp->Get_fd());
     _user.erase(pos);
     _fds.erase(it);
     delete tmp;
@@ -233,6 +233,7 @@ void    server::_Remove_user(std::vector<pollfd>::iterator pos)
     user *tmp = _user.at(std::distance(_user.begin(), it));
 
     std::cout << "*** _Remove_User fd ***" << std::endl;
+    close (tmp->Get_fd());
     _user.erase(it);
     _fds.erase(pos);
     delete tmp;
@@ -252,28 +253,72 @@ user   *server::_Get_userbyfd(int fd)
     return (NULL);
 }
 
+/*********************/
+/**** MOD CHANNEL ****/
+/*********************/
+
+
+// remplacer par JOIN ?
+void    server::_Add_channel(std::string name, user creator)
+{
+    std::cout << "*** _Add_channel ***" << std::endl;
+
+    // check name channel valide
+    // check pas de doublon de channel
+
+    _channel.push_back(new channel(name, creator));
+
+}
+
+void    server::_Remove_channel(channel *chan) // voire si passe les name ou channel*
+{
+    std::cout << "*** _Remove_channel ***" << std::endl;
+
+    // retirer tous les user du channel && retirer ce channel des vector user._channel
+    //
+
+
+    delete chan;
+}
+
 /****************/
 /**** DIVERS ****/
 /****************/
 
-int server::_Input_cli(int fd)
+int server::_Input_cli(std::vector<pollfd>::iterator it)
 {
-    std::cout << "*** _Input_cli: " << fd << "***" << std::endl;
-    char        inpt[50];
-    ssize_t         ret = -1;
+    std::cout << std::endl << "*** _Input_cli: " << it->fd << "***" << std::endl;
+    int         fd = it->fd;
+    char        inpt[SIZE_INPT];
+    ssize_t     ret = -1;
+    std::string res;
+    size_t      found;
 
     user    *test = _Get_userbyfd(fd);
-    if ((ret = recv(fd, inpt, 49, 0)) == -1)
+    if ((ret = recv(fd, inpt, SIZE_INPT - 1, 0)) == -1)
         return (-1);
+    if (!ret) // disconnect
+    {
+        _Remove_user(it);
+        return (-2);
+    }
     inpt[ret] = 0;
 
+    // append inpt dans srt de user
     test->str.append(inpt);
-    if (test->str.find("\n", 0) != std::string::npos) // ligne complete -> traite -> delete
+    while ((found = test->str.find("\n", 0)) != std::string::npos) // ligne complete -> traite -> delete
     {
-        std::cout << "   res:" << test->str; // Just to show in server terminal
-        // Use line
-        test->str.clear();// delete
+        std::cout << "  b_str:" << test->str << std::endl; // Just to show in server terminal
+        
+        
+        res = test->str.substr(0, found); // get first line in res
+        test->str.erase(0, found + 1); // get after first line in str
+        
+        std::cout  <<"  e_str:" << test->str << std::endl;
+        std::cout << "    res:" << res << std::endl;
+        // Use line ex: USE_CMD(res)
     }
+    std::cout << "*** _END inpt"  << std::endl;
     return (0);
 }
 

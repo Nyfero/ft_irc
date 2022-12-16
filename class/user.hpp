@@ -2,15 +2,22 @@
 
 # include "utils.hpp"
 
+class channel;
+
 class user
 {
     private:
         // int _socket_cli;
         struct addrinfo _addrinfo_cli;
         struct pollfd   _fd_poll; // peut etre enlever et juste garder socket
+        
+        // nom channel auxquels user appartient -> check avec vector<channel> de user
+        std::vector<channel *> _channel;
 
     public:
         std::string str;
+
+        // channel _channel;
 
         /*********************/
         /**** CONSTRUCTOR ****/
@@ -35,5 +42,12 @@ class user
         /********************/
 
         int Get_fd();
+
+        /**************/
+        /****  MOD ****/
+        /**************/
+
+        int Add_channel(channel chan);
+        int Remove_Channel(channel chan);
 
 };

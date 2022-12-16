@@ -11,6 +11,15 @@
 # include <string.h>
 # include <poll.h>
 # include <unistd.h>
+# include <vector>
+# include <csignal>
+
+# include "user.hpp"
+# include "channel.hpp"
+
+
+// # include "channel.hpp"
+// # include "user.hpp"
 
 # include <vector>
 # include "user.hpp"
