@@ -114,9 +114,10 @@ void    server::_Infinit_while()
     
     fcntl(_socket_serv, F_SETFL, O_NONBLOCK); // pour qu'accept ne soit pas bloquant
 
-    int tmp = 0;
     _fds.push_back(_fdpf);
-    while (tmp < 8 && g_stop)
+
+    int limit = 0;
+    while (g_stop && limit <= 10)
     {
         // poll(tab pollfd, size tab, timer)
         poll(_fds.data(), _fds.size(), -1);
@@ -126,9 +127,6 @@ void    server::_Infinit_while()
         while (it != _fds.end())
         {
             std::cout << "it->fd: " << it->fd<< " revents: " << it->revents << std::endl;
-
-            std::cout << "POLLIN =" << POLLIN << std::endl;
-            std::cout << "POLLHUP =" << POLLHUP << std::endl;
             
             if (it->revents & POLLHUP) // deconnexion
             {
@@ -142,23 +140,19 @@ void    server::_Infinit_while()
                 if (it->fd == _socket_serv) // sur la socket server
                 {
                     _Add_user();
-                    // modif du vector -> unvalid read/  Conditional jump
-                    // Besoin de redefnir it = begin check si begin < it < end
-                    // ou break et recommencer la boucle
-                    // if (it < _fds.begin() || it >= _fds.end())
-                    //     it = _fds.begin();
                     break;
                 }
                 else // depuis un client
                 {
-                    _Input_cli(it->fd);
+                    if (_Input_cli(it) == -2)
+                        break;
                 }
             }
             it++;
         }
         std::cout << "fds: size: " << _fds.size() << std::endl;
         sleep(1);
-        tmp++;
+        limit++;
     }
     std::vector<user*>::iterator ituser;
     for (ituser = _user.begin(); ituser != _user.end(); ituser = _user.begin())
@@ -220,6 +214,8 @@ void    server::_Remove_user(std::vector<user*>::iterator pos)
             break;
 
     std::cout << "*** _Remove_User pos ***" << std::endl;
+    std::cout << "*** _FD = " << tmp->Get_fd() << "***" << std::endl;
+    close (tmp->Get_fd());
     _user.erase(pos);
     _fds.erase(it);
     delete tmp;
@@ -238,6 +234,7 @@ void    server::_Remove_user(std::vector<pollfd>::iterator pos)
     user *tmp = _user.at(std::distance(_user.begin(), it));
 
     std::cout << "*** _Remove_User fd ***" << std::endl;
+    close (tmp->Get_fd());
     _user.erase(it);
     _fds.erase(pos);
     delete tmp;
@@ -289,25 +286,54 @@ void    server::_Remove_channel(channel *chan) // voire si passe les name ou cha
 /**** DIVERS ****/
 /****************/
 
-int server::_Input_cli(int fd)
+int server::_Input_cli(std::vector<pollfd>::iterator it)
 {
-        std::cout << "*** _Input_cli: " << fd << "***" << std::endl;
-    char        inpt[50];
-    ssize_t         ret = -1;
+    std::cout << std::endl << "*** _Input_cli: " << it->fd << "***" << std::endl;
+    int         fd = it->fd;
+    char        inpt[SIZE_INPT];
+    ssize_t     ret = -1;
+    std::string tmp;
+    size_t      found;
 
     user    *test = _Get_userbyfd(fd);
-    if ((ret = recv(fd, inpt, 49, 0)) == -1)
+    if ((ret = recv(fd, inpt, SIZE_INPT - 1, 0)) == -1)
         return (-1);
+    if (!ret) // disconnect
+    {
+        _Remove_user(it);
+        return (-2);
+    }
     inpt[ret] = 0;
 
-    std::cout << std::endl << "///" << inpt << "///" << std::endl;
+    //std::cout << std::endl << "///" << inpt << "///" << std::endl;
 
+    // append inpt dans srt de user
     test->str.append(inpt);
-    if (test->str.find("\n", 0) != std::string::npos) // ligne complete -> traite -> delete
+    // if ((found = test->str.find("\n", 0)) != std::string::npos) // ligne complete -> traite -> delete
+    // {
+    //     std::cout << "  b_str:" << test->str << std::endl; // Just to show in server terminal
+        
+        
+    //     tmp = test->str.substr(0, found); // modifie str pur avir la ligne apres
+    //     test->str.erase(0, found + 1); // recupere premiere ligne
+        
+    //     std::cout  <<"  e_str:" << test->str << std::endl;
+    //     std::cout << "    tmp:" << tmp << std::endl;
+    //     // Use line
+    //     //test->str.clear();// delete
+    // }
+
+    while ((found = test->str.find("\n", 0)) != std::string::npos) // ligne complete -> traite -> delete
     {
-        std::cout << "   res:" << test->str; // Just to show in server terminal
+        std::cout << "  b_str:" << test->str << std::endl; // Just to show in server terminal
+        
+        
+        tmp = test->str.substr(0, found); // get first line in tmp
+        test->str.erase(0, found + 1); // get after first line in str
+        
+        std::cout  <<"  e_str:" << test->str << std::endl;
+        std::cout << "    tmp:" << tmp << std::endl;
         // Use line
-        test->str.clear();// delete
     }
     std::cout << "*** _END inpt"  << std::endl;
     return (0);

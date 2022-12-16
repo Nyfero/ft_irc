@@ -5,6 +5,7 @@
 # include "channel.hpp"
 
 # define MAX_LISTEN 2
+# define SIZE_INPT 50
 
 class server
 {
@@ -58,7 +59,7 @@ class server
 
 
         /* DVERS */  
-        int     _Input_cli(int fd);
+        int     _Input_cli(std::vector<pollfd>::iterator it);
         int     _Output_cli(int fd, std::string msg);
 
     public:
