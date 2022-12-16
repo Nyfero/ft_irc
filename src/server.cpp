@@ -309,20 +309,6 @@ int server::_Input_cli(std::vector<pollfd>::iterator it)
 
     // append inpt dans srt de user
     test->str.append(inpt);
-    // if ((found = test->str.find("\n", 0)) != std::string::npos) // ligne complete -> traite -> delete
-    // {
-    //     std::cout << "  b_str:" << test->str << std::endl; // Just to show in server terminal
-        
-        
-    //     tmp = test->str.substr(0, found); // modifie str pur avir la ligne apres
-    //     test->str.erase(0, found + 1); // recupere premiere ligne
-        
-    //     std::cout  <<"  e_str:" << test->str << std::endl;
-    //     std::cout << "    tmp:" << tmp << std::endl;
-    //     // Use line
-    //     //test->str.clear();// delete
-    // }
-
     while ((found = test->str.find("\n", 0)) != std::string::npos) // ligne complete -> traite -> delete
     {
         std::cout << "  b_str:" << test->str << std::endl; // Just to show in server terminal
