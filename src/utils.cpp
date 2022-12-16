@@ -13,12 +13,11 @@ int parsing(int argc, char **argv) {
         return 1;
     }
 
-
     /*
     **  Port only contain number (0 - 9)
     **  Port's range (1 - 65535)
     */
-   
+
     std::cout << "*** PARSING PORT ***" << std::endl;
     std::string valid_port(argv[1]);
     if (!isNumber(valid_port)) {
@@ -49,7 +48,6 @@ int parsing(int argc, char **argv) {
 			return 1;
 		}
     }
-
     return 0;
 };
 
