@@ -1,8 +1,6 @@
 #pragma once
 
-# include <vector>
-# include "user.hpp"
-# include "channel.hpp"
+# include "utils.hpp"
 
 # define MAX_LISTEN 2
 # define SIZE_INPT 50
