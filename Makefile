@@ -20,7 +20,7 @@ endif
 #    Includes
 CLASS_PATH = class
 
-CFILES =	utils.hpp server.hpp user.hpp channel.hpp command.hpp
+CFILES =	utils.hpp server.hpp user.hpp channel.hpp command.hpp error_msg.hpp
 
 CLASS = $(addprefix $(CLASS_PATH)/, $(CFILES))
 

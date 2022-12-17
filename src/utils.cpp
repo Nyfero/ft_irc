@@ -54,3 +54,13 @@ bool isNumber(const std::string& str) {
     }
     return true;
 };
+
+bool Compare_case_sensitive(std::string str1, std::string str2) {
+    if (str1.size() != str2.size())
+        return false;
+    for (size_t i = 0; i < str1.size(); i++) {
+        if (tolower(str1[i]) != tolower(str2[i]))
+            return false;
+    }
+    return true;
+};

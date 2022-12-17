@@ -9,12 +9,15 @@ class user
     private:
 
         // Nom d'utilisateur (identifiant -> ne change pas)
-        const std::string   _username;
+        std::string   _username;
         // Pseudo d'utilisateur
         std::string         _nickname;
 
         // Channels du client
         std::vector<channel *> _channel_register;
+
+        // Si le client est enregistre sur le serveur
+        bool                _is_register;
 
         // Structure des requetes du client et son fd
         struct pollfd   _fd_poll_client;
@@ -49,7 +52,10 @@ class user
         /***** ACCESSOR *****/
         /********************/
 
-        int Get_fd_client();
+        int Get_fd_client() const;
+        bool Get_is_register() const;
+        std::string Get_username() const;
+        std::string Get_nickname() const;
 
         /**************/
         /****  MOD ****/
@@ -57,5 +63,7 @@ class user
 
         int Add_channel(channel *chan);
         int Remove_Channel(channel *chan);
-
+        void Set_is_register(bool modif);
+        void Set_nickname(std::string nickname);
+        void Set_username(std::string username);
 };

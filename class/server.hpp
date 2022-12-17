@@ -86,11 +86,21 @@ class server
         /*****   COMMAND   *****/
         /***********************/
 
-        void    Enter(user* user, std::string str);
-        void    join(user *user, std::string chan, std::string key);
-        void    join(user *user, std::string chan);
-        void    join(user *user);
-        int    pass(user *user, std::string pass);
-        void    nick(user *user, std::string nick);
+        void    Check_command(user *user, std::string str);
 
+        void    Pass_cmd(user *user, std::string cmd);
+        void    User_cmd(user *user, std::string cmd);
+        void    Nick_cmd(user *user, std::string cmd);
+        void    Mode_cmd(user *user, std::string cmd);
+        void    Quit_cmd(user *user, std::string cmd);
+        void    Join_cmd(user *user, std::string cmd);
+        void    Part_cmd(user *user, std::string cmd);
+        void    Names_cmd(user *user, std::string cmd);
+        void    Invite_cmd(user *user, std::string cmd);
+        void    Kick_cmd(user *user, std::string cmd);
+        void    Privmsg_cmd(user *user, std::string cmd);
+        void    Notice_cmd(user *user, std::string cmd);
+        void    Away_cmd(user *user, std::string cmd);
+        void    Users_cmd(user *user, std::string cmd);
+        void    Wallops_cmd(user *user, std::string cmd);
 };

@@ -126,7 +126,6 @@ void    server::_Launch_server() {
             it++;
         }
         std::cout << "fds: size: " << _list_poll_fd.size() << std::endl;
-        sleep(1);
         limit++;
     }
     std::vector<user*>::iterator ituser;
@@ -289,8 +288,9 @@ int server::_Input_client(std::vector<pollfd>::iterator it) {
         // std::cout  <<"  e_str:" << test->str << std::endl;
         // std::cout << "    res:" << res << std::endl;
 
+        Check_command(test, res); // check si cmd valide
+
         // Use line ex: USE_CMD(user &client, std::string line)
-        Enter(test, res);
         // client = test -> cellu qui lance la command
         // line = res -> command a traiter
     }
