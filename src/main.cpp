@@ -14,7 +14,7 @@ int main(int argc, char **argv)
     if (parsing(argc, argv))
         return 1;
     signal(SIGINT, Sig);
-    // else
+    //else
     // {
     //     server  test(argv[1], argv[2]);
     // }

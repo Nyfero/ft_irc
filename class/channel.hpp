@@ -15,7 +15,7 @@ class channel
         /***************************/
         /******* CONSTRUCTOR *******/
         /***************************/
-        channel(std::string name, user creator);
+        channel(std::string name, user *creator);
         channel();
         // cpy
 
@@ -30,5 +30,13 @@ class channel
 
         // int Add_user(user use);
         // int Remove_user(user use);
+
+        /************************/
+        /******* ACCESSOR *******/
+        /************************/
+
+        std::string         Get_name();
+        std::vector<user *> Get_user();
+        std::vector<user *> Get_op();
 
 };
