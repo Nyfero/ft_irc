@@ -9,37 +9,42 @@ class server
 {
 
     private:
+
         /***************************/
         /*** PRIVATE MEMBER TYPE ***/
         /***************************/
+
+        // Structure des informations du serveur
         struct addrinfo *_addrinfo;
-        struct addrinfo _hints; // normalement const struct addrinfo
-        struct pollfd   _fdpf;
-        
+        struct addrinfo _hints;
 
-        char    *_password; // mettre dans une string ?
+        // Structure des requetes de connexion des clients
+        struct pollfd   _serv_poll_fd;
+        
+        // Mot de passe du serveur
+        const std::string _password;
+        // Port du serveur
         const char  *_port;
+        // Adresse reseau du serveur
         const char  *_node;
-
+        // Socket du serveur
         int _socket_serv;
-        //unsigned int    _nb_client; (size vector)
-        // liste user -> vector
-        std::vector<user*>   _user;
-        std::vector<channel*>   _channel;
 
-        std::vector<pollfd>   _fds;
+        // Liste des clients connectes au serveur
+        std::vector<user*>      _list_user;
+        // Liste des channels du serveur
+        std::vector<channel*>   _list_channel;
+        // Liste des pollfd du serveur
+        std::vector<pollfd>     _list_poll_fd;
 
-        
 
-        // faire tab pollfd -> vector ?
-        // tab user -> map ?
-        // les 2 fd sont commun et uniques
 
         /**********************************/
         /****  PRIVATE MEMBER FUNCTION ****/
         /**********************************/
+
         int    _Init_server();
-        void    _Infinit_while();
+        void   _Launch_server();
 
         /* MOD USER */
         void    _Add_user();
@@ -48,7 +53,7 @@ class server
 
 
         /* GET USER */
-        user   *_Get_userbyfd(int fd);
+        user   *_Get_user_by_fd(int fd);
         
         
         /* MOD CHANNEL */
@@ -56,9 +61,9 @@ class server
         void    _Remove_channel(channel *chan);
 
 
-        /* DVERS */  
-        int     _Input_cli(std::vector<pollfd>::iterator it);
-        int     _Output_cli(int fd, std::string msg);
+        /* DVERS */
+        int     _Input_client(std::vector<pollfd>::iterator it);
+        int     _Output_client(int fd, std::string msg);
 
     public:
 
@@ -66,25 +71,26 @@ class server
         /**** CONSTRUCTOR ****/
         /*********************/
 
-        server(); // non utilisee
         server(char *port, char *password);
-        // cpy
         
+
+
         /********************/
         /**** DESTRUCTOR ****/
         /********************/
+
         ~server();
 
-        /********************/
-        /***** OPERATOR *****/
-        /********************/
-        // operator =
+
+        /***********************/
+        /*****   COMMAND   *****/
+        /***********************/
 
         void    Enter(user* user, std::string str);
         void    join(user *user, std::string chan, std::string key);
         void    join(user *user, std::string chan);
         void    join(user *user);
-        void    pass(user *user, std::string pass);
+        int    pass(user *user, std::string pass);
         void    nick(user *user, std::string nick);
 
 };

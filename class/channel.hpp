@@ -7,17 +7,25 @@ class user;
 class channel
 {
     private:
-        std::string         _name;
-        std::vector<user *> _user;
-        std::vector<user *> _op;
+
+        /***************************/
+        /*** PRIVATE MEMBER TYPE ***/
+        /***************************/
+
+        // Nom du channel
+        const std::string   _channel_name;
+        // Liste des utilisateurs du channel
+        std::vector<user *> _list_channel_user;
+        // Liste des operateurs du channel
+        std::vector<user *> _list_operator;
+
+
     public:
 
         /***************************/
         /******* CONSTRUCTOR *******/
         /***************************/
         channel(std::string name, user *creator);
-        channel();
-        // cpy
 
         /**************************/
         /******* DESTRUCTOR *******/
@@ -35,8 +43,8 @@ class channel
         /******* ACCESSOR *******/
         /************************/
 
-        std::string         Get_name();
-        std::vector<user *> Get_user();
-        std::vector<user *> Get_op();
+        const std::string       Get_channel_name() const;
+        std::vector<user *>     Get_list_channel_user() const;
+        std::vector<user *>     Get_list_operator() const;
 
 };

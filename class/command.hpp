@@ -23,8 +23,6 @@ class command {
         void    join(user *user, std::string chan);
         void    join(user *user);
 
-    
-
 
 };
 
