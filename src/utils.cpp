@@ -7,7 +7,6 @@ int parsing(int argc, char **argv) {
     **  3 Arg
     */
 
-    std::cout << "*** PARSING NB ARG ***" << std::endl;
     if (argc != 3) {
         std::cerr << "The executable will run as follows:\n\t./ircserv <port> <password>" << std::endl;
         return 1;
@@ -17,8 +16,7 @@ int parsing(int argc, char **argv) {
     **  Port only contain number (0 - 9)
     **  Port's range (1 - 65535)
     */
-
-    std::cout << "*** PARSING PORT ***" << std::endl;
+   
     std::string valid_port(argv[1]);
     if (!isNumber(valid_port)) {
         std::cerr << "The port must be an int" << std::endl;
@@ -29,14 +27,12 @@ int parsing(int argc, char **argv) {
         std::cerr << "The port's range must be between 1 and 65535" << std::endl;
         return 1;
     }
-    std::cout << "port = " << valid_port << std::endl;
 
     /*
     **  password lenght: 6 - 12 char
     **  only 0-9 a-z A-Z
     */
-
-    std::cout << "*** PARSING MDP ***" << std::endl;
+   
     std::string password(argv[2]);
     if (password.length() < 6 || password.length() > 12) {
         std::cerr << "Password's lenght must be between 6 and 12" << std::endl;
