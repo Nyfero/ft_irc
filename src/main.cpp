@@ -8,18 +8,14 @@ void    Sig(int sig)
     g_stop = 0;
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     std::cout << "BEGIN MAIN" << std::endl;
-    if (parsing(argc, argv))
+    if (parsing(argc, argv)) {
         return 1;
+    }
     signal(SIGINT, Sig);
-    //else
-    // {
-    //     server  test(argv[1], argv[2]);
-    // }
+    server  irc(argv[1], argv[2]);
 
-    
     std::cout << "END MAIN" << std::endl;
-    return (0);
-}
+    return 0;
+};

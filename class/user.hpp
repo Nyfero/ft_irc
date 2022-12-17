@@ -7,15 +7,20 @@ class channel;
 class user
 {
     private:
-        // int _socket_cli;
-        struct addrinfo _addrinfo_cli;
-        struct pollfd   _fd_poll; // peut etre enlever et juste garder socket
+
+        // Nom d'utilisateur (identifiant -> ne change pas)
+        const std::string   _username;
+        // Pseudo d'utilisateur
+        std::string         _nickname;
+
+        // Channels du client
+        std::vector<channel *> _channel_register;
+
+        // Structure des requetes du client et son fd
+        struct pollfd   _fd_poll_client;
         
-        // nom channel auxquels user appartient -> check avec vector<channel> de user
-        std::vector<channel *> _channel;
-        
-        std::string _nickname;
-        std::string _username;
+        // (optionnel) Adresse IP client
+        struct addrinfo _addrinfo_client;
 
     public:
         std::string str;
@@ -44,7 +49,7 @@ class user
         /***** ACCESSOR *****/
         /********************/
 
-        int Get_fd();
+        int Get_fd_client();
 
         /**************/
         /****  MOD ****/

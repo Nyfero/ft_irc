@@ -14,7 +14,7 @@ int parsing(int argc, char **argv) {
 
     /*
     **  Port only contain number (0 - 9)
-    **  Port's range (1 - 65535)
+    **  Port's range (1024 - 65535) 16-bits
     */
    
     std::string valid_port(argv[1]);
@@ -23,8 +23,8 @@ int parsing(int argc, char **argv) {
         return 1;
     }
     int range_port = std::atoi(argv[1]);
-    if (range_port < 1 || range_port > 65535) {
-        std::cerr << "The port's range must be between 1 and 65535" << std::endl;
+    if (range_port < 1024 || range_port > 65535) {
+        std::cerr << "The port's range must be between 1024 and 65535" << std::endl;
         return 1;
     }
 
