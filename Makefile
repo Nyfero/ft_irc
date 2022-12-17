@@ -28,7 +28,11 @@ CLASS = $(addprefix $(CLASS_PATH)/, $(CFILES))
 SRCS_PATH = src
 
 FILES = main.cpp \
+<<<<<<< HEAD
 		user.cpp server.cpp utils.cpp channel.cpp command.cpp
+=======
+		user.cpp server.cpp utils.cpp channel.cpp
+>>>>>>> gsap
 
 SRCS = $(addprefix $(SRCS_PATH)/, $(FILES))
 
