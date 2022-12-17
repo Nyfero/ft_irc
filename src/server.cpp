@@ -77,7 +77,7 @@ int    server::_Init_server() {
         return -4;
     }
     _serv_poll_fd.fd = _socket_serv;
-    _serv_poll_fd.events = POLLIN;
+    _serv_poll_fd.events = POLLIN | POLLOUT;
     _serv_poll_fd.revents = 0;
     return 0;
 };
@@ -148,7 +148,6 @@ void    server::_Add_user() {
 
     addrinfo_cli.ai_addr = NULL;
     addrinfo_cli.ai_addrlen = 0;
-
 
     std::cout << "elemt _user:" << _list_user.size() << std::endl;
     socket_cli = accept(_socket_serv, addrinfo_cli.ai_addr, &addrinfo_cli.ai_addrlen);

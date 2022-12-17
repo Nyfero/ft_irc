@@ -12,7 +12,7 @@ user::user(int  socket, addrinfo info)
     (void) _addrinfo_client;
     _fd_poll_client.fd = socket,
     _fd_poll_client.revents = 0,
-    _fd_poll_client.events = POLLIN,
+    _fd_poll_client.events = POLLIN | POLLOUT,
     std::cout << "User create: " << _fd_poll_client.fd << std::endl;
 };
 

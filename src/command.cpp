@@ -8,6 +8,7 @@ void    server::Enter(user *user, std::string str)
     std::cout << "fd uer: " <<user->Get_fd_client() << std::endl;
     std::cout << "str: " << str << std::endl;
     std::cout << "*** server::ENTER - ***" << std::endl;
+    _Output_client(user->Get_fd_client(), "UWU");
 }
 
 // join with key
