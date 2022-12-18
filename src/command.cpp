@@ -221,6 +221,7 @@ void    server::Nick_cmd(user *user, std::string cmd) {
     // Verifie si le user est enregistre
     if (!user->Get_is_register()) {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
+        return;
     }
 
     //Verifie les arguments de NICK
