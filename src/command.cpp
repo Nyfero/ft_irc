@@ -130,10 +130,6 @@ void  server::Pass_cmd(user *user, std::string cmd) {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
         return;
     }
-    if (cmd[0] == ':') {
-        _Output_client(user->Get_fd_client(), ERR_PASSWITHPREFIX);
-        return;
-    }
 
     std::string check_password = cmd.substr(pos, cmd.length());
     if (user->Get_is_register()) { // Verifie si le user est deja connecte
