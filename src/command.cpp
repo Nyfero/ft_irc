@@ -276,10 +276,7 @@ void    server::Quit_cmd(user *user, std::string cmd) { //jgour
 
 void    server::Join_cmd(user *user, std::string cmd) { //jgour
     std::cout << "COMMANDE -> JOIN" << std::endl;
-    // '&', '#', '+' or '!'
-    // lenght 50 max
-    // no scape ctrl+g '7' ','
-    // TotO == toto
+
     std::string chan, key;
     size_t  pos, pos2;
 
@@ -289,9 +286,6 @@ void    server::Join_cmd(user *user, std::string cmd) { //jgour
         return;
     }
     chan = cmd.substr(pos, cmd.length());
-
-    std::cout << "chan = " << chan << std::endl;
-
     pos = chan.find(" ");
     if (((pos = chan.find(" ")) != std::string::npos) && (pos2 = chan.find_first_not_of(" ", pos))!= std::string::npos)
     {
@@ -304,35 +298,23 @@ void    server::Join_cmd(user *user, std::string cmd) { //jgour
     {
         std::cout << "key = " << key << std::endl;
         pos = key.find(" ", 0);
-        if (pos == std::string::npos) {
+        if (pos != std::string::npos && (pos2 = key.find_first_not_of(" ", pos)) != std::string::npos){
             _Output_client(user->Get_fd_client(), ERR_TOMUCHPARAMS);
             return;
         }
+        _Join_treat(user, chan, key);
+        std::cout << "JOIN <channel> <key>" << std::endl;
 
     }
     else if (!chan.compare("0"))// 1 arg && 0
     {
         user->Remove_all_channel();
-
     }
     else // 1 arg
     {
-        // if () // channel exist
-        // {
-
-        // }
-        // if ()// channel exist pas
-        // {
-
-        //     _Add_channel(name_channel, user);
-        // }
+        std::cout << "JOIN <channel>" << std::endl;
+        _Join_treat(user, chan);
     }
-
-    //cas 1: channel exist
-    //cas 2: channel doesn't exist
-    //cas 3: 0
-    (void) cmd;
-    (void) user;
 };
 
 void    server::Part_cmd(user *user, std::string cmd) { //gjour
@@ -353,7 +335,7 @@ void    server::Invite_cmd(user *user, std::string cmd) { // jgoru
     (void) user;
 };
 
-void    server::Kick_cmd(user *user, std::string cmd) {
+void    server::Kick_cmd(user *user, std::string cmd) { // jgour
     std::cout << "COMMANDE -> KICK" << std::endl;
     (void) cmd;
     (void) user;
@@ -388,3 +370,77 @@ void    server::Wallops_cmd(user *user, std::string cmd) {
     (void) cmd;
     (void) user;
 };
+
+
+/* utils command */
+
+int server::_Join_treat(user *user, std::string chan, std::string key)
+{
+    (void) user;
+    (void) chan;
+    (void) key;
+
+    // verifier tout comme celui en bas mais avant d'ajouter verifier que key est bonne
+    return 0;
+};
+
+int server::_Join_treat(user *user, std::string chan)
+{
+    std::cout << "_Join_treat chan" << std::endl;
+    
+    std::string str = chan;
+    size_t  pos;
+
+
+    while ((pos = chan.find(",", 0)) != std::string::npos) // check si d'autre channel
+    {
+        std::cout << "_Join_treat chan ALPHA" << std::endl;
+        if (str[0] == ',')
+        {
+            _Output_client(user->Get_fd_client(), ERR_NOSUCHCHANNEL);
+        }
+        else
+        {
+            std::cout << "_Join_treat chan BRAVO" << std::endl;
+            str = chan.substr(0, pos);
+            if (Check_valid_channel(str))
+            {
+                if (!_Channel_already_exist(str))
+                {
+                    // ajouter channel dans serveur
+                }
+                // ajouter user dans channel
+                // ajouter channel dans user
+            }
+            else
+                _Output_client(user->Get_fd_client(), ERR_NOSUCHCHANNEL);
+        }
+        chan.erase(0, pos + 1);
+        std::cout << chan << std::endl;
+    }
+    if (!chan.empty() && Check_valid_channel(chan)) // dernier/seul channel
+    {
+        if (!_Channel_already_exist(chan))
+        {
+            // ajouter channel dans serveur
+        }
+        // ajouter user dans channel
+        // ajouter channel dans user
+    }
+    else
+        _Output_client(user->Get_fd_client(), ERR_NOSUCHCHANNEL);
+    return 0;
+};
+
+bool    server::_Channel_already_exist(std::string str)
+{
+    std::vector<channel *>::iterator    it;
+
+    it = _list_channel.begin();
+    for (size_t  i = 0; i < _list_channel.size(); i++)
+    {
+        if (Compare_case_sensitive(str, _list_channel[i]->Get_channel_name()))
+            return true;
+    }
+    return false;
+}
