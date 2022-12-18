@@ -71,6 +71,7 @@ class user
 
         int Add_channel(channel *chan);
         int Remove_Channel(channel *chan);
+        void Remove_all_channel();
         void Set_is_register(bool modif);
         void Set_nickname(std::string nickname);
         void Set_username(std::string username);

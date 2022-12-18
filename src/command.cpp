@@ -1,4 +1,5 @@
 # include "../class/server.hpp"
+# include "../class/user.hpp"
 
 void    server::Check_command(user *user, std::string str) {
     std::cout << "*** server::Check_command + ***" << std::endl;
@@ -191,19 +192,43 @@ void    server::Mode_cmd(user *user, std::string cmd) {
     (void) user;
 };
 
-void    server::Quit_cmd(user *user, std::string cmd) {
+void    server::Quit_cmd(user *user, std::string cmd) { //jgour
     std::cout << "COMMANDE -> QUIT" << std::endl;
     (void) cmd;
     (void) user;
 };
 
-void    server::Join_cmd(user *user, std::string cmd) {
+void    server::Join_cmd(user *user, std::string cmd) { //jgour
     std::cout << "COMMANDE -> JOIN" << std::endl;
+    // '&', '#', '+' or '!'
+    // lenght 50 max
+    // no scape ctrl+g '7' ','
+    // TotO == toto
+    //std::string prefix, chan, key;
+
+    // prefix
+    // if (cmd[0] == ':')
+    // {
+
+    // }
+    //else if ()
+
+    // command
+    // arg
+
+    // <channel>
+    // <channel> <key>
+    // "0" l'user leave tous les channels auxquels il apaprtient
+    //user->Remove_all_channel();
+
+    //cas 1: channel exist
+    //cas 2: channel doesn't exist
+    //cas 3: 0
     (void) cmd;
     (void) user;
 };
 
-void    server::Part_cmd(user *user, std::string cmd) {
+void    server::Part_cmd(user *user, std::string cmd) { //gjour
     std::cout << "COMMANDE -> PART" << std::endl;
     (void) cmd;
     (void) user;
@@ -215,7 +240,7 @@ void    server::Names_cmd(user *user, std::string cmd) {
     (void) user;
 };
 
-void    server::Invite_cmd(user *user, std::string cmd) {
+void    server::Invite_cmd(user *user, std::string cmd) { // jgoru
     std::cout << "COMMANDE -> INVITE" << std::endl;
     (void) cmd;
     (void) user;

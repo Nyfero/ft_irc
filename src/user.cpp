@@ -89,6 +89,10 @@ int user::Remove_Channel(channel *chan) {
     return 0;
 };
 
+void    Remove_all_channel(){
+    std::cout << "/*** USER::REMOVE_CHANNEL ***/"<< std::endl;
+};
+
 void user::Set_is_register(bool modif) {
     _is_register = modif;
 };
