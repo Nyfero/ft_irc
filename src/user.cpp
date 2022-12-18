@@ -59,6 +59,10 @@ int user::Get_mode() const {
     return _mode;
 };
 
+std::string user::Get_realname() const {
+    return _realname;
+};
+
 
 /**************/
 /****  MOD ****/
@@ -111,4 +115,8 @@ void user::Set_hostname(std::string hostname) {
 
 void user::Set_mode(int mode) {
     _mode = mode;
+};
+
+void user::Set_realname(std::string realname) {
+    _realname = realname;
 };

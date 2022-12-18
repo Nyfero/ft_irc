@@ -10,6 +10,10 @@ class user
 
         // Nom d'utilisateur (identifiant -> ne change pas)
         std::string   _username;
+
+        // Nom reel du client
+        std::string         _realname;
+
         // Pseudo d'utilisateur
         std::string         _nickname;
 
@@ -64,6 +68,7 @@ class user
         std::string Get_nickname() const;
         std::string Get_hostname() const;
         int     Get_mode() const;
+        std::string Get_realname() const;
 
         /**************/
         /****  MOD ****/
@@ -77,4 +82,5 @@ class user
         void Set_username(std::string username);
         void Set_hostname(std::string hostname);
         void Set_mode(int mode);
+        void Set_realname(std::string realname);
 };

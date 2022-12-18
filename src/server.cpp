@@ -96,8 +96,7 @@ void    server::_Launch_server() {
 
     _list_poll_fd.push_back(_serv_poll_fd);
 
-    int limit = 0;
-    while (g_stop && limit <= 10) {
+    while (g_stop) {
         // poll(tab pollfd, size tab, timer)
         poll(_list_poll_fd.data(), _list_poll_fd.size(), -1);
 
@@ -126,7 +125,6 @@ void    server::_Launch_server() {
             it++;
         }
         std::cout << "fds: size: " << _list_poll_fd.size() << std::endl;
-        limit++;
     }
     std::vector<user*>::iterator ituser;
     for (ituser = _list_user.begin(); ituser != _list_user.end(); ituser = _list_user.begin()) {
