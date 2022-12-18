@@ -174,14 +174,18 @@ void server::User_cmd(user *user, std::string cmd) {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
         return;
     }
-    int check_mode = Stoi(cmd.substr(pos2, cmd.find(" ", pos2) - pos2)); 
+    int check_mode = Stoi(cmd.substr(pos2, cmd.find(" ", pos2) - pos2));
     if (check_mode < 0 || check_mode > 15) {
         _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG);
         return;
     }
 
     // Verifie le hostname
-    size_t pos3 = cmd.find_first_not_of(" ", pos2 + 1);
+    int i = 1;
+    if (check_mode > 9) {
+        i = 2;
+    }
+    size_t pos3 = cmd.find_first_not_of(" ", pos2 + i);
     if (pos3 == std::string::npos) {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
         return;

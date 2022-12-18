@@ -70,5 +70,6 @@ int Stoi(std::string str) {
     for (size_t i = 0; i < str.size(); i++) {
         res = res * 10 + (str[i] - '0');
     }
+    std::cout << "res: " << res << std::endl;
     return res;
 };
