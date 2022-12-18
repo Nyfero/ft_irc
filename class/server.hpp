@@ -86,6 +86,17 @@ class server
         /*****   COMMAND   *****/
         /***********************/
 
+        void    Enter(user* user, std::string str);
+        void    join(user *user, std::string chan, std::string key);
+        void    join(user *user, std::string chan);
+        void    join(user *user);
+        int    pass(user *user, std::string pass);
+        void    nick(user *user, std::string nick);
+
+        /***********************/
+        /*****   COMMAND   *****/
+        /***********************/
+
         void    Check_command(user *user, std::string str);
 
         void    Pass_cmd(user *user, std::string cmd);

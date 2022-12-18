@@ -148,7 +148,6 @@ void    server::_Add_user() {
     addrinfo_cli.ai_addr = NULL;
     addrinfo_cli.ai_addrlen = 0;
 
-
     std::cout << "elemt _user:" << _list_user.size() << std::endl;
     socket_cli = accept(_socket_serv, addrinfo_cli.ai_addr, &addrinfo_cli.ai_addrlen);
    
