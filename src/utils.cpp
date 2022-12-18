@@ -64,3 +64,11 @@ bool Compare_case_sensitive(std::string str1, std::string str2) {
     }
     return true;
 };
+
+int Stoi(std::string str) {
+    int res = 0;
+    for (size_t i = 0; i < str.size(); i++) {
+        res = res * 10 + (str[i] - '0');
+    }
+    return res;
+};

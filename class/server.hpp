@@ -98,6 +98,7 @@ class server
         /***********************/
 
         void    Check_command(user *user, std::string str);
+        bool    Check_prefix(user *user, std::string str);
 
         void    Pass_cmd(user *user, std::string cmd);
         void    User_cmd(user *user, std::string cmd);

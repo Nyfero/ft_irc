@@ -3,14 +3,15 @@
 void    server::Check_command(user *user, std::string str) {
     std::cout << "*** server::Check_command + ***" << std::endl;
 
-    std::string command;
     if (str[0] == ':') { // :nick!user@host COMMAND
-        command = str.substr(str.find(" ") + 1, str.size());    // remove :nick!user@host
-        command = command.substr(0, command.find(" "));         // remove arguments
+        if (!Check_prefix(user, str)) {
+            return;
+        }
+        // Supprime le prefix de la commande
+        str = str.substr(str.find(" ") + 1, str.size());
     }
-    else { // COMMAND
-        command = str.substr(0, str.find(" "));
-    }
+    
+    std::string command = str.substr(0, str.find(" "));
 
     std::string list_command[15] = {"PASS", "USER", "NICK", "MODE", "QUIT", "JOIN", "PART", "NAMES", "INVITE", "KICK", "PRIVMSG", "NOTICE", "AWAY", "USERS", "WALLOPS"};
 
@@ -74,6 +75,53 @@ void    server::Check_command(user *user, std::string str) {
     }
 };
 
+bool    server::Check_prefix(user *user, std::string str) {
+
+    // Verifie si le user est deja connecte
+    if (user->Get_username().empty()) {
+        _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
+        return false;
+    }
+
+    // Verifie si le prefix correspond au nickname du user
+    std::string prefix = str.substr(1, str.find(" ") - 1);
+    std::string check_old_nick = prefix.substr(0, prefix.find("!"));
+    if (check_old_nick != user->Get_nickname()) {
+        _Output_client(user->Get_fd_client(), ERR_NOSUCHNICK);
+        return false;
+    }
+
+    // Verifie si le prefix contient un ! apres le nickname
+    size_t pos = prefix.find("!");
+    if (pos == std::string::npos) {
+        _Output_client(user->Get_fd_client(), ERR_PARSINGPREFIX);
+        return false;
+    }
+
+    // Verifie si le prefix contient un @ apres le username
+    size_t pos2 = prefix.find("@");
+    if (pos2 == std::string::npos) {
+        _Output_client(user->Get_fd_client(), ERR_PARSINGPREFIX);
+        return false;
+    }
+
+    // Verifie si le prefix correspond au username du user
+    std::string check_user = prefix.substr(pos + 1, pos2 - pos - 1);
+    if (check_user != user->Get_username()) {
+        _Output_client(user->Get_fd_client(), ERR_NOSUCHUSER);
+        return false;
+    }
+
+    // Verifie si le prefix correspond au hostname du user
+    std::string check_host = prefix.substr(pos2 + 1, prefix.size());
+    if (check_host != user->Get_hostname()) {
+        _Output_client(user->Get_fd_client(), ERR_NOSUCHHOSTNAME);
+        return false;
+    }
+    
+    return true;
+};
+
 void  server::Pass_cmd(user *user, std::string cmd) {
 
     // Verifie les arguments de PASS
@@ -102,46 +150,76 @@ void  server::Pass_cmd(user *user, std::string cmd) {
 };
 
 void server::User_cmd(user *user, std::string cmd) {
-    (void)cmd;
-    (void)user;
+    
+    // Verifie si le user a deja envoye une commande USER
+    if (!user->Get_username().empty()) {
+        _Output_client(user->Get_fd_client(), ERR_ALREADYREGISTRED);
+        return;
+    }
+
+    // Verifie les arguments de USER
+    size_t pos = cmd.find_first_not_of(" ", 4);
+    if (pos == std::string::npos) {
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
+        return;
+    }
+
+    // Verifie si le username est vide
+    std::string check_username = cmd.substr(pos, cmd.find(" ", pos) - pos);
+    if (check_username.empty()) {
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
+        return;
+    }
+
+    // Verifie le mode
+    size_t pos2 = cmd.find_first_not_of(" ", pos + check_username.length());
+    if (pos2 == std::string::npos) {
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
+        return;
+    }
+    int check_mode = Stoi(cmd.substr(pos2, cmd.find(" ", pos2) - pos2)); 
+    if (check_mode < 0 || check_mode > 15) {
+        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG);
+        return;
+    }
+
+    // Verifie le hostname
+    size_t pos3 = cmd.find_first_not_of(" ", pos2 + 1);
+    if (pos3 == std::string::npos) {
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
+        return;
+    }
+    std::string check_hostname = cmd.substr(pos3, cmd.find(" ", pos3) - pos3);
+    if (check_hostname.empty()) {
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
+        return;
+    }
+
+    // Verifie le realname
+    size_t pos4 = cmd.find_first_not_of(" ", pos3 + check_hostname.length());
+    if (pos4 == std::string::npos) {
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
+        return;
+    }
+    if (cmd[pos4] != ':') {
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
+        return;
+    }
+    std::string check_realname = cmd.substr(pos4 + 1, cmd.length() - pos4);
+    if (check_realname.empty()) {
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
+        return;
+    }
+
+    // Enregistre le user
+    user->Set_username(check_username);
+    user->Set_hostname(check_hostname);
+    user->Set_realname(check_realname);
+    user->Set_mode(check_mode);
+    _Output_client(user->Get_fd_client(), "New user registered as: " + check_username + "\nHostname: " + check_hostname + "\nMode:  ... \nRealname: " + check_realname);
 };
 
 void    server::Nick_cmd(user *user, std::string cmd) {
-
-    // Verifie s'il y a un prefix
-    if (cmd[0] == ':') {
-        if (!user->Get_is_register() || user->Get_nickname().empty() || user->Get_username().empty()) { // Verifie si le user est deja connecte
-            _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
-            return;
-        }
-        std::string prefix = cmd.substr(1, cmd.find(" ") - 1);
-        std::string check_old_nick = prefix.substr(0, prefix.find("!"));
-        if (check_old_nick != user->Get_nickname()) {   // Verifie si le prefix correspond au nickname du user
-            _Output_client(user->Get_fd_client(), ERR_NICKCOLLISION);
-            return;
-        }
-        size_t pos = prefix.find("!");
-        if (pos == std::string::npos) { // Verifie si le prefix contient un ! apres le nickname
-            _Output_client(user->Get_fd_client(), ERR_NICKCOLLISION);
-            return;
-        }
-        size_t pos2 = prefix.find("@");
-        if (pos2 == std::string::npos) { // Verifie si le prefix contient un @ apres le username
-            _Output_client(user->Get_fd_client(), ERR_NICKCOLLISION);
-            return;
-        }
-        std::string check_user = prefix.substr(pos + 1, pos2 - pos - 1);
-        if (check_user != user->Get_username()) { // Verifie si le prefix correspond au username du user
-            _Output_client(user->Get_fd_client(), ERR_NICKCOLLISION);
-            return;
-        }
-        std::string check_host = prefix.substr(pos2 + 1, prefix.size());
-        if (check_host != user->Get_hostname()) { // Verifie si le prefix correspond au hostname du user
-            _Output_client(user->Get_fd_client(), ERR_NICKCOLLISION);
-            return;
-        }
-        cmd = cmd.substr(cmd.find(" ") + 1, cmd.size());
-    }
 
     //Verifie les arguments de NICK
     size_t pos = cmd.find_first_not_of(" ", 4);
@@ -150,21 +228,23 @@ void    server::Nick_cmd(user *user, std::string cmd) {
         return;
     }
 
+     // Verifie la longueur du nickname
     std::string check_nick = cmd.substr(pos, cmd.length());
-
-    if (check_nick.length() > 9 || check_nick.length() < 1) { // Verifie la longueur du nick
+    if (check_nick.length() > 9 || check_nick.length() < 1) {
         _Output_client(user->Get_fd_client(), ERR_ERRONEUSNICKNAME);
         return;
     }
 
-    for (size_t i = 0; i < check_nick.length(); i++) { // Verifie si le nick contient des caracteres speciaux
+    // Verifie si le nick contient des caracteres speciaux
+    for (size_t i = 0; i < check_nick.length(); i++) {
         if (!isalnum(check_nick[i]) && check_nick[i] != '-' && check_nick[i] != '_') {
             _Output_client(user->Get_fd_client(), ERR_ERRONEUSNICKNAME);
             return;
         }
     }
 
-    for (size_t i = 0; i < _list_user.size(); i++) { // Verifie si le nick est deja pris
+    // Verifie si le nick est deja pris
+    for (size_t i = 0; i < _list_user.size(); i++) {
         if (Compare_case_sensitive(_list_user[i]->Get_username(), check_nick)) {
             _Output_client(user->Get_fd_client(), ERR_NICKNAMEINUSE);
             return;
@@ -175,11 +255,11 @@ void    server::Nick_cmd(user *user, std::string cmd) {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
     }
     else if (!user->Get_username().empty()) { // Modifie le nickname
-        user->Set_username(check_nick);
+        user->Set_nickname(check_nick);
         _Output_client(user->Get_fd_client(), "Your nickname is now " + check_nick);
     }
     else {  // Definit le nickname
-        user->Set_username(check_nick);
+        user->Set_nickname(check_nick);
         std::cout << "Introducing new " << check_nick << " user" << std::endl;
         _Output_client(user->Get_fd_client(), "Hello " + check_nick + " !");
     }
