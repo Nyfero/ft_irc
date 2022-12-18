@@ -26,15 +26,14 @@
 # define ERR_UMODEUNKNOWNFLAG "Unknown MODE flag"
 
 // JOIN Error
-# define ERR_BADCHANNELKEY
+# define ERR_BADCHANNELKEY  "Key-locked channel, either without a key or with the wrong key"
+# define ERR_NOSUCHCHANNEL  "Channel name is invalid"
+# define ERR_TOMUCHPARAMS   "To much parameters"
 
 # define ERR_BANNEDFROMCHAN
 # define ERR_INVITEONLYCHAN
 # define ERR_CHANNELISFULL
 # define ERR_BADCHANMASK
-# define ERR_NOSUCHCHANNEL
-# define ERR_TOOMANYCHANNELS
-# define ERR_TOOMANYTARGETS
 
 // JOIN RPL
 # define RPL_TOPIC

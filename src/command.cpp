@@ -11,6 +11,7 @@ void    server::Check_command(user *user, std::string str) {
         // Supprime le prefix de la commande
         str = str.substr(str.find(" ") + 1, str.size());
     }
+    std::cout << std::endl << "size: " << str.size() << std::endl;
     
     std::string command = str.substr(0, str.find(" "));
 
@@ -23,7 +24,6 @@ void    server::Check_command(user *user, std::string str) {
         }
         i++;
     }
-    std::cout << "str: " << str << "|" << std::endl << "str size="<< str.size()<< std::endl;
     switch (i) {
     case 0: 
         return Pass_cmd(user, str);
@@ -218,12 +218,6 @@ void server::User_cmd(user *user, std::string cmd) {
 
 void    server::Nick_cmd(user *user, std::string cmd) {
 
-    // Verifie si le user est enregistre
-    if (!user->Get_is_register()) {
-        _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
-        return;
-    }
-
     //Verifie les arguments de NICK
     size_t pos = cmd.find_first_not_of(" ", 4);
     if (pos == std::string::npos) {
@@ -254,8 +248,10 @@ void    server::Nick_cmd(user *user, std::string cmd) {
         }
     }
 
-    // Modifie le nickname
-    if (!user->Get_username().empty()) { 
+    if (!user->Get_is_register()) {
+        _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
+    }
+    else if (!user->Get_username().empty()) { // Modifie le nickname
         user->Set_nickname(check_nick);
         _Output_client(user->Get_fd_client(), "Your nickname is now " + check_nick);
     }
@@ -305,39 +301,32 @@ void    server::Join_cmd(user *user, std::string cmd) { //jgour
 
     std::cout << "chan = " << chan << std::endl;
     if (!key.empty())
+    {
         std::cout << "key = " << key << std::endl;
-    else
-        std::cout << "key vide" << std::endl;
-    
+        pos = key.find(" ", 0);
+        if (pos == std::string::npos) {
+            _Output_client(user->Get_fd_client(), ERR_TOMUCHPARAMS);
+            return;
+        }
 
-    // command
-    // arg
+    }
+    else if (!chan.compare("0"))// 1 arg && 0
+    {
+        user->Remove_all_channel();
 
-    // <channel>
-    // <channel> <key>
-    // "0" l'user leave tous les channels auxquels il apaprtient
+    }
+    else // 1 arg
+    {
+        // if () // channel exist
+        // {
 
-    // if () //2 arg
-    // {
+        // }
+        // if ()// channel exist pas
+        // {
 
-    // }
-    // else if ()// 1 arg && 0
-    // {
-    //     user->Remove_all_channel();
-
-    // }
-    // else if ()// 1 arg
-    // {
-    //     if () // channel exist
-    //     {
-
-    //     }
-    //     if ()// channel exist pas
-    //     {
-
-    //         _Add_channel(name_channel, user);
-    //     }
-    // }
+        //     _Add_channel(name_channel, user);
+        // }
+    }
 
     //cas 1: channel exist
     //cas 2: channel doesn't exist

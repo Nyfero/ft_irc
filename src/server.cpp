@@ -285,6 +285,8 @@ int server::_Input_client(std::vector<pollfd>::iterator it) {
         // std::cout  <<"  e_str:" << test->str << std::endl;
         // std::cout << "    res:" << res << std::endl;
 
+        if ((found = res.find("\r", 0)) != std::string::npos)
+            res.erase(found);
         Check_command(test, res); // check si cmd valide
 
         // Use line ex: USE_CMD(user &client, std::string line)
