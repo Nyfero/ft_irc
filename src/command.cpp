@@ -2,7 +2,7 @@
 # include "../class/user.hpp"
 
 void    server::Check_command(user *user, std::string str) {
-    std::cout << "*** server::Check_command + ***" << std::endl;
+    std::cout << "*** sserver::Check_command + ***" << std::endl;
 
     if (str[0] == ':') { // :nick!user@host COMMAND
         if (!Check_prefix(user, str)) {
@@ -23,7 +23,7 @@ void    server::Check_command(user *user, std::string str) {
         }
         i++;
     }
-
+    std::cout << "str: " << str << "|" << std::endl << "str size="<< str.size()<< std::endl;
     switch (i) {
     case 0: 
         return Pass_cmd(user, str);
@@ -129,10 +129,6 @@ void  server::Pass_cmd(user *user, std::string cmd) {
     size_t pos = cmd.find_first_not_of(" ", 4);
     if (pos == std::string::npos) {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
-        return;
-    }
-    if (cmd[0] == ':') {
-        _Output_client(user->Get_fd_client(), ERR_PASSWITHPREFIX);
         return;
     }
 
@@ -284,14 +280,31 @@ void    server::Join_cmd(user *user, std::string cmd) { //jgour
     // lenght 50 max
     // no scape ctrl+g '7' ','
     // TotO == toto
-    //std::string prefix, chan, key;
+    std::string chan, key;
+    size_t  pos, pos2;
 
-    // prefix
-    // if (cmd[0] == ':')
-    // {
+    pos = cmd.find_first_not_of(" ", 4);
+    if (pos == std::string::npos) {
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
+        return;
+    }
+    chan = cmd.substr(pos, cmd.length());
 
-    // }
-    //else if ()
+    std::cout << "chan = " << chan << std::endl;
+
+    pos = chan.find(" ");
+    if (((pos = chan.find(" ")) != std::string::npos) && (pos2 = chan.find_first_not_of(" ", pos))!= std::string::npos)
+    {
+        key = chan.substr(pos2, chan.length());
+        chan = chan.substr(0, pos);
+    }
+
+    std::cout << "chan = " << chan << std::endl;
+    if (!key.empty())
+        std::cout << "key = " << key << std::endl;
+    else
+        std::cout << "key vide" << std::endl;
+    
 
     // command
     // arg
@@ -299,7 +312,28 @@ void    server::Join_cmd(user *user, std::string cmd) { //jgour
     // <channel>
     // <channel> <key>
     // "0" l'user leave tous les channels auxquels il apaprtient
-    //user->Remove_all_channel();
+
+    // if () //2 arg
+    // {
+
+    // }
+    // else if ()// 1 arg && 0
+    // {
+    //     user->Remove_all_channel();
+
+    // }
+    // else if ()// 1 arg
+    // {
+    //     if () // channel exist
+    //     {
+
+    //     }
+    //     if ()// channel exist pas
+    //     {
+
+    //         _Add_channel(name_channel, user);
+    //     }
+    // }
 
     //cas 1: channel exist
     //cas 2: channel doesn't exist

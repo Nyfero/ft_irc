@@ -93,7 +93,7 @@ int user::Remove_Channel(channel *chan) {
     return 0;
 };
 
-void    Remove_all_channel(){
+void    user::Remove_all_channel(){
     std::cout << "/*** USER::REMOVE_CHANNEL ***/"<< std::endl;
 };
 

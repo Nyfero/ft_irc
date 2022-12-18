@@ -24,3 +24,21 @@
 
 // USER Error
 # define ERR_UMODEUNKNOWNFLAG "Unknown MODE flag"
+
+// JOIN Error
+# define ERR_BADCHANNELKEY
+
+# define ERR_BANNEDFROMCHAN
+# define ERR_INVITEONLYCHAN
+# define ERR_CHANNELISFULL
+# define ERR_BADCHANMASK
+# define ERR_NOSUCHCHANNEL
+# define ERR_TOOMANYCHANNELS
+# define ERR_TOOMANYTARGETS
+
+// JOIN RPL
+# define RPL_TOPIC
+
+// PART Error
+
+# define ERR_NOTONCHANNEL
