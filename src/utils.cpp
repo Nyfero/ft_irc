@@ -29,13 +29,13 @@ int parsing(int argc, char **argv) {
     }
 
     /*
-    **  password lenght: 6 - 12 char
+    **  password lenght: 1 - 12 char
     **  only 0-9 a-z A-Z
     */
    
     std::string password(argv[2]);
-    if (password.length() < 6 || password.length() > 12) {
-        std::cerr << "Password's lenght must be between 6 and 12" << std::endl;
+    if (password.length() < 1 || password.length() > 12) {
+        std::cerr << "Password's lenght must be between 1 and 12" << std::endl;
         return 1;
     }
     for(size_t i = 0; i < password.length(); i++) {

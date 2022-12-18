@@ -11,6 +11,7 @@ user::user(int  socket, addrinfo info)
     std::cout << "/*** CONSTRUCTOR USER ***/"<< std::endl;
     (void) _addrinfo_client;
     _is_register = false;
+    _mode = 0;
     _fd_poll_client.fd = socket,
     _fd_poll_client.revents = 0,
     _fd_poll_client.events = POLLIN,
@@ -48,6 +49,14 @@ std::string user::Get_username() const {
 
 std::string user::Get_nickname() const {
     return _nickname;
+};
+
+std::string user::Get_hostname() const {
+    return _hostname;
+};
+
+int user::Get_mode() const {
+    return _mode;
 };
 
 
@@ -90,4 +99,12 @@ void user::Set_nickname(std::string nickname) {
 
 void user::Set_username(std::string username) {
     _username = username;
+};
+
+void user::Set_hostname(std::string hostname) {
+    _hostname = hostname;
+};
+
+void user::Set_mode(int mode) {
+    _mode = mode;
 };

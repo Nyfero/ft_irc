@@ -13,6 +13,12 @@ class user
         // Pseudo d'utilisateur
         std::string         _nickname;
 
+        // Hostname du client
+        std::string         _hostname;
+
+        // Mode du client
+        int                _mode;
+
         // Channels du client
         std::vector<channel *> _channel_register;
 
@@ -56,6 +62,8 @@ class user
         bool Get_is_register() const;
         std::string Get_username() const;
         std::string Get_nickname() const;
+        std::string Get_hostname() const;
+        int     Get_mode() const;
 
         /**************/
         /****  MOD ****/
@@ -66,4 +74,6 @@ class user
         void Set_is_register(bool modif);
         void Set_nickname(std::string nickname);
         void Set_username(std::string username);
+        void Set_hostname(std::string hostname);
+        void Set_mode(int mode);
 };
