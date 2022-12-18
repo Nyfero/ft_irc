@@ -218,6 +218,11 @@ void server::User_cmd(user *user, std::string cmd) {
 
 void    server::Nick_cmd(user *user, std::string cmd) {
 
+    // Verifie si le user est enregistre
+    if (!user->Get_is_register()) {
+        _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
+    }
+
     //Verifie les arguments de NICK
     size_t pos = cmd.find_first_not_of(" ", 4);
     if (pos == std::string::npos) {
@@ -248,10 +253,8 @@ void    server::Nick_cmd(user *user, std::string cmd) {
         }
     }
 
-    if (!user->Get_is_register()) {
-        _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
-    }
-    else if (!user->Get_username().empty()) { // Modifie le nickname
+    // Modifie le nickname
+    if (!user->Get_username().empty()) { 
         user->Set_nickname(check_nick);
         _Output_client(user->Get_fd_client(), "Your nickname is now " + check_nick);
     }
