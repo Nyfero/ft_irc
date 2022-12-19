@@ -81,7 +81,9 @@ int Check_valid_channel(std::string str){
     // lenght 50 max
     // no scape ctrl+g '7' ','
     // TotO == toto
-    if (str.empty() || str.length() > 49 || ((str[0] != '&') && (str[0] != '#') && (str[0] != '+') && (str[0] != '!')) || (str.find("\a", 0) != t) || str.find(" ", 0) != t || str.find(",", 0) != t)
+    if (str.empty() || str.size() > 49 || (str.find("\a", 0) != t) || str.find(" ", 0) != t || str.find(",", 0) != t)
         return 0;
-    return 1;
+    if (((str[0] == '&') || (str[0] == '#') || (str[0] == '+') || (str[0] == '!')))
+        return 1;
+    return 0;
 };
