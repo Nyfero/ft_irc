@@ -73,3 +73,15 @@ int Stoi(std::string str) {
     std::cout << "res: " << res << std::endl;
     return res;
 };
+
+int Check_valid_channel(std::string str){
+    std::cout << "Check_valid_channel: " << str << "|" << std::endl;
+    size_t  t = std::string::npos;
+    // '&', '#', '+' or '!'
+    // lenght 50 max
+    // no scape ctrl+g '7' ','
+    // TotO == toto
+    if (str.empty() || str.length() > 49 || ((str[0] != '&') && (str[0] != '#') && (str[0] != '+') && (str[0] != '!')) || (str.find("\a", 0) != t) || str.find(" ", 0) != t || str.find(",", 0) != t)
+        return 0;
+    return 1;
+};

@@ -65,6 +65,13 @@ class server
         int     _Input_client(std::vector<pollfd>::iterator it);
         int     _Output_client(int fd, std::string msg);
 
+        /* GET CHANNEL */
+        bool     _Channel_already_exist(std::string str);
+
+        /* COMMAND*/
+        int _Join_treat(user *user, std::string chan, std::string key);
+        int _Join_treat(user *user, std::string chan);
+
     public:
 
         /*********************/
@@ -86,12 +93,9 @@ class server
         /*****   COMMAND   *****/
         /***********************/
 
-        void    Enter(user* user, std::string str);
-        void    join(user *user, std::string chan, std::string key);
-        void    join(user *user, std::string chan);
-        void    join(user *user);
-        int    pass(user *user, std::string pass);
-        void    nick(user *user, std::string nick);
+        // void    Enter(user* user, std::string str);
+        // int    pass(user *user, std::string pass);
+        // void    nick(user *user, std::string nick);
 
         /***********************/
         /*****   COMMAND   *****/

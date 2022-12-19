@@ -26,7 +26,8 @@
 int     parsing(int argc, char **argv);
 bool    isNumber(const std::string& s);
 bool    Compare_case_sensitive(std::string str1, std::string str2);
-int Stoi(std::string str);
+int     Stoi(std::string str);
+int     Check_valid_channel(std::string str);
 
 // int socket(int domain, int type, int protocol);
 // int setsockopt(int socket, int level, int option_name, const void *option_value, socklen_t option_len);
