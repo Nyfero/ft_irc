@@ -6,7 +6,7 @@
 /*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/19 11:27:26 by egiacomi          #+#    #+#             */
-/*   Updated: 2022/12/19 13:28:18 by egiacomi         ###   ########.fr       */
+/*   Updated: 2022/12/19 19:09:17 by egiacomi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,17 +67,17 @@ void    Privmsg_cmd(std::string cmd) {
     {
       if ((*it)[0] == '#') {
         std::cout << *it << " : I am a channel" << std::endl; 
-        for (size_t i = 0; i < _list_user.size(); i++) { // Verifie si le nick est deja pris
-          if (Compare_case_sensitive(_list_user[i]->Get_username(), *it))
-            std::cout << "No user with that nickname" << std::endl;
-        }
+        // for (size_t i = 0; i < _list_user.size(); i++) {
+        //   if (Compare_case_sensitive(_list_user[i]->Get_username(), *it))
+        //     std::cout << "No user with that nickname" << std::endl;
+        // }
       }
       else {
         std::cout << *it << " : I am a user" << std::endl; 
-        for (size_t i = 0; i < _list_user.size(); i++) { // Verifie si le nick est deja pris
-          if (Compare_case_sensitive(_list_user[i]->Get_username(), *it))
-            std::cout << "No user with that nickname" << std::endl;
-        }
+        // for (size_t i = 0; i < _list_user.size(); i++) {
+        //   if (Compare_case_sensitive(_list_user[i]->Get_username(), *it))
+        //     std::cout << "No user with that nickname" << std::endl;
+        // }
       }
     }
    // Check if target is good (useror channel)

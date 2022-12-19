@@ -7,7 +7,7 @@ bool g_stop;
 /*************************/
 
 server::server(char *port, char *password)
-    : _addrinfo(NULL), _password(password), _port(port), _node("127.0.0.1"), _socket_serv(-1) {
+    : _addrinfo(NULL), _name_serveur("localhost"), _password(password), _port(port), _node("127.0.0.1"), _socket_serv(-1) {
     int res;
     g_stop = 1;
 

@@ -9,6 +9,7 @@
 # include <netdb.h>
 # include <cstdlib>
 # include <string.h>
+# include <sstream>
 # include <poll.h>
 # include <unistd.h>
 # include <vector>

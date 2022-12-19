@@ -243,14 +243,54 @@ void    server::Privmsg_cmd(user *user, std::string cmd) {
         return;
     }
 
-    // Check si la target est valide
-    std::string target;
-    target = cmd.substr(pos, cmd.find(" "));
-    // Check if target is good (useror channel)
+    // Create vector of targets
+    std::vector<std::string> target;
+    size_t end_otarget;
+    end_otarget = cmd.find(" ", pos);
+    target.push_back(cmd.substr(pos, end_otarget - pos));
+    
+    std::stringstream targstream(target[0]);
+    std::string newtarget;
+    while (std::getline(targstream, newtarget, ',')) {
+      target.push_back(newtarget);
+    }
+    target.erase(target.begin());
 
+    // Check if a message to send is specified
+    size_t strt_omsg = cmd.find_first_not_of(" ", end_otarget);
+    if (strt_omsg == std::string::npos) {
+        _Output_client(user->Get_fd_client(), ERR_NORECIPIENT(_name_serveur));
+      return ;
+    }
+
+    // Check if targets are valid & add to fd to send
+    std::vector<int> targets_fds;
+    for (std::vector<std::string>::iterator it = target.begin() ; it != target.end(); ++it)
+    {
+      if ((*it)[0] == '#') {
+        for (size_t i = 0; i < _list_channel.size(); i++) {
+          if (Compare_case_sensitive(_list_channel[i]->Get_channel_name(), *it)) {
+
+          }
+          else if (i + 1 == _list_channel.size())
+            Output_client(user->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, *it));
+        }
+      }
+      else {
+        for (size_t i = 0; i < _list_user.size(); i++) {
+          if (Compare_case_sensitive(_list_user[i]->Get_nickname(), *it)) {
+
+          }
+          else if (i + 1 == _list_user.size())
+            _Output_client(user->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur, *it));
+        }
+      }
+    }
     // Check if message is "ok" (lenght, prefix?)
 
     // Send message
+
+    // Notify message well sent
 
 };
 
