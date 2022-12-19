@@ -74,36 +74,36 @@ int Stoi(std::string str) {
     return res;
 };
 
-// std::vector<user *>::iterator    User_in_channel(user *use, channel *chan)
-// {
-//     // chan exist && user exist
-//     std::vector<user *> list_user;
+bool    User_in_channel(user *use, channel *chan)
+{
+    // chan exist && user exist
+    std::vector<user *> list_user;
 
-//     list_user = chan->Get_list_channel_user();
-//     size_t  i = 0;
-//     std::vector<user *>::iterator it = list_user.begin();
-//     while (i < list_user.size()){
-//         if (list_user[i]->Get_fd_client() == use->Get_fd_client())
-//             return it;
-//         i++;
-//         it++;
-//     }
-//     return list_user.end();
-// }
+    list_user = chan->Get_list_channel_user();
+    size_t  i = 0;
+    std::vector<user *>::iterator it = list_user.begin();
+    while (i < list_user.size()){
+        if (list_user[i]->Get_fd_client() == use->Get_fd_client())
+            return 1;
+        i++;
+        it++;
+    }
+    return 0;
+}
 
-// std::vector<user *>::iterator    User_in_channel_is_op(user *use, channel *chan)
-// {
-//     // chan exist && user exist
-//     std::vector<user *> list_user;
+bool   User_in_channel_is_op(user *use, channel *chan)
+{
+    // chan exist && user exist
+    std::vector<user *> list_user;
 
-//     list_user = chan->Get_list_operator();
-//     size_t  i = 0;
-//     std::vector<user *>::iterator it = list_user.begin();
-//     while (i < list_user.size()){
-//         if (list_user[i]->Get_fd_client() == use->Get_fd_client())
-//             return it;
-//         i++;
-//         it++;
-//     }
-//     return chan->Get_list_operator().end();
-// }
+    list_user = chan->Get_list_operator();
+    size_t  i = 0;
+    std::vector<user *>::iterator it = list_user.begin();
+    while (i < list_user.size()){
+        if (list_user[i]->Get_fd_client() == use->Get_fd_client())
+            return 1;
+        i++;
+        it++;
+    }
+    return 0;
+}
