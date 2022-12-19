@@ -11,23 +11,25 @@
 # include <string.h>
 # include <sstream>
 # include <poll.h>
-# include <unistd.h>
 # include <vector>
 # include <csignal>
 # include <algorithm>
 # include <cctype>
-# include "user.hpp"
-# include "channel.hpp"
 
-# include <vector>
-# include "user.hpp"
-# include "server.hpp"
-# include "command.hpp"
+# include "channel.hpp"
 # include "error_msg.hpp"
+# include "mode.hpp"
+# include "server.hpp"
+# include "user.hpp"
 
 int     parsing(int argc, char **argv);
 bool    isNumber(const std::string& s);
 bool    Compare_case_sensitive(std::string str1, std::string str2);
+int     Stoi(std::string str);
+int     Check_valid_channel(std::string str);
+
+bool    User_in_channel(user *user, channel *chan);
+bool    User_in_channel_is_op(user *user, channel *chan);
 
 // int socket(int domain, int type, int protocol);
 // int setsockopt(int socket, int level, int option_name, const void *option_value, socklen_t option_len);
@@ -63,21 +65,3 @@ bool    Compare_case_sensitive(std::string str1, std::string str2);
 //     short events;     /* Événements attendus    */
 //     short revents;    /* Événements détectés    */
 // };
-
-
-// PASS <password>
-// USER <user> <mode> <unused> <realname>
-// NICK <user> <mode> <unused> <realname>
-// MODE <nickname> ( ( "+" / "-" )( "i" / "w" / "o" / "O" / "r" ) )
-// MODE <channel> ( ( "-" / "+" )<modes> <modeparams> )
-// QUIT <Quit Message>
-// JOIN (<channel>( "," <channel> ) [ <key> ( "," <key> ) ] ) / "0"
-// PART <channel>( "," <channel> ) [ <Part Message> ]
-// NAMES [ <channel> ( "," <channel> ) [ <target> ] ]
-// INVITE <nickname> <channel>
-// KICK <channel>( "," <channel> ) <user> *( "," <user> ) [<comment>]
-// PRIVMSG <msgtarget> <text to be sent>
-// NOTICE <msgtarget> <text>
-// AWAY [ <text> ]
-// USERS [ <target> ]
-// WALLOPS <Text to be sent> 

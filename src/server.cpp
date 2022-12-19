@@ -96,8 +96,7 @@ void    server::_Launch_server() {
 
     _list_poll_fd.push_back(_serv_poll_fd);
 
-    int limit = 0;
-    while (g_stop && limit <= 10) {
+    while (g_stop) {
         // poll(tab pollfd, size tab, timer)
         poll(_list_poll_fd.data(), _list_poll_fd.size(), -1);
 
@@ -126,11 +125,14 @@ void    server::_Launch_server() {
             it++;
         }
         std::cout << "fds: size: " << _list_poll_fd.size() << std::endl;
-        limit++;
     }
     std::vector<user*>::iterator ituser;
     for (ituser = _list_user.begin(); ituser != _list_user.end(); ituser = _list_user.begin()) {
         _Remove_user(ituser);
+    }
+
+    for (size_t i = 0; !_list_channel.empty(); i++) {
+        _Remove_channel(_list_channel[i]);
     }
 };
 
@@ -205,6 +207,10 @@ void    server::_Remove_user(std::vector<pollfd>::iterator pos) {
     }
     user *tmp = _list_user.at(std::distance(_list_user.begin(), it));
 
+    // leave all channel
+    while (!tmp->Get_channel_register().empty())
+        tmp->Get_channel_register().front()->Remove_user(tmp);
+
     std::cout << "*** _Remove_User fd ***" << std::endl;
     close (tmp->Get_fd_client());
     _list_user.erase(it);
@@ -233,23 +239,29 @@ user   *server::_Get_user_by_fd(int fd) {
 
 
 // remplacer par JOIN ?
-void    server::_Add_channel(std::string name, user *creator) {
+channel    *server::_Add_channel(std::string name, user *creator) {
     std::cout << "*** _Add_channel ***" << std::endl;
-
-    // check name channel valide
-    // check pas de doublon de channel
-
     _list_channel.push_back(new channel(name, creator));
+    return (_list_channel.back());
 
 };
 
 void    server::_Remove_channel(channel *chan) {
     std::cout << "*** _Remove_channel ***" << std::endl;
+    
+    for (size_t  i = 0; i < chan->Get_list_channel_user().size(); i++)
+        chan->Get_list_channel_user()[i]->Remove_Channel(chan);
 
-    // retirer tous les user du channel && retirer ce channel des vector user._channel
-    //
-
-
+    std::vector<channel *>::iterator    it = _list_channel.begin();
+    for (size_t i = 0; it < _list_channel.end(); it++)
+    {
+        if (_list_channel[i]->Get_channel_name() == chan->Get_channel_name())
+        {
+            _list_channel.erase(it);
+            break;
+        }
+        i++;
+    }
     delete chan;
 };
 
@@ -284,14 +296,9 @@ int server::_Input_client(std::vector<pollfd>::iterator it) {
         res = test->str.substr(0, found); // get first line in res
         test->str.erase(0, found + 1); // get after first line in str
         
-        // std::cout  <<"  e_str:" << test->str << std::endl;
-        // std::cout << "    res:" << res << std::endl;
-
+        if ((found = res.find("\r", 0)) != std::string::npos)
+            res.erase(found);
         Check_command(test, res); // check si cmd valide
-
-        // Use line ex: USE_CMD(user &client, std::string line)
-        // client = test -> cellu qui lance la command
-        // line = res -> command a traiter
     }
     std::cout << "*** _END inpt"  << std::endl;
     return 0;

@@ -2,14 +2,16 @@
 
 # include "utils.hpp"
 
-class channel;
-
 class user
 {
     private:
 
         // Nom d'utilisateur (identifiant -> ne change pas)
         std::string   _username;
+
+        // Nom reel du client
+        std::string         _realname;
+
         // Pseudo d'utilisateur
         std::string         _nickname;
 
@@ -17,7 +19,7 @@ class user
         std::string         _hostname;
 
         // Mode du client
-        int                _mode;
+        Mode            _mode;
 
         // Channels du client
         std::vector<channel *> _channel_register;
@@ -63,7 +65,9 @@ class user
         std::string Get_username() const;
         std::string Get_nickname() const;
         std::string Get_hostname() const;
-        int     Get_mode() const;
+        Mode    Get_mode() const;
+        std::string Get_realname() const;
+        std::vector<channel *>  Get_channel_register() const;
 
         /**************/
         /****  MOD ****/
@@ -71,9 +75,11 @@ class user
 
         int Add_channel(channel *chan);
         int Remove_Channel(channel *chan);
+        void Remove_all_channel();
         void Set_is_register(bool modif);
         void Set_nickname(std::string nickname);
         void Set_username(std::string username);
         void Set_hostname(std::string hostname);
-        void Set_mode(int mode);
+        void Set_mode(std::string mode);
+        void Set_realname(std::string realname);
 };

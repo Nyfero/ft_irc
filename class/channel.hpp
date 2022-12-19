@@ -36,8 +36,10 @@ class channel
         /****  MOD ****/
         /**************/
 
-        // int Add_user(user use);
-        // int Remove_user(user use);
+        int Add_user(user *use);
+        int Remove_user(user *use);
+
+        void Add_oper(user *use);
 
         /************************/
         /******* ACCESSOR *******/

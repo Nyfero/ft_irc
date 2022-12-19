@@ -11,7 +11,6 @@ user::user(int  socket, addrinfo info)
     std::cout << "/*** CONSTRUCTOR USER ***/"<< std::endl;
     (void) _addrinfo_client;
     _is_register = false;
-    _mode = 0;
     _fd_poll_client.fd = socket,
     _fd_poll_client.revents = 0,
     _fd_poll_client.events = POLLIN,
@@ -55,8 +54,16 @@ std::string user::Get_hostname() const {
     return _hostname;
 };
 
-int user::Get_mode() const {
+Mode    user::Get_mode() const {
     return _mode;
+};
+
+std::string user::Get_realname() const {
+    return _realname;
+};
+
+std::vector<channel *>  user::Get_channel_register() const{
+    return _channel_register;
 };
 
 
@@ -89,6 +96,12 @@ int user::Remove_Channel(channel *chan) {
     return 0;
 };
 
+void    user::Remove_all_channel(){
+    std::cout << "/*** USER::REMOVE_ALL_CHANNEL ***/"<< std::endl;
+    if (!_channel_register.empty())
+        _channel_register.clear();
+};
+
 void user::Set_is_register(bool modif) {
     _is_register = modif;
 };
@@ -105,6 +118,60 @@ void user::Set_hostname(std::string hostname) {
     _hostname = hostname;
 };
 
-void user::Set_mode(int mode) {
-    _mode = mode;
+void user::Set_mode(std::string mode) {
+    if (isNumber(mode)) {
+        return;
+    }
+    else if (mode[0] == '+') {
+        if (mode[1] == 'a') {
+            _mode.Set_away(true);
+        }
+        else if (mode[1] == 'i') {
+            _mode.Set_invisible(true);
+        }
+        else if (mode[1] == 'w') {
+            _mode.Set_wallops(true);
+        }
+        else if (mode[1] == 'r') {
+            _mode.Set_restricted(true);
+        }
+        else if (mode[1] == 'o') {
+            _mode.Set_operator(true);
+        }
+        else if (mode[1] == 'O') {
+            _mode.Set_local_operator(true);
+        }
+        else if (mode[1] == 's') {
+            _mode.Set_server_notice(true);
+        }
+    }
+    else if (mode[0] == '-') {
+        if (mode[1] == 'a') {
+            _mode.Set_away(false);
+        }
+        else if (mode[1] == 'i') {
+            _mode.Set_invisible(false);
+        }
+        else if (mode[1] == 'w') {
+            _mode.Set_wallops(false);
+        }
+        else if (mode[1] == 'r') {
+            _mode.Set_restricted(false);
+        }
+        else if (mode[1] == 'o') {
+            _mode.Set_operator(false);
+        }
+        else if (mode[1] == 'O') {
+            _mode.Set_local_operator(false);
+        }
+        else if (mode[1] == 's') {
+            _mode.Set_server_notice(false);
+        }
+    }
 };
+
+void user::Set_realname(std::string realname) {
+    _realname = realname;
+};
+
+

@@ -5,6 +5,9 @@
 # define MAX_LISTEN 2
 # define SIZE_INPT 50
 
+class user;
+class channel;
+
 class server
 {
 
@@ -59,13 +62,20 @@ class server
         
         
         /* MOD CHANNEL */
-        void    _Add_channel(std::string name, user *creator);
+        channel *_Add_channel(std::string name, user *creator);
         void    _Remove_channel(channel *chan);
 
 
         /* DVERS */
         int     _Input_client(std::vector<pollfd>::iterator it);
         int     _Output_client(int fd, std::string msg);
+
+        /* GET CHANNEL */
+        channel     *_Channel_already_exist(std::string str);
+
+        /* COMMAND*/
+        int _Join_treat(user *user, std::string chan, std::string key);
+        int _Join_treat(user *user, std::string chan);
 
     public:
 
@@ -88,18 +98,16 @@ class server
         /*****   COMMAND   *****/
         /***********************/
 
-        void    Enter(user* user, std::string str);
-        void    join(user *user, std::string chan, std::string key);
-        void    join(user *user, std::string chan);
-        void    join(user *user);
-        int    pass(user *user, std::string pass);
-        void    nick(user *user, std::string nick);
-
+        // void    Enter(user* user, std::string str);
+        // int    pass(user *user, std::string pass);
+        // void    nick(user *user, std::string nick);
+ 
         /***********************/
         /*****   COMMAND   *****/
         /***********************/
 
         void    Check_command(user *user, std::string str);
+        bool    Check_prefix(user *user, std::string str);
 
         void    Pass_cmd(user *user, std::string cmd);
         void    User_cmd(user *user, std::string cmd);
