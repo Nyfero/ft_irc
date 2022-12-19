@@ -462,9 +462,15 @@ void    server::Away_cmd(user *user, std::string cmd) {
 };
 
 void    server::Users_cmd(user *user, std::string cmd) {
-    std::cout << "COMMANDE -> USERS" << std::endl;
-    (void) cmd;
-    (void) user;
+
+    // Verifie que le user est enregistre
+    if (user->Get_username().empty()) {
+        _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
+        return;
+    }
+
+    // Verifie les arguments de USERS
+    size_t pos = cmd.find_first_not_of(" ", 5);
 };
 
 void    server::Wallops_cmd(user *user, std::string cmd) {
