@@ -96,7 +96,7 @@ class server
         // void    Enter(user* user, std::string str);
         // int    pass(user *user, std::string pass);
         // void    nick(user *user, std::string nick);
-
+ 
         /***********************/
         /*****   COMMAND   *****/
         /***********************/
