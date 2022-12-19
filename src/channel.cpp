@@ -74,7 +74,7 @@ int channel::Remove_user(user *use){
     return 0;
 };
 
-int channel::Add_oper(user *use)
+void channel::Add_oper(user *use)
 {
     if (User_in_channel(use, this) && !User_in_channel_is_op(use, this))
         _list_operator.push_back(use);

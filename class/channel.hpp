@@ -39,7 +39,7 @@ class channel
         int Add_user(user *use);
         int Remove_user(user *use);
 
-        int Add_oper(user *use);
+        void Add_oper(user *use);
 
         /************************/
         /******* ACCESSOR *******/
