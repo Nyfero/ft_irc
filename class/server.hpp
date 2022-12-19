@@ -21,6 +21,8 @@ class server
         // Structure des requetes de connexion des clients
         struct pollfd   _serv_poll_fd;
         
+        // Name serveur
+        const std::string   _name_serveur;
         // Mot de passe du serveur
         const std::string _password;
         // Port du serveur

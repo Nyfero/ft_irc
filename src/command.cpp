@@ -86,7 +86,7 @@ bool    server::Check_prefix(user *user, std::string str) {
     std::string prefix = str.substr(1, str.find(" ") - 1);
     std::string check_nick = prefix.substr(0, prefix.find("!"));
     if (check_nick != user->Get_nickname()) {
-        _Output_client(user->Get_fd_client(), ERR_NOSUCHNICK);
+        _Output_client(user->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur));
         return false;
     }
 
@@ -131,16 +131,16 @@ void  server::Pass_cmd(user *user, std::string cmd) {
     // Verifie les arguments de PASS
     size_t pos = cmd.find_first_not_of(" ", 4);
     if (pos == std::string::npos) {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
         return;
     }
 
     std::string check_password = cmd.substr(pos, cmd.length());
     if (user->Get_is_register()) { // Verifie si le user est deja connecte
-        _Output_client(user->Get_fd_client(), ERR_ALREADYREGISTRED);
+        _Output_client(user->Get_fd_client(), ERR_ALREADYREGISTRED(_name_serveur));
     }
     else if (check_password != _password) { // Verifie le mot de passe
-        _Output_client(user->Get_fd_client(), ERR_PASSWDMISMATCH);
+        _Output_client(user->Get_fd_client(), ERR_PASSWDMISMATCH(_name_serveur));
     }
     else { // Connecte le user et envoie un message de bienvenue
         std::cout << "New user connected on " << user->Get_fd_client() << std::endl;
@@ -159,34 +159,34 @@ void server::User_cmd(user *user, std::string cmd) {
 
     // Verifie si le user a deja envoye une commande USER
     if (!user->Get_username().empty()) {
-        _Output_client(user->Get_fd_client(), ERR_ALREADYREGISTRED);
+        _Output_client(user->Get_fd_client(), ERR_ALREADYREGISTRED(_name_serveur));
         return;
     }
 
     // Verifie les arguments de USER
     size_t pos = cmd.find_first_not_of(" ", 4);
     if (pos == std::string::npos || cmd[pos] == ':') {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
         return;
     }
 
     // Verifie si le username est vide
     std::string check_username = cmd.substr(pos, cmd.find(" ", pos) - pos);
     if (check_username.empty()) {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
         return;
     }
 
     // Verifie le mode
     size_t pos2 = cmd.find_first_not_of(" ", pos + check_username.length());
     if (pos2 == std::string::npos || cmd[pos2] == ':') {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
         return;
     }
     std::string check_mode = cmd.substr(pos2, cmd.find(" ", pos2) - pos2);
     if (isNumber(check_mode)) {
         if (Stoi(check_mode) < 0 || Stoi(check_mode) > 15) {
-            _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG);
+            _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur));
             return;
         }
     }
@@ -198,28 +198,28 @@ void server::User_cmd(user *user, std::string cmd) {
     // Verifie le hostname
     size_t pos3 = cmd.find_first_not_of(" ", pos2 + check_mode.length());
     if (pos3 == std::string::npos || cmd[pos3] == ':') {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
         return;
     }
     std::string check_hostname = cmd.substr(pos3, cmd.find(" ", pos3) - pos3);
     if (check_hostname.empty()) {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
         return;
     }
 
     // Verifie le realname
     size_t pos4 = cmd.find_first_not_of(" ", pos3 + check_hostname.length());
     if (pos4 == std::string::npos) {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
         return;
     }
     if (cmd[pos4] != ':') {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
         return;
     }
     std::string check_realname = cmd.substr(pos4 + 1, cmd.length() - pos4);
     if (check_realname.empty()) {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
         return;
     }
 
@@ -231,7 +231,9 @@ void server::User_cmd(user *user, std::string cmd) {
         check_mode = "0";
     }
     user->Set_mode(Stoi(check_mode));
-    _Output_client(user->Get_fd_client(), "New user registered as: " + check_username + "\nHostname: " + check_hostname + "\nMode: " + check_mode + "\nRealname: " + check_realname);
+
+    _Output_client(user->Get_fd_client(), RPL_WELCOME(_name_serveur, user->Get_realname(), user->Get_username(), user->Get_hostname()));
+    //_Output_client(user->Get_fd_client(), "New user registered as: " + check_username + "\nHostname: " + check_hostname + "\nMode: " + check_mode + "\nRealname: " + check_realname);
 };
 
 void    server::Nick_cmd(user *user, std::string cmd) {
@@ -239,21 +241,21 @@ void    server::Nick_cmd(user *user, std::string cmd) {
     //Verifie les arguments de NICK
     size_t pos = cmd.find_first_not_of(" ", 4);
     if (pos == std::string::npos) {
-        _Output_client(user->Get_fd_client(), ERR_NONICKNAMEGIVEN);
+        _Output_client(user->Get_fd_client(), ERR_NONICKNAMEGIVEN(_name_serveur));
         return;
     }
 
      // Verifie la longueur du nickname
     std::string check_nick = cmd.substr(pos, cmd.length());
     if (check_nick.length() > 9 || check_nick.length() < 1) {
-        _Output_client(user->Get_fd_client(), ERR_ERRONEUSNICKNAME);
+        _Output_client(user->Get_fd_client(), ERR_ERRONEUSNICKNAME(_name_serveur, user->Get_nickname()));
         return;
     }
 
     // Verifie si le nick contient des caracteres speciaux
     for (size_t i = 0; i < check_nick.length(); i++) {
         if (!isalnum(check_nick[i]) && check_nick[i] != '-' && check_nick[i] != '_') {
-            _Output_client(user->Get_fd_client(), ERR_ERRONEUSNICKNAME);
+            _Output_client(user->Get_fd_client(), ERR_ERRONEUSNICKNAME(_name_serveur, user->Get_nickname()));
             return;
         }
     }
@@ -261,7 +263,7 @@ void    server::Nick_cmd(user *user, std::string cmd) {
     // Verifie si le nick est deja pris
     for (size_t i = 0; i < _list_user.size(); i++) {
         if (Compare_case_sensitive(_list_user[i]->Get_nickname(), check_nick)) {
-            _Output_client(user->Get_fd_client(), ERR_NICKNAMEINUSE);
+            _Output_client(user->Get_fd_client(), ERR_NICKNAMEINUSE(_name_serveur, user->Get_nickname()));
             return;
         }
     }
@@ -300,7 +302,7 @@ void    server::Join_cmd(user *user, std::string cmd) { //jgour
 
     pos = cmd.find_first_not_of(" ", 4);
     if (pos == std::string::npos) {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
         return;
     }
     chan = cmd.substr(pos, cmd.length());
@@ -415,7 +417,7 @@ int server::_Join_treat(user *user, std::string chan)
         std::cout << "_Join_treat chan ALPHA" << std::endl;
         if (str[0] == ',')
         {
-            _Output_client(user->Get_fd_client(), ERR_NOSUCHCHANNEL);
+            _Output_client(user->Get_fd_client(), (ERR_NOSUCHCHANNEL(_name_serveur, chan)));
         }
         else
         {
@@ -431,7 +433,7 @@ int server::_Join_treat(user *user, std::string chan)
                 // ajouter channel dans user
             }
             else
-                _Output_client(user->Get_fd_client(), ERR_NOSUCHCHANNEL);
+                _Output_client(user->Get_fd_client(), (ERR_NOSUCHCHANNEL(_name_serveur, chan)));
         }
         chan.erase(0, pos + 1);
         std::cout << chan << std::endl;
@@ -446,7 +448,7 @@ int server::_Join_treat(user *user, std::string chan)
         // ajouter channel dans user
     }
     else
-        _Output_client(user->Get_fd_client(), ERR_NOSUCHCHANNEL);
+        _Output_client(user->Get_fd_client(), (ERR_NOSUCHCHANNEL(_name_serveur, chan)));
     return 0;
 };
 
