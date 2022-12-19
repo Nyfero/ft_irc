@@ -180,6 +180,10 @@ void server::User_cmd(user *user, std::string cmd) {
         return;
     }
 
+    /*
+    **  TO DO
+    **  Attention ircsi envoie une string et non un int
+    */
     // Verifie le hostname
     int i = 1;
     if (check_mode > 9) {
