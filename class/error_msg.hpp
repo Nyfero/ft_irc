@@ -26,8 +26,8 @@
 # define ERR_UMODEUNKNOWNFLAG(serveur)       ":" + serveur + " 501 : Unknown MODE flag"
 
 // JOIN Error
-# define ERR_BADCHANNELKEY(serveur, chan)   ":" + serveur + " 475 :" + chan + ": Key-locked channel, either without a key or with the wrong key"
-# define ERR_NOSUCHCHANNEL(serveur, chan)   ":" + serveur + " 403 :" + chan + ": Channel name is invalid"
+# define ERR_BADCHANNELKEY(serveur, chan)   ":" + serveur + " 475 " + chan + ": Key-locked channel, either without a key or with the wrong key"
+# define ERR_NOSUCHCHANNEL(serveur, chan)   ":" + serveur + " 403 " + chan + ": Channel name is invalid"
 # define ERR_TOMUCHPARAMS                   "To much parameters"
 
 # define ERR_BANNEDFROMCHAN

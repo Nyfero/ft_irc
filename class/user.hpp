@@ -69,6 +69,7 @@ class user
         std::string Get_hostname() const;
         int     Get_mode() const;
         std::string Get_realname() const;
+        std::vector<channel *>  Get_channel_register() const;
 
         /**************/
         /****  MOD ****/

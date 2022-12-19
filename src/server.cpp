@@ -130,6 +130,10 @@ void    server::_Launch_server() {
     for (ituser = _list_user.begin(); ituser != _list_user.end(); ituser = _list_user.begin()) {
         _Remove_user(ituser);
     }
+
+    for (size_t i = 0; !_list_channel.empty(); i++) {
+        _Remove_channel(_list_channel[i]);
+    }
 };
 
 /******************/
@@ -203,6 +207,10 @@ void    server::_Remove_user(std::vector<pollfd>::iterator pos) {
     }
     user *tmp = _list_user.at(std::distance(_list_user.begin(), it));
 
+    // leave all channel
+    while (!tmp->Get_channel_register().empty())
+        tmp->Get_channel_register().front()->Remove_user(tmp);
+
     std::cout << "*** _Remove_User fd ***" << std::endl;
     close (tmp->Get_fd_client());
     _list_user.erase(it);
@@ -243,7 +251,6 @@ void    server::_Remove_channel(channel *chan) {
     
     for (size_t  i = 0; i < chan->Get_list_channel_user().size(); i++)
         chan->Get_list_channel_user()[i]->Remove_Channel(chan);
-    // peut etre claer tab user et op
 
     std::vector<channel *>::iterator    it = _list_channel.begin();
     for (size_t i = 0; it < _list_channel.end(); it++)
