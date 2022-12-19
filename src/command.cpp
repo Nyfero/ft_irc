@@ -189,10 +189,6 @@ void server::User_cmd(user *user, std::string cmd) {
         }
     }
 
-    /*
-    **  TO DO
-    **  Attention ircsi envoie une string et non un int
-    */
     // Verifie le hostname
     size_t pos3 = cmd.find_first_not_of(" ", pos2 + check_mode.length());
     if (pos3 == std::string::npos || cmd[pos3] == ':') {
@@ -228,10 +224,9 @@ void server::User_cmd(user *user, std::string cmd) {
     if (!isNumber(check_mode)) {
         check_mode = "0";
     }
-    user->Set_mode(Stoi(check_mode));
+    user->Set_mode(check_mode);
 
     _Output_client(user->Get_fd_client(), RPL_WELCOME(_name_serveur, user->Get_realname(), user->Get_username(), user->Get_hostname()));
-    //_Output_client(user->Get_fd_client(), "New user registered as: " + check_username + "\nHostname: " + check_hostname + "\nMode: " + check_mode + "\nRealname: " + check_realname);
 };
 
 void    server::Nick_cmd(user *user, std::string cmd) {
@@ -281,9 +276,71 @@ void    server::Nick_cmd(user *user, std::string cmd) {
 };
 
 void    server::Mode_cmd(user *user, std::string cmd) {
-    std::cout << "COMMANDE -> MODE" << std::endl;
-    (void) cmd;
-    (void) user;
+
+    // Verifie que le user est enregistre
+    if (user->Get_username().empty()) {
+        _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
+        return;
+    }
+    
+    // Verifie les arguments de MODE
+    size_t pos = cmd.find_first_not_of(" ", 4);
+    if (pos == std::string::npos) {
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        return;
+    }
+
+    // Verifie le nickname
+    std::string check_nick = cmd.substr(pos, cmd.find(" ", pos) - pos);
+    if (check_nick != user->Get_nickname()) {
+        _Output_client(user->Get_fd_client(), ERR_USERSDONTMATCH(_name_serveur));
+        return;
+    }
+
+    // Verifie si on affiche le mode ou si on le modifie
+    pos = cmd.find_first_not_of(" ", pos + check_nick.length());
+    if (pos == std::string::npos) {
+         _Output_client(user->Get_fd_client(), user->Get_mode().Print_mode());
+        return;
+    }
+
+    // Verifie qu'il n'y a qu'un mode en parametre
+    std::string check_mode = cmd.substr(pos, cmd.find(" ", pos) - pos);
+    if (check_mode.length() > 2) {
+        _Output_client(user->Get_fd_client(), ERR_TOMUCHPARAMS);
+        return;
+    }
+
+    // Verifie que le prefix du mode est correct
+    if (check_mode[0] != '+' && check_mode[0] != '-') {
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        return;
+    }
+
+    // Verifie que le mode est correct
+    if (check_mode[1] == 'i' || check_mode[1] == 'w' || check_mode[1] == 's') {
+        user->Set_mode(check_mode);
+        _Output_client(user->Get_fd_client(), "Mode change [" + check_mode + "] for " + user->Get_nickname());
+    }
+    else if (check_mode[1] == 'o' || check_mode[1] == 'O') {
+        if (check_mode[0] == '-') { // Ignore le mode +o et +O
+            user->Set_mode(check_mode);
+            _Output_client(user->Get_fd_client(), "Mode change [" + check_mode + "] for " + user->Get_nickname());
+        }
+    }
+    else if (check_mode[1] == 'r') {
+        if (check_mode[0] == '+') { // Ignore le mode -r
+            user->Set_mode(check_mode);
+            _Output_client(user->Get_fd_client(), "Mode change [" + check_mode + "] for " + user->Get_nickname());
+        }
+    }
+    else if (check_mode[1] == 'a') {
+        _Output_client(user->Get_fd_client(), ERR_USEAWAY);
+    }
+    else {
+        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur));
+    }
+
 };
 
 void    server::Quit_cmd(user *user, std::string cmd) { //jgour

@@ -5,6 +5,9 @@
 # define MAX_LISTEN 2
 # define SIZE_INPT 50
 
+class user;
+class channel;
+
 class server
 {
 

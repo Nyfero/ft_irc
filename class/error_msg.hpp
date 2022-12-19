@@ -22,6 +22,10 @@
 # define ERR_UNAVAILRESOURCE "Nick/channel is temporarily unavailable"
 # define ERR_RESTRICTED "Your connection is restricted"
 
+// MODE Error
+# define ERR_USERSDONTMATCH(serveur)       ":" + serveur + " 502 : User don't match"
+# define ERR_USEAWAY "Please use command AWAY"
+
 // USER Error
 # define ERR_UMODEUNKNOWNFLAG(serveur)       ":" + serveur + " 501 : Unknown MODE flag"
 
