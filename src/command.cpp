@@ -5,9 +5,9 @@ void    server::Check_command(user *user, std::string str) {
     std::cout << "*** sserver::Check_command + ***" << std::endl;
 
     if (str[0] == ':') { // :nick!user@host COMMAND
-        if (!Check_prefix(user, str)) {
-            return;
-        }
+        // if (!Check_prefix(user, str)) {
+        //     return;
+        // }
         // Supprime le prefix de la commande
         str = str.substr(str.find(" ") + 1, str.size());
     }
@@ -92,10 +92,8 @@ bool    server::Check_prefix(user *user, std::string str) {
 
     // Verifie si le prefix contient un ! apres le nickname
     size_t pos = prefix.find("!");
-    std::cout << "pos = " << pos << std::endl;
-    std::cout << "prefix.size() = " << prefix.size() << std::endl;
     if (pos == std::string::npos) {
-        if (pos == prefix.size() - 1) {
+        if (pos + 1 == 0) {
             return true;
         }
         _Output_client(user->Get_fd_client(), ERR_PARSINGPREFIX);
