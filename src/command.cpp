@@ -1,5 +1,10 @@
 # include "../class/server.hpp"
 
+void    skip_cmd()
+{
+
+}
+
 void    server::Check_command(user *user, std::string str) {
     std::cout << "*** server::Check_command + ***" << std::endl;
 
@@ -229,8 +234,24 @@ void    server::Kick_cmd(user *user, std::string cmd) {
 
 void    server::Privmsg_cmd(user *user, std::string cmd) {
     std::cout << "COMMANDE -> PRIVMSG" << std::endl;
-    (void) cmd;
     (void) user;
+
+    // Skip la command & check si il y a des arguments
+    size_t pos = cmd.find_first_not_of(" ", 7);
+    if (pos == std::string::npos) {
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS);
+        return;
+    }
+
+    // Check si la target est valide
+    std::string target;
+    target = cmd.substr(pos, cmd.find(" "));
+    // Check if target is good (useror channel)
+
+    // Check if message is "ok" (lenght, prefix?)
+
+    // Send message
+
 };
 
 void    server::Notice_cmd(user *user, std::string cmd) {
