@@ -352,6 +352,9 @@ void    server::Quit_cmd(user *user, std::string cmd) { //jgour
 void    server::Join_cmd(user *user, std::string cmd) { //jgour
     std::cout << "COMMANDE -> JOIN" << std::endl;
 
+    (void) user;
+    (void) cmd;
+
     std::string chan, key;
     size_t  pos, pos2;
 
@@ -360,11 +363,11 @@ void    server::Join_cmd(user *user, std::string cmd) { //jgour
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
         return;
     }
-    chan = cmd.substr(pos, cmd.length());
+    chan = cmd.substr(pos, cmd.size()); //lpha
     pos = chan.find(" ");
     if (((pos = chan.find(" ")) != std::string::npos) && (pos2 = chan.find_first_not_of(" ", pos))!= std::string::npos)
     {
-        key = chan.substr(pos2, chan.length());
+        key = chan.substr(pos2, chan.size()); //lpha
         chan = chan.substr(0, pos);
     }
 
@@ -445,77 +448,3 @@ void    server::Wallops_cmd(user *user, std::string cmd) {
     (void) cmd;
     (void) user;
 };
-
-
-/* utils command */
-
-int server::_Join_treat(user *user, std::string chan, std::string key)
-{
-    (void) user;
-    (void) chan;
-    (void) key;
-
-    // verifier tout comme celui en bas mais avant d'ajouter verifier que key est bonne
-    return 0;
-};
-
-int server::_Join_treat(user *user, std::string chan)
-{
-    std::cout << "_Join_treat chan" << std::endl;
-    
-    std::string str = chan;
-    size_t  pos;
-
-
-    while ((pos = chan.find(",", 0)) != std::string::npos) // check si d'autre channel
-    {
-        std::cout << "_Join_treat chan ALPHA" << std::endl;
-        if (str[0] == ',')
-        {
-            _Output_client(user->Get_fd_client(), (ERR_NOSUCHCHANNEL(_name_serveur, chan)));
-        }
-        else
-        {
-            std::cout << "_Join_treat chan BRAVO" << std::endl;
-            str = chan.substr(0, pos);
-            if (Check_valid_channel(str))
-            {
-                if (!_Channel_already_exist(str))
-                {
-                    // ajouter channel dans serveur
-                }
-                // ajouter user dans channel
-                // ajouter channel dans user
-            }
-            else
-                _Output_client(user->Get_fd_client(), (ERR_NOSUCHCHANNEL(_name_serveur, chan)));
-        }
-        chan.erase(0, pos + 1);
-        std::cout << chan << std::endl;
-    }
-    if (!chan.empty() && Check_valid_channel(chan)) // dernier/seul channel
-    {
-        if (!_Channel_already_exist(chan))
-        {
-            // ajouter channel dans serveur
-        }
-        // ajouter user dans channel
-        // ajouter channel dans user
-    }
-    else
-        _Output_client(user->Get_fd_client(), (ERR_NOSUCHCHANNEL(_name_serveur, chan)));
-    return 0;
-};
-
-bool    server::_Channel_already_exist(std::string str)
-{
-    std::vector<channel *>::iterator    it;
-
-    it = _list_channel.begin();
-    for (size_t  i = 0; i < _list_channel.size(); i++)
-    {
-        if (Compare_case_sensitive(str, _list_channel[i]->Get_channel_name()))
-            return true;
-    }
-    return false;
-}

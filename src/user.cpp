@@ -62,6 +62,10 @@ std::string user::Get_realname() const {
     return _realname;
 };
 
+std::vector<channel *>  user::Get_channel_register() const{
+    return _channel_register;
+};
+
 
 /**************/
 /****  MOD ****/
@@ -169,3 +173,5 @@ void user::Set_mode(std::string mode) {
 void user::Set_realname(std::string realname) {
     _realname = realname;
 };
+
+
