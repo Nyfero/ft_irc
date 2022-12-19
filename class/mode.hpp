@@ -18,6 +18,8 @@ class Mode
         bool    _local_operator;
         bool    _server_notice;
 
+        std::string _away_reply;
+
     public:
 
     /***********************************/
@@ -46,6 +48,8 @@ class Mode
         bool    Get_local_operator() const;
         bool    Get_server_notice() const;
 
+        std::string Get_away_reply() const;
+
 
     /***********************************/
     /*******   MODIFIER   **************/
@@ -58,6 +62,8 @@ class Mode
         void    Set_operator(bool op);
         void    Set_local_operator(bool local_op);
         void    Set_server_notice(bool server_notice);
+
+        void    Set_away_reply(std::string away_reply);
 
 
     /***********************************/

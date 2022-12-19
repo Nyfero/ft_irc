@@ -322,10 +322,13 @@ void    server::Mode_cmd(user *user, std::string cmd) {
         user->Set_mode(check_mode);
         _Output_client(user->Get_fd_client(), "Mode change [" + check_mode + "] for " + user->Get_nickname());
     }
-    else if (check_mode[1] == 'o' || check_mode[1] == 'O') {
+    else if (check_mode[1] == 'o' || check_mode[1] == 'O' || check_mode[1] == 'a') {
         if (check_mode[0] == '-') { // Ignore le mode +o et +O
             user->Set_mode(check_mode);
             _Output_client(user->Get_fd_client(), "Mode change [" + check_mode + "] for " + user->Get_nickname());
+        }
+        else if (check_mode[1] == 'a' && check_mode[0] == '+') { // L'utilisateur doit utiliser AWAY
+            _Output_client(user->Get_fd_client(), ERR_USEAWAY);
         }
     }
     else if (check_mode[1] == 'r') {
@@ -333,9 +336,6 @@ void    server::Mode_cmd(user *user, std::string cmd) {
             user->Set_mode(check_mode);
             _Output_client(user->Get_fd_client(), "Mode change [" + check_mode + "] for " + user->Get_nickname());
         }
-    }
-    else if (check_mode[1] == 'a') {
-        _Output_client(user->Get_fd_client(), ERR_USEAWAY);
     }
     else {
         _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur));
@@ -432,9 +432,33 @@ void    server::Notice_cmd(user *user, std::string cmd) {
 };
 
 void    server::Away_cmd(user *user, std::string cmd) {
-    std::cout << "COMMANDE -> AWAY" << std::endl;
-    (void) cmd;
-    (void) user;
+
+    // Verifie que le user est enregistre
+    if (user->Get_username().empty()) {
+        _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
+        return;
+    }
+    
+    // Verifie les arguments de AWAY
+    // Si l'utilisateur ne passe pas de parametre, le message d'absence est vide
+    size_t pos = cmd.find_first_not_of(" ", 4);
+    if (pos == std::string::npos) {
+        user->Set_mode("+a");
+        user->Get_mode().Set_away_reply("");
+        _Output_client(user->Get_fd_client(), "Changed away status to away with no message");
+        return;
+    }
+
+    // Si l'utilisateur passe un parametre, le message d'absence est celui passe en parametre
+    std::string away = cmd.substr(pos, cmd.size());
+    if (away[0] != ':') {
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        return;
+    }
+    away = away.substr(1, away.size());
+    user->Set_mode("+a");
+    user->Get_mode().Set_away_reply(away);
+    _Output_client(user->Get_fd_client(), "Changed away status to away with message: " + away);
 };
 
 void    server::Users_cmd(user *user, std::string cmd) {

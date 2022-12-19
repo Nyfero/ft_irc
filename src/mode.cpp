@@ -55,6 +55,10 @@ bool    Mode::Get_server_notice() const {
     return _server_notice;
 };
 
+std::string Mode::Get_away_reply() const {
+    return _away_reply;
+};
+
 /********************/
 /***** MODIFIER *****/
 /********************/
@@ -87,12 +91,15 @@ void    Mode::Set_server_notice(bool server_notice) {
     _server_notice = server_notice;
 };
 
+void    Mode::Set_away_reply(std::string away_reply) {
+    _away_reply = away_reply;
+};
+
 /*********************/
 /***** FUNCTIONS *****/
 /*********************/
 
 std::string Mode::Print_mode() const {
-std::cout << "PRINT MODE" << std::endl;
     std::string mode = "Mode :";
     if (_away == true) {
         mode.append("\n- Away");
