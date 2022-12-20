@@ -3,7 +3,7 @@
 # include "utils.hpp"
 
 // PREFIX Error
-# define ERR_NOSUCHNICK(serveur)    ":" + serveur + " 401 : No such nick"
+// # define ERR_NOSUCHNICK(serveur)    ":" + serveur + " 401 : No such nick"
 # define ERR_PARSINGPREFIX          "Parsing prefix error"
 # define ERR_NOSUCHUSER             "No such user"
 # define ERR_NOSUCHHOSTNAME         "No such hostname"
@@ -44,5 +44,11 @@
 # define ERR_NOTONCHANNEL   ":" + srv + " 442 :" + chan + " : Not in channel"
 
 // RPL
+// PRIVMSG Error
+# define ERR_NORECIPIENT(serveur) ":" + serveur + " 411 : No recipient specified"
+# define ERR_NOTEXTTOSEND(serveur) ":" + serveur + " 412 : No text to send"
+# define ERR_NOSUCHNICK(serveur, nick_target) ":" + serveur + " 401 :" + nick_target + " : Nickname does not exist"
+# define ERR_CANNOTSENDTOCHAN(serveur, channel_target) ":" + serveur + " 404 :" + channel_target + " : User cannot send to this channel"
+# define ERR_UNVALIDMSG(serveur) ":" + serveur + " : Message to send is invalid 9must start with :"
 
 # define RPL_WELCOME(serv, name, use, hostname)    ":"+serv+" 001 "+name+" :Welcome to the "+serv+" network, "+name+"["+use+"@"+hostname+"]"
