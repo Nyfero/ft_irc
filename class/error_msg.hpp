@@ -45,8 +45,10 @@
 
 // RPL
 // PRIVMSG Error
-# define ERR_NORECIPIENT(serveur) ":" + serveur + " 412 : No message to send"
+# define ERR_NORECIPIENT(serveur) ":" + serveur + " 411 : No recipient specified"
+# define ERR_NOTEXTTOSEND(serveur) ":" + serveur + " 412 : No text to send"
 # define ERR_NOSUCHNICK(serveur, nick_target) ":" + serveur + " 401 :" + nick_target + " : Nickname does not exist"
-# define ERR_NOSUCHCHANNEL(serveur, chan_target) ":" + serveur + " 403 :" + chan_target + " : Channel does not exist"
+# define ERR_CANNOTSENDTOCHAN(serveur, channel_target) ":" + serveur + " 404 :" + channel_target + " : User cannot send to this channel"
+# define ERR_UNVALIDMSG(serveur) ":" + serveur + " : Message to send is invalid 9must start with :"
 
 # define RPL_WELCOME(serv, name, use, hostname)    ":"+serv+" 001 "+name+" :Welcome to the "+serv+" network, "+name+"["+use+"@"+hostname+"]"

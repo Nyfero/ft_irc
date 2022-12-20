@@ -30,6 +30,7 @@ int     Check_valid_channel(std::string str);
 
 bool    User_in_channel(user *user, channel *chan);
 bool    User_in_channel_is_op(user *user, channel *chan);
+bool    IsInTargetFds(int fd_client, std::vector<int> target_fds);
 
 // int socket(int domain, int type, int protocol);
 // int setsockopt(int socket, int level, int option_name, const void *option_value, socklen_t option_len);

@@ -287,7 +287,7 @@ int server::_Input_client(std::vector<pollfd>::iterator it) {
     }
     inpt[ret] = 0;
 
-    // append inpt dans srt de user
+    // append inpt dans str de user
     test->str.append(inpt);
     while ((found = test->str.find("\n", 0)) != std::string::npos) { // ligne complete -> traite -> delete
         std::cout << "  b_str:" << test->str << std::endl; // Just to show in server terminal
