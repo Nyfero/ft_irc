@@ -69,6 +69,7 @@ class server
         /* DVERS */
         int     _Input_client(std::vector<pollfd>::iterator it);
         int     _Output_client(int fd, std::string msg);
+        int     _Output_channel(channel *chan, std::string msg);
 
         /* GET CHANNEL */
         channel     *_Channel_already_exist(std::string str);
@@ -124,4 +125,5 @@ class server
         void    Away_cmd(user *user, std::string cmd);
         void    Users_cmd(user *user, std::string cmd);
         void    Wallops_cmd(user *user, std::string cmd);
+        void    Pong_cmd(user *user, std::string cmd);
 };

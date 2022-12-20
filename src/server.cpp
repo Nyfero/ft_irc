@@ -313,3 +313,14 @@ int server::_Output_client(int fd, std::string msg) {
 
     return 0;
 };
+
+int server::_Output_channel(channel *chan, std::string msg) {
+    std::cout << "*** _Output_channel: " << chan->Get_channel_name() << "***" << std::endl;
+    std::vector<user *> list = chan->Get_list_channel_user();
+    std::vector<user *>::iterator it;
+
+    for (it = list.begin(); it < list.end(); it++) {
+        _Output_client((*it)->Get_fd_client(), msg);
+    }
+    return 0;
+};

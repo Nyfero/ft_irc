@@ -91,6 +91,23 @@ bool    User_in_channel(user *use, channel *chan)
     return 0;
 }
 
+user    *Get_user_in_channel(user *use, channel *chan)
+{
+    // chan exist && user exist
+    std::vector<user *> list_user;
+
+    list_user = chan->Get_list_channel_user();
+    size_t  i = 0;
+    std::vector<user *>::iterator it = list_user.begin();
+    while (i < list_user.size()){
+        if (list_user[i]->Get_fd_client() == use->Get_fd_client())
+            return list_user[i];
+        i++;
+        it++;
+    }
+    return NULL;
+}
+
 bool   User_in_channel_is_op(user *use, channel *chan)
 {
     // chan exist && user exist

@@ -5,15 +5,12 @@ void    server::Check_command(user *user, std::string str) {
     std::cout << "*** sserver::Check_command + ***" << std::endl;
 
     if (str[0] == ':') { // :nick!user@host COMMAND
-        // if (!Check_prefix(user, str)) {
-        //     return;
-        // }
         // Supprime le prefix de la commande
         str = str.substr(str.find(" ") + 1, str.size());
     }
     
     std::string command = str.substr(0, str.find(" "));
-    std::string list_command[15] = {"PASS", "USER", "NICK", "MODE", "QUIT", "JOIN", "PART", "NAMES", "INVITE", "KICK", "PRIVMSG", "NOTICE", "AWAY", "USERS", "WALLOPS"};
+    std::string list_command[16] = {"PASS", "USER", "NICK", "MODE", "QUIT", "JOIN", "PART", "NAMES", "INVITE", "KICK", "PRIVMSG", "NOTICE", "AWAY", "USERS", "WALLOPS", "PING"};
 
     int i = 0;
     while (i < 15) {
@@ -68,61 +65,66 @@ void    server::Check_command(user *user, std::string str) {
     case 14:
         return Wallops_cmd(user, str);
     
+    case 15:
+        return Pong_cmd(user, str);
+    
     default:
         std::cout << "*** server::Check_command - ***" << std::endl;
         break;
     }
 };
 
-bool    server::Check_prefix(user *user, std::string str) {
 
-    // Verifie si le user est deja connecte
-    if (user->Get_username().empty()) {
-        _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
-        return false;
-    }
+// NON UTILISE
+// bool    server::Check_prefix(user *user, std::string str) {
 
-    // Verifie si le prefix correspond au nickname du user
-    std::string prefix = str.substr(1, str.find(" ") - 1);
-    std::string check_nick = prefix.substr(0, prefix.find("!"));
-    if (check_nick != user->Get_nickname()) {
-        _Output_client(user->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur, check_nick));
-        return false;
-    }
+//     // Verifie si le user est deja connecte
+//     if (user->Get_username().empty()) {
+//         _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
+//         return false;
+//     }
 
-    // Verifie si le prefix contient un ! apres le nickname
-    size_t pos = prefix.find("!");
-    if (pos == std::string::npos) {
-        if (pos + 1 == 0) {
-            return true;
-        }
-        _Output_client(user->Get_fd_client(), ERR_PARSINGPREFIX);
-        return false;
-    }
+//     // Verifie si le prefix correspond au nickname du user
+//     std::string prefix = str.substr(1, str.find(" ") - 1);
+//     std::string check_nick = prefix.substr(0, prefix.find("!"));
+//     if (check_nick != user->Get_nickname()) {
+//         _Output_client(user->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur, check_nick));
+//         return false;
+//     }
 
-    // Verifie si le prefix contient un @ apres le username
-    size_t pos2 = prefix.find("@");
-    if (pos2 == std::string::npos) {
-        _Output_client(user->Get_fd_client(), ERR_PARSINGPREFIX);
-        return false;
-    }
+//     // Verifie si le prefix contient un ! apres le nickname
+//     size_t pos = prefix.find("!");
+//     if (pos == std::string::npos) {
+//         if (pos + 1 == 0) {
+//             return true;
+//         }
+//         _Output_client(user->Get_fd_client(), ERR_PARSINGPREFIX);
+//         return false;
+//     }
 
-    // Verifie si le prefix correspond au username du user
-    std::string check_user = prefix.substr(pos + 1, pos2 - pos - 1);
-    if (check_user != user->Get_username()) {
-        _Output_client(user->Get_fd_client(), ERR_NOSUCHUSER);
-        return false;
-    }
+//     // Verifie si le prefix contient un @ apres le username
+//     size_t pos2 = prefix.find("@");
+//     if (pos2 == std::string::npos) {
+//         _Output_client(user->Get_fd_client(), ERR_PARSINGPREFIX);
+//         return false;
+//     }
 
-    // Verifie si le prefix correspond au hostname du user
-    std::string check_host = prefix.substr(pos2 + 1, prefix.size());
-    if (check_host != user->Get_hostname()) {
-        _Output_client(user->Get_fd_client(), ERR_NOSUCHHOSTNAME);
-        return false;
-    }
+//     // Verifie si le prefix correspond au username du user
+//     std::string check_user = prefix.substr(pos + 1, pos2 - pos - 1);
+//     if (check_user != user->Get_username()) {
+//         _Output_client(user->Get_fd_client(), ERR_NOSUCHUSER);
+//         return false;
+//     }
+
+//     // Verifie si le prefix correspond au hostname du user
+//     std::string check_host = prefix.substr(pos2 + 1, prefix.size());
+//     if (check_host != user->Get_hostname()) {
+//         _Output_client(user->Get_fd_client(), ERR_NOSUCHHOSTNAME);
+//         return false;
+//     }
     
-    return true;
-};
+//     return true;
+// };
 
 void  server::Pass_cmd(user *user, std::string cmd) {
 
@@ -525,17 +527,93 @@ void    server::Privmsg_cmd(user *sender, std::string cmd) {
 
     /*                                           Send message                                           */
     std::vector<int>::iterator dest;
-    for (dest = targets_fds.begin(); dest != targets_fds.end(); dest++)
+    for (dest = targets_fds.begin(); dest != targets_fds.end(); dest++) {
       _Output_client(*dest, msg);
+    }
 
     // Notify message well sent
     _Output_client(sender->Get_fd_client(), "Message has been successfully sent");
 };
 
 void    server::Notice_cmd(user *user, std::string cmd) {
-    std::cout << "COMMANDE -> NOTICE" << std::endl;
-    (void) cmd;
-    (void) user;
+    std::cout << "Notice_cmd" << std::endl;
+    
+    // Verifie que le user est enregistre
+    if (user->Get_username().empty()) {
+        return;
+    }
+    
+    // Verifie les arguments de NOTICE
+    size_t pos = cmd.find_first_not_of(" ", 6);
+    if (pos == std::string::npos) {
+        return;
+    }
+    
+    // Recupere les destinataires
+    std::string dest = cmd.substr(pos, cmd.find(" ", pos) - pos);
+    std::vector<std::string>    target;
+    for (size_t i = 0; i < dest.size(); i++) {
+        if (dest[i] == ',') {
+            for (size_t j = 0; j < target.size(); j++) {
+                if (target[j] == dest.substr(0, i)) {
+                    dest = dest.substr(i + 1, dest.size() - i);
+                }
+                else {
+                    target.push_back(dest.substr(0, i));
+                    dest = dest.substr(i + 1, dest.size() - i);
+                }
+                i = 0;
+            }
+        }
+    }
+    target.push_back(dest);
+
+    // Recupere le message
+    size_t strt_omsg = cmd.find_first_not_of(" ", cmd.find(" ", pos));
+    if (strt_omsg == std::string::npos) {
+        return;
+    }
+    std::string msg = cmd.substr(strt_omsg, cmd.size() - strt_omsg);
+    if (msg[0] != ':') {
+        return;
+    }
+
+    // Envoie le message
+    for (size_t j = 0; j < target.size(); j++) {
+        dest = target[j];
+        std::string real_msg = ":" + user->Get_nickname() + "!" + user->Get_username() + "@" + user->Get_hostname() + " :NOTICE " + dest + " " + msg;
+        std::cout << "real_msg = " << real_msg << std::endl;
+        if (dest[0] == '#') {
+            // Si le destinataire est un channel
+            for (size_t i = 0; i < _list_channel.size(); i++) {
+                if (Compare_case_sensitive(_list_channel[i]->Get_channel_name(), dest)) {
+                    // Verifie que le user est dans le channel (sinon, il ne peut pas envoyer de message)
+                    if (!User_in_channel(user, _list_channel[i])) {
+                        ;
+                    }
+                    // Verifie que le user n'est pas restreint (flag +r)
+                    else if (Get_user_in_channel(user, _list_channel[i])->Get_mode().Get_restricted()) {
+                        ;
+                    }
+                    // Envoie le message
+                    else {
+                        _Output_channel(_list_channel[i], msg);
+                    }
+                }
+            }
+        }
+        else {
+            // Si le destinataire est un user
+            for (size_t i = 0; i < _list_user.size(); i++) {
+                if (Compare_case_sensitive(_list_user[i]->Get_nickname(), dest)) {
+                    // Envoie le message
+                    std::cout << _list_user[i]->Get_nickname() << std::endl;
+                    std::cout << _list_user[i]->Get_fd_client() << std::endl;
+                    _Output_client(_list_user[i]->Get_fd_client(), msg);
+                }
+            }
+        }
+    }
 };
 
 void    server::Away_cmd(user *user, std::string cmd) {
@@ -599,7 +677,7 @@ void    server::Users_cmd(user *user, std::string cmd) {
 void    server::Wallops_cmd(user *user, std::string cmd) {
     
     // Verifie que le user est enregistre
-    if (user->Get_username().empty()) {
+    if (user->Get_username().empty() || !user->Get_mode().Get_operator()) {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
         return;
     }
@@ -623,4 +701,18 @@ void    server::Wallops_cmd(user *user, std::string cmd) {
             _Output_client(_list_user[i]->Get_fd_client(), "WALLOPS: " + message);
         }
     }
+};
+
+void server::Pong_cmd(user *user, std::string cmd) {
+    std::cout << "PONG" << std::endl;
+
+    // Verifie les arguments de PONG
+    size_t pos = cmd.find_first_not_of(" ", 4);
+    if (pos == std::string::npos) {
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        return;
+    }
+
+    std::string pong = cmd.substr(pos, cmd.size());
+    std::cout << ":" + user->Get_nickname() + " PONG " + user->Get_nickname() + " :" + pong + "\r\n" << std::endl;
 };
