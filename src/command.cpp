@@ -464,17 +464,56 @@ void    server::Away_cmd(user *user, std::string cmd) {
 void    server::Users_cmd(user *user, std::string cmd) {
 
     // Verifie que le user est enregistre
-    if (user->Get_username().empty()) {
+    if (user->Get_username().empty() || !user->Get_mode().Get_operator()) {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
         return;
     }
 
     // Verifie les arguments de USERS
     size_t pos = cmd.find_first_not_of(" ", 5);
+    if (pos == std::string::npos) {
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        return;
+    }
+
+    std::string check_serveur = cmd.substr(pos, cmd.size());
+    if (check_serveur != _name_serveur) {
+        _Output_client(user->Get_fd_client(), ERR_NOSUCHSERVER(_name_serveur));
+        return;
+    }
+
+    // Affiche la liste des utilisateurs connectes
+    _Output_client(user->Get_fd_client(), "Connected on " + _name_serveur + ":");
+    for (size_t i = 0; i < _list_user.size(); i++) {
+         _Output_client(user->Get_fd_client(), "\n***\n-" + _list_user[i]->Get_username() + "\n-" + _list_user[i]->Get_hostname() + "\n-" + _list_user[i]->Get_realname() + "\n-" + _list_user[i]->Get_mode().Print_mode() + "\n***");
+    }
 };
 
 void    server::Wallops_cmd(user *user, std::string cmd) {
-    std::cout << "COMMANDE -> WALLLOPS" << std::endl;
-    (void) cmd;
-    (void) user;
+    
+    // Verifie que le user est enregistre
+    if (user->Get_username().empty()) {
+        _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
+        return;
+    }
+
+    // Verifie les arguments de WALLOPS
+    size_t pos = cmd.find_first_not_of(" ", 7);
+    if (pos == std::string::npos) {
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        return;
+    }
+
+    // Envoie le message a tous les utilisateurs connectes avec le mode +w
+    std::string message = cmd.substr(pos, cmd.size());
+    if (message[0] != ':') {
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        return;
+    }
+    message = message.substr(1, message.size());
+    for (size_t i = 0; i < _list_user.size(); i++) {
+        if (_list_user[i]->Get_mode().Get_wallops()) {
+            _Output_client(_list_user[i]->Get_fd_client(), "WALLOPS: " + message);
+        }
+    }
 };

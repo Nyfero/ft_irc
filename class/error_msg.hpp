@@ -29,6 +29,9 @@
 // USER Error
 # define ERR_UMODEUNKNOWNFLAG(serveur)       ":" + serveur + " 501 : Unknown MODE flag"
 
+// USERS Error
+# define ERR_NOSUCHSERVER(serveur)       ":" + serveur + " 402 : No such server"
+
 // JOIN Error
 # define ERR_BADCHANNELKEY(serveur, chan)   ":" + serveur + " 475 " + chan + ": Key-locked channel, either without a key or with the wrong key"
 # define ERR_NOSUCHCHANNEL(serveur, chan)   ":" + serveur + " 403 " + chan + ": Channel name is invalid"
