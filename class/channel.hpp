@@ -18,6 +18,9 @@ class channel
         std::vector<user *> _list_channel_user;
         // Liste des operateurs du channel
         std::vector<user *> _list_operator;
+        // Key channel
+        std::string _key;
+
 
 
     public:
@@ -26,6 +29,7 @@ class channel
         /******* CONSTRUCTOR *******/
         /***************************/
         channel(std::string name, user *creator);
+        channel(std::string name, user *creator, std::string key);
 
         /**************************/
         /******* DESTRUCTOR *******/
@@ -48,5 +52,9 @@ class channel
         const std::string       Get_channel_name() const;
         std::vector<user *>     Get_list_channel_user() const;
         std::vector<user *>     Get_list_operator() const;
+        const std::string       Get_channel_key() const;
+
+        void    print_user_channel();
+        void    print_oper_channel();
 
 };

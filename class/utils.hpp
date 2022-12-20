@@ -25,7 +25,9 @@ int     parsing(int argc, char **argv);
 bool    isNumber(const std::string& s);
 bool    Compare_case_sensitive(std::string str1, std::string str2);
 int     Stoi(std::string str);
+
 int     Check_valid_channel(std::string str);
+std::string Next_arg(std::string str);
 
 bool    User_in_channel(user *user, channel *chan);
 bool    User_in_channel_is_op(user *user, channel *chan);

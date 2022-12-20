@@ -2,82 +2,126 @@
 
 /* utils command */
 
-int server::_Join_treat(user *user, std::string chan, std::string key)
-{
-    (void) user;
-    (void) chan;
-    (void) key;
-
-    // verifier tout comme celui en bas mais avant d'ajouter verifier que key est bonne
-    return 0;
-};
-
-int server::_Join_treat(user *user, std::string chan)
+int server::_Join_treat(user *use, std::string chan, std::string key)
 {
     std::cout << "_Join_treat chan" << std::endl;
 
-    (void) user;
+    (void) use;
     (void) chan;
     
-    std::string str = chan;
-    size_t  pos;
+    std::string str_chan;
+    std::string str_key;
+    channel *res;
+    (void) res;
+
+    // ex chan:  #qwe,#qwer,,,,&qweasd
+    // get chan -> check ok ->1 traiter
+    //                      ->2 gonext
+
+    std::cout << "pre chan =" << chan<< std::endl;
+
+    str_chan = Next_arg(chan);
+    chan.erase(0, str_chan.size());
+    if (chan[0] == ',')
+        chan.erase(0, 1);
+    str_key = Next_arg(key);
+    key.erase(0, str_key.size());
+    if (key[0] == ',')
+        key.erase(0, 1);
+    // std::cout << "first str_chan =" << str_chan<< std::endl;
+    // std::cout << "first chan =" << chan<< std::endl;
+    while (!str_chan.empty() && !str_key.empty())
+    {
+        std::cout << "verifier si " << str_chan << " is okay "<< std::endl;
+        if (Check_valid_channel(str_chan))
+            _Join_add(use, str_chan, str_key);
+        else
+            _Output_client(use->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, chan));
+        str_chan = Next_arg(chan);
+        chan.erase(0, str_chan.size());
+        if (chan[0] == ',')
+            chan.erase(0, 1);
+        str_key = Next_arg(key);
+        key.erase(0, str_key.size());
+        if (key[0] == ',')
+            key.erase(0, 1);
+        std::cout << "str_chan =" << str_chan<< std::endl;
+        std::cout << "chan =" << chan<< std::endl;
+    }
+    if (!str_chan.empty())
+    {
+        if (Check_valid_channel(str_chan))
+            _Join_add(use, str_chan, str_key);
+        else
+            _Output_client(use->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, chan));
+        _Join_treat(use, chan);
+    }
+    return 0;
+};
+
+int server::_Join_treat(user *use, std::string chan)
+{
+    std::cout << "_Join_treat chan" << std::endl;
+
+    (void) use;
+    (void) chan;
+    
+    std::string str_chan;
+    channel *res;
+    (void) res;
+
+    // ex chan:  #qwe,#qwer,,,,&qweasd
+    // get chan -> check ok ->1 traiter
+    //                      ->2 gonext
+
+    std::cout << "pre chan =" << chan<< std::endl;
+
+    str_chan = Next_arg(chan);
+    chan.erase(0, str_chan.size());
+    if (chan[0] == ',')
+        chan.erase(0, 1);
+    std::cout << "first str_chan =" << str_chan<< std::endl;
+    std::cout << "first chan =" << chan<< std::endl;
+    while (!str_chan.empty())
+    {
+        std::cout << "verifier si " << str_chan << " is okay "<< std::endl;
+        if (Check_valid_channel(str_chan))
+            _Join_add(use, str_chan, "");
+        else
+            _Output_client(use->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, chan));
+        str_chan = Next_arg(chan);
+        chan.erase(0, str_chan.size());
+        if (chan[0] == ',')
+            chan.erase(0, 1);
+        std::cout << "str_chan =" << str_chan<< std::endl;
+        std::cout << "chan =" << chan<< std::endl;
+    }
+    return 0;
+};
+
+int server::_Join_add(user *use, std::string chan, std::string key){
     channel *res;
 
-
-    while ((pos = chan.find(",", 0)) != std::string::npos) // check si d'autre channel
+    if ((res = _Channel_already_exist(chan)) != NULL)
     {
-        std::cout << "_Join_treat chan ALPHA" << std::endl;
-        if (str[0] == ',')
+        std::cout << "_Join_treat chan already exist" << std::endl;
+        if (res->Get_channel_key().empty() || res->Get_channel_key() == key)
         {
-            _Output_client(user->Get_fd_client(), (ERR_NOSUCHCHANNEL(_name_serveur, chan)));
+            res->Add_user(use);
+            use->Add_channel(res);
         }
         else
-        {
-            std::cout << "_Join_treat chan BRAVO" << std::endl;
-            str = chan.substr(0, pos);
-            if (Check_valid_channel(str))
-            {
-                std::cout << "channel valide" << std::cout;
-                if ((res = _Channel_already_exist(str)) == NULL)
-                {
-                    res = _Add_channel(str, user);
-                    user->Add_channel(res);
-                }
-                else
-                {
-                    user->Add_channel(res); // ajouter channel dans user
-                    res->Add_user(user); // ajouter user dans channel
-                }
-            }
-            else
-                _Output_client(user->Get_fd_client(), (ERR_NOSUCHCHANNEL(_name_serveur, chan)));
-        }
-        chan.erase(0, pos + 1);
-        std::cout << chan << std::endl;
-    }
-    if (!chan.empty() && Check_valid_channel(chan)) // dernier/seul channel
-    {
-        std::cout << "channel valide" << std::cout;
-        if ((res = _Channel_already_exist(str)) == NULL)
-        {
-            res = _Add_channel(str, user);
-            user->Add_channel(res);
-        }
-        else
-        {
-            user->Add_channel(res); // ajouter channel dans user
-            res->Add_user(user); // ajouter user dans channel
-        }
+           _Output_client(use->Get_fd_client(), ERR_BADCHANNELKEY(_name_serveur, res->Get_channel_name()));
     }
     else
     {
-        std::cout << "***********************8unvalid channel name" << std::endl;
-        _Output_client(user->Get_fd_client(), (ERR_NOSUCHCHANNEL(_name_serveur, chan)));
+        std::cout << "_Join_treat chan doesn't exist then create" << std::endl;
+        if (key.empty())
+            _Add_channel(chan, use);
+        else
+            _Add_channel(chan, use, key);
     }
-
-    std::cout << "size _list_channel: " << _list_channel.size() << std::endl;
-    std::cout << "size _list_user   : " << _list_user.size() << std::endl;
-    return 0;
+    return (0);
 };
 
 channel    *server::_Channel_already_exist(std::string str)
@@ -92,6 +136,32 @@ channel    *server::_Channel_already_exist(std::string str)
     }
     return NULL;
 }
+
+std::string Next_arg(std::string str)
+{
+    size_t  pos;
+
+    std::string res;
+
+    if ((pos = str.find(",", 0)) == std::string::npos) // pas de ,
+    {
+        res = str.substr(0, str.size());
+        str.clear();
+        return (res);
+    }
+    res = str.substr(0, pos);
+    std::cout << "Next_arg res= " << res << std::endl;
+    if (str[0] == ',')
+    {
+        //str.erase(0, pos);
+        std::cout << "Next_arg str= " << str << std::endl;
+        return res;
+    }
+    //str.erase(0, pos + 1);
+    std::cout << "Next_arg str= " << str << std::endl;
+    return (res);
+};
+
 
 int Check_valid_channel(std::string str){
     std::cout << "Check_valid_channel: " << str << "|" << std::endl;
