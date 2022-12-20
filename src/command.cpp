@@ -292,10 +292,11 @@ void    server::Mode_cmd(user *user, std::string cmd) {
 
     // Verifie le nickname
     std::string check_nick = cmd.substr(pos, cmd.find(" ", pos) - pos);
-    // if (check_nick != user->Get_nickname()) {
-    //     _Output_client(user->Get_fd_client(), ERR_USERSDONTMATCH(_name_serveur));
-    //     return;
-    // }
+    std::string tmp = user->Get_realname().substr(0, user->Get_realname().find(" ", 0));
+    if (check_nick != user->Get_nickname() && check_nick != tmp) {
+        _Output_client(user->Get_fd_client(), ERR_USERSDONTMATCH(_name_serveur));
+        return;
+    }
 
     // Verifie si on affiche le mode ou si on le modifie
     pos = cmd.find_first_not_of(" ", pos + check_nick.length());
