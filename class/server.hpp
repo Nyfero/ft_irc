@@ -111,12 +111,15 @@ class server
         bool    Check_prefix(user *user, std::string str);
 
         void    Pass_cmd(user *user, std::string cmd);
-        void    User_cmd(user *user, std::string cmd);
         void    Nick_cmd(user *user, std::string cmd);
+        void    User_cmd(user *user, std::string cmd);
+        //void    Oper_cmd(user *user, std::string cmd);
         void    Mode_cmd(user *user, std::string cmd);
-        void    Quit_cmd(user *user, std::string cmd);
         void    Join_cmd(user *user, std::string cmd);
         void    Part_cmd(user *user, std::string cmd);
+        //void   Topic_cmd(user *user, std::string cmd);
+        void    Quit_cmd(user *user, std::string cmd);
+        
         void    Names_cmd(user *user, std::string cmd);
         void    Invite_cmd(user *user, std::string cmd);
         void    Kick_cmd(user *user, std::string cmd);
