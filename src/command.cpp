@@ -131,7 +131,7 @@ void  server::Pass_cmd(user *user, std::string cmd) {
     // Verifie les arguments de PASS
     size_t pos = cmd.find_first_not_of(" ", 4);
     if (pos == std::string::npos) {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PASS"));
         return;
     }
 
@@ -152,13 +152,7 @@ void  server::Pass_cmd(user *user, std::string cmd) {
 void server::User_cmd(user *user, std::string cmd) {
     
     // Verifie si le user est connecte
-    if (!user->Get_is_register() || user->Get_nickname().empty()) {
-        _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
-        return;
-    }
-
-    // Verifie si le user a deja envoye une commande USER
-    if (!user->Get_username().empty()) {
+    if (!user->Get_is_register() ||  !user->Get_username().empty()) {
         _Output_client(user->Get_fd_client(), ERR_ALREADYREGISTRED(_name_serveur));
         return;
     }
@@ -166,21 +160,21 @@ void server::User_cmd(user *user, std::string cmd) {
     // Verifie les arguments de USER
     size_t pos = cmd.find_first_not_of(" ", 4);
     if (pos == std::string::npos || cmd[pos] == ':') {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "USER"));
         return;
     }
 
     // Verifie si le username est vide
     std::string check_username = cmd.substr(pos, cmd.find(" ", pos) - pos);
     if (check_username.empty()) {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "USER"));
         return;
     }
 
     // Verifie le mode
     size_t pos2 = cmd.find_first_not_of(" ", pos + check_username.length());
     if (pos2 == std::string::npos || cmd[pos2] == ':') {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "USER"));
         return;
     }
     std::string check_mode = cmd.substr(pos2, cmd.find(" ", pos2) - pos2);
@@ -194,28 +188,28 @@ void server::User_cmd(user *user, std::string cmd) {
     // Verifie le hostname
     size_t pos3 = cmd.find_first_not_of(" ", pos2 + check_mode.length());
     if (pos3 == std::string::npos || cmd[pos3] == ':') {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "USER"));
         return;
     }
     std::string check_hostname = cmd.substr(pos3, cmd.find(" ", pos3) - pos3);
     if (check_hostname.empty()) {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "USER"));
         return;
     }
 
     // Verifie le realname
     size_t pos4 = cmd.find_first_not_of(" ", pos3 + check_hostname.length());
     if (pos4 == std::string::npos) {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "USER"));
         return;
     }
     if (cmd[pos4] != ':') {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "USER"));
         return;
     }
     std::string check_realname = cmd.substr(pos4 + 1, cmd.length() - pos4);
     if (check_realname.empty()) {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "USER"));
         return;
     }
 
@@ -264,7 +258,7 @@ void    server::Nick_cmd(user *user, std::string cmd) {
     }
 
     if (!user->Get_is_register()) {
-        _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
+        _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
     }
     else if (!user->Get_username().empty()) { // Modifie le nickname
         user->Set_nickname(check_nick);
@@ -281,14 +275,14 @@ void    server::Mode_cmd(user *user, std::string cmd) {
 
     // Verifie que le user est enregistre
     if (user->Get_username().empty()) {
-        _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
+        _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
         return;
     }
     
     // Verifie les arguments de MODE
     size_t pos = cmd.find_first_not_of(" ", 4);
     if (pos == std::string::npos) {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "MODE"));
         return;
     }
 
@@ -310,13 +304,13 @@ void    server::Mode_cmd(user *user, std::string cmd) {
     // Verifie qu'il n'y a qu'un mode en parametre
     std::string check_mode = cmd.substr(pos, cmd.find(" ", pos) - pos);
     if (check_mode.length() > 2) {
-        _Output_client(user->Get_fd_client(), ERR_TOMUCHPARAMS);
+        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur));
         return;
     }
 
     // Verifie que le prefix du mode est correct
     if (check_mode[0] != '+' && check_mode[0] != '-') {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur));
         return;
     }
 
@@ -363,7 +357,7 @@ void    server::Join_cmd(user *user, std::string cmd) { //jgour
 
     pos = cmd.find_first_not_of(" ", 4);
     if (pos == std::string::npos) {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "JOIN"));
         return;
     }
     chan = cmd.substr(pos, cmd.size()); //lpha
@@ -380,7 +374,7 @@ void    server::Join_cmd(user *user, std::string cmd) { //jgour
         std::cout << "key = " << key << std::endl;
         pos = key.find(" ", 0);
         if (pos != std::string::npos && (pos2 = key.find_first_not_of(" ", pos)) != std::string::npos){
-            _Output_client(user->Get_fd_client(), ERR_TOMUCHPARAMS);
+            _Output_client(user->Get_fd_client(), ERR_TOOMANYTARGETS(_name_serveur, "JOIN"));
             return;
         }
         _Join_treat(user, chan, key);
@@ -436,7 +430,7 @@ void    server::Privmsg_cmd(user *sender, std::string cmd) {
     /*                       Skip la command & check si il y a des arguments                       */
     size_t pos = cmd.find_first_not_of(" ", 7);
     if (pos == std::string::npos) {
-        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PRIVMSG"));
         return;
     }
 
@@ -518,7 +512,7 @@ void    server::Privmsg_cmd(user *sender, std::string cmd) {
 
     // Check if message start with ':'
     if (cmd.at(strt_omsg) != ':') {
-      _Output_client(sender->Get_fd_client(), ERR_UNVALIDMSG(_name_serveur));
+      _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PRIVMSG"));
       return ;        
     }
 
@@ -620,7 +614,7 @@ void    server::Away_cmd(user *user, std::string cmd) {
 
     // Verifie que le user est enregistre
     if (user->Get_username().empty()) {
-        _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
+        _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
         return;
     }
     
@@ -637,7 +631,7 @@ void    server::Away_cmd(user *user, std::string cmd) {
     // Si l'utilisateur passe un parametre, le message d'absence est celui passe en parametre
     std::string away = cmd.substr(pos, cmd.size());
     if (away[0] != ':') {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "AWAY"));
         return;
     }
     away = away.substr(1, away.size());
@@ -650,20 +644,20 @@ void    server::Users_cmd(user *user, std::string cmd) {
 
     // Verifie que le user est enregistre
     if (user->Get_username().empty() || !user->Get_mode().Get_operator()) {
-        _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
+        _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
         return;
     }
 
     // Verifie les arguments de USERS
     size_t pos = cmd.find_first_not_of(" ", 5);
     if (pos == std::string::npos) {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "USERS"));
         return;
     }
 
     std::string check_serveur = cmd.substr(pos, cmd.size());
     if (check_serveur != _name_serveur) {
-        _Output_client(user->Get_fd_client(), ERR_NOSUCHSERVER(_name_serveur));
+        _Output_client(user->Get_fd_client(), ERR_NOSUCHSERVER(_name_serveur, check_serveur));
         return;
     }
 
@@ -678,21 +672,21 @@ void    server::Wallops_cmd(user *user, std::string cmd) {
     
     // Verifie que le user est enregistre
     if (user->Get_username().empty() || !user->Get_mode().Get_operator()) {
-        _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
+        _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
         return;
     }
 
     // Verifie les arguments de WALLOPS
     size_t pos = cmd.find_first_not_of(" ", 7);
     if (pos == std::string::npos) {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "WALLOPS"));
         return;
     }
 
     // Envoie le message a tous les utilisateurs connectes avec le mode +w
     std::string message = cmd.substr(pos, cmd.size());
     if (message[0] != ':') {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "WALLOPS"));
         return;
     }
     message = message.substr(1, message.size());
@@ -709,7 +703,7 @@ void server::Pong_cmd(user *user, std::string cmd) {
     // Verifie les arguments de PONG
     size_t pos = cmd.find_first_not_of(" ", 4);
     if (pos == std::string::npos) {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur));
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PONG"));
         return;
     }
 
