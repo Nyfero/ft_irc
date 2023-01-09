@@ -9,64 +9,65 @@ void    server::Check_command(user *user, std::string str) {
         str = str.substr(str.find(" ") + 1, str.size());
     }
     
-    std::string command = str.substr(0, str.find(" "));
+    std::vector<std::string> arg = Split(str, ' ');
+
     std::string list_command[16] = {"PASS", "USER", "NICK", "MODE", "QUIT", "JOIN", "PART", "NAMES", "INVITE", "KICK", "PRIVMSG", "NOTICE", "AWAY", "USERS", "WALLOPS", "PING"};
 
     int i = 0;
     while (i < 15) {
-        if (command == list_command[i]) {
+        if (arg[0] == list_command[i]) {
             break;
         }
         i++;
     }
     switch (i) {
     case 0: 
-        return Pass_cmd(user, str);
+        return Pass_cmd(user, arg);
     
     case 1:
-        return User_cmd(user, str);
+        return User_cmd(user, arg);
 
     case 2:
-        return Nick_cmd(user, str);
+        return Nick_cmd(user, arg);
 
     case 3:
-        return Mode_cmd(user, str);
+        return Mode_cmd(user, arg);
 
     case 4:
-        return Quit_cmd(user, str);
+        return Quit_cmd(user, arg);
 
     case 5:
-        return Join_cmd(user, str);
+        return Join_cmd(user, arg);
     
     case 6:
-        return Part_cmd(user, str);
+        return Part_cmd(user, arg);
     
     case 7:
-        return Names_cmd(user, str);
+        return Names_cmd(user, arg);
 
     case 8:
-        return Invite_cmd(user, str);
+        return Invite_cmd(user, arg);
     
     case 9:
-        return Kick_cmd(user, str);
+        return Kick_cmd(user, arg);
     
     case 10:
-        return Privmsg_cmd(user, str);
+        return Privmsg_cmd(user, arg);
     
     case 11:
-        return Notice_cmd(user, str);
+        return Notice_cmd(user, arg);
 
     case 12:
-        return Away_cmd(user, str);
+        return Away_cmd(user, arg);
     
     case 13:
-        return Users_cmd(user, str);
+        return Users_cmd(user, arg);
 
     case 14:
-        return Wallops_cmd(user, str);
+        return Wallops_cmd(user, arg);
     
     case 15:
-        return Pong_cmd(user, str);
+        return Pong_cmd(user, arg);
     
     default:
         std::cout << "*** server::Check_command - ***" << std::endl;
@@ -126,20 +127,18 @@ void    server::Check_command(user *user, std::string str) {
 //     return true;
 // };
 
-void  server::Pass_cmd(user *user, std::string cmd) {
+void  server::Pass_cmd(user *user, std::vector<std::string> cmd) {
 
     // Verifie les arguments de PASS
-    size_t pos = cmd.find_first_not_of(" ", 4);
-    if (pos == std::string::npos) {
+    if (cmd.size() < 2) {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PASS"));
         return;
     }
 
-    std::string check_password = cmd.substr(pos, cmd.length());
     if (user->Get_is_register()) { // Verifie si le user est deja connecte
         _Output_client(user->Get_fd_client(), ERR_ALREADYREGISTRED(_name_serveur));
     }
-    else if (check_password != _password) { // Verifie le mot de passe
+    else if (cmd[1] != _password) { // Verifie le mot de passe
         _Output_client(user->Get_fd_client(), ERR_PASSWDMISMATCH(_name_serveur));
     }
     else { // Connecte le user et envoie un message de bienvenue
@@ -149,7 +148,7 @@ void  server::Pass_cmd(user *user, std::string cmd) {
     }
 };
 
-void server::User_cmd(user *user, std::string cmd) {
+void server::User_cmd(user *user, std::vector<std::string> cmd) {
     
     // Verifie si le user est connecte
     if (!user->Get_is_register() ||  !user->Get_username().empty()) {
@@ -158,15 +157,13 @@ void server::User_cmd(user *user, std::string cmd) {
     }
 
     // Verifie les arguments de USER
-    size_t pos = cmd.find_first_not_of(" ", 4);
-    if (pos == std::string::npos || cmd[pos] == ':') {
+    if (cmd.size() < 2) {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "USER"));
         return;
     }
 
     // Verifie si le username est vide
-    std::string check_username = cmd.substr(pos, cmd.find(" ", pos) - pos);
-    if (check_username.empty()) {
+    if (cmd[1].empty()) {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "USER"));
         return;
     }
@@ -225,7 +222,7 @@ void server::User_cmd(user *user, std::string cmd) {
     _Output_client(user->Get_fd_client(), RPL_WELCOME(_name_serveur, user->Get_realname(), user->Get_username(), user->Get_hostname()));
 };
 
-void    server::Nick_cmd(user *user, std::string cmd) {
+void    server::Nick_cmd(user *user, std::vector<std::string> cmd) {
 
     //Verifie les arguments de NICK
     size_t pos = cmd.find_first_not_of(" ", 4);
@@ -271,7 +268,7 @@ void    server::Nick_cmd(user *user, std::string cmd) {
     }
 };
 
-void    server::Mode_cmd(user *user, std::string cmd) {
+void    server::Mode_cmd(user *user, std::vector<std::string> cmd) {
 
     // Verifie que le user est enregistre
     if (user->Get_username().empty()) {
@@ -340,13 +337,13 @@ void    server::Mode_cmd(user *user, std::string cmd) {
 
 };
 
-void    server::Quit_cmd(user *user, std::string cmd) { //jgour
+void    server::Quit_cmd(user *user, std::vector<std::string> cmd) { //jgour
     std::cout << "COMMANDE -> QUIT" << std::endl;
     (void) cmd;
     (void) user;
 };
 
-void    server::Join_cmd(user *user, std::string cmd) { //jgour
+void    server::Join_cmd(user *user, std::vector<std::string> cmd) { //jgour
     std::cout << "COMMANDE -> JOIN" << std::endl;
 
     (void) user;
@@ -392,25 +389,25 @@ void    server::Join_cmd(user *user, std::string cmd) { //jgour
     }
 };
 
-void    server::Part_cmd(user *user, std::string cmd) { //gjour
+void    server::Part_cmd(user *user, std::vector<std::string> cmd) { //gjour
     std::cout << "COMMANDE -> PART" << std::endl;
     (void) cmd;
     (void) user;
 };
 
-void    server::Names_cmd(user *user, std::string cmd) {
+void    server::Names_cmd(user *user, std::vector<std::string> cmd) {
     std::cout << "COMMANDE -> NAMES" << std::endl;
     (void) cmd;
     (void) user;
 };
 
-void    server::Invite_cmd(user *user, std::string cmd) { // jgoru
+void    server::Invite_cmd(user *user, std::vector<std::string> cmd) { // jgoru
     std::cout << "COMMANDE -> INVITE" << std::endl;
     (void) cmd;
     (void) user;
 };
 
-void    server::Kick_cmd(user *user, std::string cmd) { // jgour
+void    server::Kick_cmd(user *user, std::vector<std::string> cmd) { // jgour
     std::cout << "COMMANDE -> KICK" << std::endl;
     (void) cmd;
     (void) user;
@@ -423,7 +420,7 @@ void    server::Kick_cmd(user *user, std::string cmd) { // jgour
   - Improve message sent back to user
   - Handle AWAY response if user mode a
 */
-void    server::Privmsg_cmd(user *sender, std::string cmd) {
+void    server::Privmsg_cmd(user *sender, std::vector<std::string> cmd) {
     std::cout << "COMMANDE -> PRIVMSG" << std::endl;
     (void) sender;
 
@@ -529,7 +526,7 @@ void    server::Privmsg_cmd(user *sender, std::string cmd) {
     _Output_client(sender->Get_fd_client(), "Message has been successfully sent");
 };
 
-void    server::Notice_cmd(user *user, std::string cmd) {
+void    server::Notice_cmd(user *user, std::vector<std::string> cmd) {
     std::cout << "Notice_cmd" << std::endl;
     
     // Verifie que le user est enregistre
@@ -610,7 +607,7 @@ void    server::Notice_cmd(user *user, std::string cmd) {
     }
 };
 
-void    server::Away_cmd(user *user, std::string cmd) {
+void    server::Away_cmd(user *user, std::vector<std::string> cmd) {
 
     // Verifie que le user est enregistre
     if (user->Get_username().empty()) {
@@ -640,7 +637,7 @@ void    server::Away_cmd(user *user, std::string cmd) {
     _Output_client(user->Get_fd_client(), "Changed away status to away with message: " + away);
 };
 
-void    server::Users_cmd(user *user, std::string cmd) {
+void    server::Users_cmd(user *user, std::vector<std::string> cmd) {
 
     // Verifie que le user est enregistre
     if (user->Get_username().empty() || !user->Get_mode().Get_operator()) {
@@ -668,7 +665,7 @@ void    server::Users_cmd(user *user, std::string cmd) {
     }
 };
 
-void    server::Wallops_cmd(user *user, std::string cmd) {
+void    server::Wallops_cmd(user *user, std::vector<std::string> cmd) {
     
     // Verifie que le user est enregistre
     if (user->Get_username().empty() || !user->Get_mode().Get_operator()) {
@@ -697,7 +694,7 @@ void    server::Wallops_cmd(user *user, std::string cmd) {
     }
 };
 
-void server::Pong_cmd(user *user, std::string cmd) {
+void server::Pong_cmd(user *user, std::vector<std::string> cmd) {
     std::cout << "PONG" << std::endl;
 
     // Verifie les arguments de PONG
