@@ -70,7 +70,7 @@ int Stoi(std::string str) {
     for (size_t i = 0; i < str.size(); i++) {
         res = res * 10 + (str[i] - '0');
     }
-    std::cout << "res: " << res << std::endl;
+    std::cout << "res: ﻿" << res << std::endl;
     return res;
 };
 
@@ -136,19 +136,26 @@ bool    IsInTargetFds(int fd_client, std::vector<int> target_fds) {
     return false;
 };
 
-std::vector<std::string> Split(std::string str, char c) {
-    std::vector<std::string> res;
-    std::string tmp;
+t_IRCMessage split_message(std::string& input) {
+    t_IRCMessage msg;
 
-    for (size_t i = 0; i < str.size(); i++) {
-        if (str[i] == c) {
-            res.push_back(tmp);
-            tmp.clear();
-        }
-        else {
-            tmp += str[i];
+    // Extract the prefix if it exists
+    if (input[0] == ':') {
+        size_t prefixEnd = input.find(' ');
+        msg.prefix = input.substr(1, prefixEnd - 1);
+        input = input.substr(prefixEnd + 1);
+    }
+
+    // Extract the command and parameters
+    std::stringstream ss(input);
+    ss >> msg.command;
+    while (ss) {
+        std::string param;
+        ss >> param;
+        if (!param.empty()) {
+            msg.params.push_back(param);
         }
     }
-    res.push_back(tmp);
-    return res;
-};
+
+    return msg;
+}
