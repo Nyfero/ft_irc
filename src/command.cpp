@@ -340,8 +340,9 @@ void    server::Join_cmd(user *user, std::vector<std::string> cmd) { //jgour
         return;
     }
     chan = cmd[1];
-    if (cmd.size() > 2)
+    if (cmd.size() > 2) {
         key = cmd[2];
+    }
 
     std::cout << "chan = " << cmd[1] << std::endl;
     if (!key.empty())
