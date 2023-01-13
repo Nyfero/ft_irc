@@ -70,7 +70,6 @@ int Stoi(std::string str) {
     for (size_t i = 0; i < str.size(); i++) {
         res = res * 10 + (str[i] - '0');
     }
-    std::cout << "res: ﻿" << res << std::endl;
     return res;
 };
 
@@ -158,4 +157,19 @@ t_IRCMessage split_message(std::string& input) {
     }
 
     return msg;
+}
+
+std::vector<std::string> Split(std::string str, char delimiter) {
+    std::vector<std::string> res;
+
+    for (size_t i = 0; i < str.size(); i++) {
+        std::string tmp;
+        while (str[i] != delimiter && i < str.size()) {
+            tmp += str[i];
+            i++;
+        }
+        res.push_back(tmp);
+    }
+
+    return res;
 }
