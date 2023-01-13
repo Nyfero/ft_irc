@@ -403,122 +403,114 @@ void server::Privmsg_cmd(user *sender, t_IRCMessage cmd)
 {
     (void)cmd;
     (void)sender;
-    // std::cout << "COMMANDE -> PRIVMSG" << std::endl;
-    // (void)sender;
+    std::cout << "COMMANDE -> PRIVMSG" << std::endl;
+    (void)sender;
 
-    // /*                       Check si il y a des arguments                       */
-    // if (cmd.params.empty())
-    // {
-    //     _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PRIVMSG"));
-    //     return;
-    // }
+    /*                       Check si il y a des arguments                       */
+    if (cmd.params.empty())
+    {
+        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PRIVMSG"));
+        return;
+    }
 
-    // /*                                        Handle Targets                                        */
-    // // Check if there are any target specified
-    // if (cmd.params[0][0] == ':')
-    //     _Output_client(sender->Get_fd_client(), ERR_NORECIPIENT(_name_serveur));
+    /*                                        Handle Targets                                        */
+    // Check if there are any target specified
+    if (cmd.params[0][0] == ':')
+        _Output_client(sender->Get_fd_client(), ERR_NORECIPIENT(_name_serveur));
 
-    // // Create vector of targets
-    // std::vector<std::string> target;
-    // size_t end_otarget;
-    // end_otarget = cmd.find(" ", pos);
-    // target.push_back(cmd.substr(pos, end_otarget - pos));
+    // Create vector of targets
+    std::vector<std::string> target;
+    size_t end_otarget;
+    target.push_back(cmd.params[0]);
 
-    // std::stringstream targstream(target[0]);
-    // std::string newtarget;
-    // while (std::getline(targstream, newtarget, ','))
-    // {
-    //     target.push_back(newtarget);
-    // }
-    // target.erase(target.begin());
+    std::stringstream targstream(target[0]);
+    std::string newtarget;
+    while (std::getline(targstream, newtarget, ','))
+    {
+        target.push_back(newtarget);
+    }
+    target.erase(target.begin());
 
-    // /*                        Check if targets are valid & add to fd to send                        */
-    // std::vector<int> targets_fds;
-    // for (std::vector<std::string>::iterator it = target.begin(); it != target.end(); ++it)
-    // {
+    /*                        Check if targets are valid & add to fd to send                        */
+    std::vector<int> targets_fds;
+    for (std::vector<std::string>::iterator it = target.begin(); it != target.end(); ++it)
+    {
 
-    //     // CHECK if target is a Channel
-    //     if ((*it)[0] == '#')
-    //     {
+        // CHECK if target is a Channel
+        if ((*it)[0] == '#')
+        {
 
-    //         // Check if channel Exist
-    //         for (size_t i = 0; i < _list_channel.size(); i++)
-    //         {
-    //             std::string target_channel = _list_channel[i]->Get_channel_name();
-    //             if (Compare_case_sensitive(target_channel, *it))
-    //             {
+            // Check if channel Exist
+            for (size_t i = 0; i < _list_channel.size(); i++)
+            {
+                std::string target_channel = _list_channel[i]->Get_channel_name();
+                if (Compare_case_sensitive(target_channel, *it))
+                {
 
-    //                 // Check is user is in the channel
-    //                 if (User_in_channel(sender, _list_channel[i]))
-    //                 {
-    //                     std::vector<user *> channel_users = _list_channel[i]->Get_list_channel_user();
+                    // Check is user is in the channel
+                    if (User_in_channel(sender, _list_channel[i]))
+                    {
+                        std::vector<user *> channel_users = _list_channel[i]->Get_list_channel_user();
 
-    //                     // Add all channel_users_fd, but don't copy doublons (fd already present in target_fds)
-    //                     for (size_t i = 0; i < channel_users.size(); i++)
-    //                     {
-    //                         if (IsInTargetFds(channel_users[i]->Get_fd_client(), targets_fds) == false)
-    //                             targets_fds.push_back(channel_users[i]->Get_fd_client());
-    //                     }
-    //                 }
-    //                 else
-    //                 {
-    //                     std::string chan_name = _list_channel[i]->Get_channel_name();
-    //                     _Output_client(sender->Get_fd_client(), ERR_CANNOTSENDTOCHAN(_name_serveur, chan_name));
-    //                 }
-    //             }
-    //             else if (i + 1 == _list_channel.size())
-    //                 _Output_client(sender->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, *it));
-    //         }
-    //     }
-    //     else
-    //     {
+                        // Add all channel_users_fd
+                        for (size_t i = 0; i < channel_users.size(); i++)
+                                targets_fds.push_back(channel_users[i]->Get_fd_client());
+                    }
+                    else
+                    {
+                        std::string chan_name = _list_channel[i]->Get_channel_name();
+                        _Output_client(sender->Get_fd_client(), ERR_CANNOTSENDTOCHAN(_name_serveur, chan_name));
+                    }
+                }
+                else if (i + 1 == _list_channel.size())
+                    _Output_client(sender->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, *it));
+            }
+        }
+        else
+        {
 
-    //         // Check if target is user
-    //         for (size_t i = 0; i < _list_user.size(); i++)
-    //         {
+            // Check if target is user
+            for (size_t i = 0; i < _list_user.size(); i++)
+            {
 
-    //             // Check if username exists
-    //             if (Compare_case_sensitive(_list_user[i]->Get_nickname(), *it))
-    //             {
+                // Check if username exists
+                if (Compare_case_sensitive(_list_user[i]->Get_nickname(), *it))
+                    // Add user_fd
+                    targets_fds.push_back(_list_user[i]->Get_fd_client());
+                else if (i + 1 == _list_user.size())
+                    _Output_client(sender->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur, *it));
+            }
+        }
+    }
 
-    //                 // Add user_fd, but don't copy doublons (fd already present in target_fds)
-    //                 if (IsInTargetFds(_list_user[i]->Get_fd_client(), targets_fds) == false)
-    //                     targets_fds.push_back(_list_user[i]->Get_fd_client());
-    //             }
-    //             else if (i + 1 == _list_user.size())
-    //                 _Output_client(sender->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur, *it));
-    //         }
-    //     }
-    // }
+    /*                             Parse Message (exist, lenght, prefix?)                             */
+    // Check if a message is specified
+    if (cmd.params.size() == 1)
+    {
+        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PRIVMSG"));
+        return;
+    }
 
-    // /*                             Parse Message (exist, lenght, prefix?)                             */
-    // // Check if a message is specified
-    // size_t strt_omsg = cmd.find_first_not_of(" ", end_otarget);
-    // if (strt_omsg == std::string::npos)
-    // {
-    //     _Output_client(sender->Get_fd_client(), ERR_NOTEXTTOSEND(_name_serveur));
-    //     return;
-    // }
+    // merge all params in one message if more than 1 word
+    std::string message = cmd.params[1];
+    for (size_t i = 2; i < cmd.params.size(); i++) {
+        message += " " + cmd.params[i];
+    }
+    // Check if message start with ':' and delete ":"
+    if (message[0] != ':')
+    {
+        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PRIVMSG"));
+        return;
+    }
+    message = message.substr(1, message.size());
 
-    // // Check if message start with ':'
-    // if (cmd.at(strt_omsg) != ':')
-    // {
-    //     _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PRIVMSG"));
-    //     return;
-    // }
+    /*                                           Send message                                           */
+    std::vector<int>::iterator dest;
+    for (dest = targets_fds.begin(); dest != targets_fds.end(); dest++)
+        _Output_client(*dest, message);
 
-    // // Create message
-    // std::string msg = cmd.substr(strt_omsg, cmd.size() - strt_omsg);
-
-    // /*                                           Send message                                           */
-    // std::vector<int>::iterator dest;
-    // for (dest = targets_fds.begin(); dest != targets_fds.end(); dest++)
-    // {
-    //     _Output_client(*dest, msg);
-    // }
-
-    // // Notify message well sent
-    // _Output_client(sender->Get_fd_client(), "Message has been successfully sent");
+    // Notify message well sent
+    _Output_client(sender->Get_fd_client(), "Message has been successfully sent");
 };
 
 void server::Notice_cmd(user *user, t_IRCMessage cmd)
