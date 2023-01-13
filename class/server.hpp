@@ -56,13 +56,13 @@ class server
         void    _Remove_user(std::vector<user*>::iterator pos);
         void    _Remove_user(std::vector<pollfd>::iterator pos);
 
-
         /* GET USER */
         user   *_Get_user_by_fd(int fd);
         
         
         /* MOD CHANNEL */
         channel *_Add_channel(std::string name, user *creator);
+        channel *_Add_channel(std::string name, user *creator, std::string key);
         void    _Remove_channel(channel *chan);
 
 
@@ -70,6 +70,7 @@ class server
         int     _Input_client(std::vector<pollfd>::iterator it);
         int     _Output_client(int fd, std::string msg);
         int     _Output_channel(channel *chan, std::string msg);
+        void    _Print_channel();
 
         /* GET CHANNEL */
         channel     *_Channel_already_exist(std::string str);
@@ -77,6 +78,7 @@ class server
         /* COMMAND*/
         int _Join_treat(user *user, std::string chan, std::string key);
         int _Join_treat(user *user, std::string chan);
+        int _Join_add(user *use, std::string chan, std::string key);
 
     public:
 
@@ -107,7 +109,7 @@ class server
         /*****   COMMAND   *****/
         /***********************/
 
-        void    Check_command(user *user, std::string str);
+        int     Check_command(user *user, std::string str);
         bool    Check_prefix(user *user, std::string str);
 
         void    Pass_cmd(user *user, struct s_IRCMessage cmd);

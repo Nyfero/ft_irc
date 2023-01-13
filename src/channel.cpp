@@ -10,6 +10,12 @@ channel::channel(std::string name, user *creator)
     _list_operator.push_back(creator);
 };
 
+channel::channel(std::string name, user *creator, std::string key)
+    :_channel_name(name), _key(key) {
+    _list_channel_user.push_back(creator);
+    _list_operator.push_back(creator);
+};
+
 /**************************/
 /******* DESTRUCTOR *******/
 /**************************/
@@ -70,7 +76,6 @@ int channel::Remove_user(user *use){
         i++;
         it++;
     }
-        
     return 0;
 };
 
@@ -94,4 +99,28 @@ std::vector<user *> channel::Get_list_channel_user() const {
 
 std::vector<user *> channel::Get_list_operator() const {
     return(_list_operator);
+};
+
+const std::string   channel::Get_channel_key() const {
+    return(_key);
+};
+
+void    channel::print_user_channel()
+{
+    std::cout << "  channel user: " << _list_channel_user.size() <<std::endl;
+    for (size_t i=0; i< _list_channel_user.size();i++)
+    {
+        std::cout << i << ": " << _list_channel_user[i]->Get_nickname() << std::endl;
+        _list_channel_user[i]->Print_channel_user();
+    }
+};
+
+void    channel::print_oper_channel()
+{
+    std::cout << "  channel oper: " << _list_operator.size() <<std::endl;
+    for (size_t i=0; i< _list_operator.size();i++)
+    {
+        std::cout << i << ": " << _list_operator[i]->Get_nickname() << std::endl;
+    }
+    std::cout << std::endl;
 };

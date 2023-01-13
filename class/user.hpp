@@ -82,4 +82,6 @@ class user
         void Set_hostname(std::string hostname);
         void Set_mode(std::string mode);
         void Set_realname(std::string realname);
+
+        void    Print_channel_user();
 };

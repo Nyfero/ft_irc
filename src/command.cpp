@@ -2,7 +2,7 @@
 #include "../class/utils.hpp"
 #include "../class/user.hpp"
 
-void server::Check_command(user *user, std::string str)
+int server::Check_command(user *user, std::string str)
 {
     std::cout << "Check_command: " << str << std::endl;
 
@@ -79,6 +79,7 @@ void server::Check_command(user *user, std::string str)
         std::cout << "*** server::Check_command - ***" << std::endl;
         break;
     }
+    return 0;
 };
 
 // NON UTILISE
@@ -151,6 +152,7 @@ void server::Pass_cmd(user *user, t_IRCMessage cmd) {
         _Output_client(user->Get_fd_client(), "Welcome to the IRC server");
         user->Set_is_register(true);
     }
+    return 0;
 };
 
 void server::User_cmd(user *user, t_IRCMessage cmd) {
@@ -158,7 +160,7 @@ void server::User_cmd(user *user, t_IRCMessage cmd) {
     // Verifie si le user est connecte
     if (!user->Get_is_register() || !user->Get_username().empty()) {
         _Output_client(user->Get_fd_client(), ERR_ALREADYREGISTRED(_name_serveur));
-        return;
+        return 0;
     }
 
     // Verifie les arguments de USER
@@ -210,6 +212,7 @@ void server::User_cmd(user *user, t_IRCMessage cmd) {
     }
 
     _Output_client(user->Get_fd_client(), RPL_WELCOME(_name_serveur, user->Get_realname(), user->Get_username(), user->Get_hostname()));
+    return 0;
 };
 
 void server::Nick_cmd(user *user, t_IRCMessage cmd) {
@@ -217,20 +220,20 @@ void server::Nick_cmd(user *user, t_IRCMessage cmd) {
     // Verifie les arguments de NICK
     if (cmd.params[0].empty()) {
         _Output_client(user->Get_fd_client(), ERR_NONICKNAMEGIVEN(_name_serveur));
-        return;
+        return 0;
     }
 
     // Verifie la longueur du nickname
     if (cmd.params[0].length() > 9 || cmd.params[0].length() < 1) {
         _Output_client(user->Get_fd_client(), ERR_ERRONEUSNICKNAME(_name_serveur, user->Get_nickname()));
-        return;
+        return 0;
     }
 
     // Verifie si le nick contient des caracteres speciaux
     for (size_t i = 0; i < cmd.params[0].length(); i++) {
         if (!isalnum(cmd.params[0][i]) && cmd.params[0][i] != '-' && cmd.params[0][i] != '_') {
             _Output_client(user->Get_fd_client(), ERR_ERRONEUSNICKNAME(_name_serveur, user->Get_nickname()));
-            return;
+            return 0;
         }
     }
 
@@ -238,7 +241,7 @@ void server::Nick_cmd(user *user, t_IRCMessage cmd) {
     for (size_t i = 0; i < _list_user.size(); i++) {
         if (Compare_case_sensitive(_list_user[i]->Get_nickname(), cmd.params[0])) {
             _Output_client(user->Get_fd_client(), ERR_NICKNAMEINUSE(_name_serveur, user->Get_nickname()));
-            return;
+            return 0;
         }
     }
 
@@ -254,6 +257,7 @@ void server::Nick_cmd(user *user, t_IRCMessage cmd) {
         std::cout << "Introducing new " << cmd.params[0] << " user" << std::endl;
         _Output_client(user->Get_fd_client(), "Hello " + cmd.params[0] + " !");
     }
+    return 0;
 };
 
 void server::Mode_cmd(user *user, t_IRCMessage cmd) {
@@ -302,11 +306,13 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
     }
 };
 
-void server::Quit_cmd(user *user, t_IRCMessage cmd)
+int server::Quit_cmd(user *user, t_IRCMessage cmd)
 { // jgour
     std::cout << "COMMANDE -> QUIT" << std::endl;
     (void)cmd;
     (void)user;
+
+    return -2;
 };
 
 void server::Join_cmd(user *user, t_IRCMessage cmd)
@@ -609,7 +615,7 @@ void server::Away_cmd(user *user, t_IRCMessage cmd)
         user->Set_mode("+a");
         user->Get_mode().Set_away_reply("");
         _Output_client(user->Get_fd_client(), "Changed away status to away with no message");
-        return;
+        return 0;
     }
 
     // Si l'utilisateur passe un parametre, le message d'absence est celui passe en parametre
@@ -627,6 +633,7 @@ void server::Away_cmd(user *user, t_IRCMessage cmd)
     user->Set_mode("+a");
     user->Get_mode().Set_away_reply(away);
     _Output_client(user->Get_fd_client(), "Changed away status to away with message: " + away);
+    return 0;
 };
 
 void server::Users_cmd(user *user, t_IRCMessage cmd)
@@ -659,6 +666,7 @@ void server::Users_cmd(user *user, t_IRCMessage cmd)
     {
         _Output_client(user->Get_fd_client(), "\n***\n-" + _list_user[i]->Get_username() + "\n-" + _list_user[i]->Get_hostname() + "\n-" + _list_user[i]->Get_realname() + "\n-" + _list_user[i]->Get_mode().Print_mode() + "\n***");
     }
+    return 0;
 };
 
 void server::Wallops_cmd(user *user, t_IRCMessage cmd)
@@ -697,6 +705,7 @@ void server::Wallops_cmd(user *user, t_IRCMessage cmd)
             _Output_client(_list_user[i]->Get_fd_client(), "WALLOPS: " + message);
         }
     }
+    return 0;
 };
 
 void server::Pong_cmd(user *user, t_IRCMessage cmd)
