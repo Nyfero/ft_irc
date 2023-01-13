@@ -3,49 +3,70 @@
 # include "utils.hpp"
 
 // PREFIX Error
-# define ERR_NOSUCHNICK(serveur)    ":" + serveur + " 401 : No such nick"
 # define ERR_PARSINGPREFIX          "Parsing prefix error"
 # define ERR_NOSUCHUSER             "No such user"
 # define ERR_NOSUCHHOSTNAME         "No such hostname"
 
+# define ERR_USEAWAY "Use AWAY command"
 
-// PASS Error
-# define ERR_NEEDMOREPARAMS(serveur)         ":" + serveur + " 461 : Not enough parameters"
-# define ERR_ALREADYREGISTRED(serveur)       ":" + serveur + " 462 : This username is already registred"
-# define ERR_PASSWDMISMATCH(serveur)         ":" + serveur + " 464 : Wrong password"
 
-// NICK Error
-# define ERR_NONICKNAMEGIVEN(serveur)          ":" + serveur + " 431 : No nickname given"
-# define ERR_ERRONEUSNICKNAME(serveur, nick)    ":" + serveur + " 432 :" + nick + " : Erroneus nickname"
-# define ERR_NICKNAMEINUSE(serveur, nick)       ":" + serveur + " 433 :" + nick + " : Nickname is already in use"
-# define ERR_NICKCOLLISION(serveur, nick)       ":" + serveur + " 436 :" + nick + " : Nickname collision"
-# define ERR_UNAVAILRESOURCE "Nick/channel is temporarily unavailable"
-# define ERR_RESTRICTED "Your connection is restricted"
 
-// MODE Error
-# define ERR_USERSDONTMATCH(serveur)       ":" + serveur + " 502 : User don't match"
-# define ERR_USEAWAY "Please use command AWAY"
+/*---------------------------------------------------------------------------*/
+# define RPL_WELCOME(serveur, nick, use, host) ":" + serveur + " 001 " + nick + " :Welcome to the Internet Relay Network " + nick + "!" + use + "@" + host
 
-// USER Error
-# define ERR_UMODEUNKNOWNFLAG(serveur)       ":" + serveur + " 501 : Unknown MODE flag"
+# define RPL_UMODEIS(serveur, mode) ":" + serveur + " 221 " + mode
 
-// USERS Error
-# define ERR_NOSUCHSERVER(serveur)       ":" + serveur + " 402 : No such server"
+# define RPL_AWAY(serveur, nick, msg) ":" + serveur + " 301 " + nick + " :" + msg
+# define RPL_UNAWAY(serveur, nick) ":" + serveur + " 305 " + nick + " :You are no longer marked as being away"
+# define RPL_NOWAWAY(serveur, nick) ":" + serveur + " 306 " + nick + " :You have been marked as being away"
+# define RPL_LIST(serveur, chan, nb_users, topic) ":" + serveur + " 322 " + chan + " " + nb_users + " :" + topic
+# define RPL_LISTEND(serveur) ":" + serveur + " 323 :End of LIST"
+# define RPL_NOTOPIC(serveur, chan) ":" + serveur + " 331 " + chan + " :No topic is set"
+# define RPL_TOPIC(serveur, chan, topic) ":" + serveur + " 332 " + chan + " :" + topic
+# define RPL_INVITING(serveur, nick, chan) ":" + serveur + " 341 " + nick + " " + chan
+# define RPL_NAMREPLY(serveur, chan, names) ":" + serveur + " 353 " + chan + " :" + names
+# define RPL_ENDOFNAMES(serveur, chan) ":" + serveur + " 366 " + chan + " :End of NAMES list"
+# define RPL_YOUREOPER(serveur, nick) ":" + serveur + " 381 " + nick + " :You are now an IRC operator"
+# define RPL_USERSSTART(serveur) ":" + serveur + " 392 :UserID Terminal Host"
+# define RPL_USERS(serveur, nick, usr, host) ":" + serveur + " 393 " + nick + " " + usr + " " + host
+# define RPL_ENDOFUSERS(serveur) ":" + serveur + " 394 :End of users"
+# define RPL_NOUSERS(serveur) ":" + serveur + " 395 :Nobody logged in"
 
-// JOIN Error
-# define ERR_BADCHANNELKEY(serveur, chan)   ":" + serveur + " 475 " + chan + ": Key-locked channel, either without a key or with the wrong key"
-# define ERR_NOSUCHCHANNEL(serveur, chan)   ":" + serveur + " 403 " + chan + ": Channel name is invalid"
-# define ERR_TOMUCHPARAMS                   "To much parameters"
+# define ERR_NOSUCHNICK(serveur, nick) ":" + serveur + " 401 " + nick + " :No such nick/channel"
+# define ERR_NOSUCHSERVER(serveur, chan) ":" + serveur + " 402 " + chan + " :No such server"
+# define ERR_NOSUCHCHANNEL(serveur, nick, chan) ":" + serveur + " 403 " + nick + " " + chan + " :No such channel"
+# define ERR_CANNOTSENDTOCHAN(serveur, chan) ":" + serveur + " 404 " + chan + " :Cannot send to channel"
+# define ERR_TOOMANYCHANNELS(serveur, chan) ":" + serveur + " 405 " + chan + " :You have joined too many channels"
+# define ERR_TOOMANYTARGETS(serveur, chan) ":" + serveur + " 407 " + chan + " :Too many targets"
+# define ERR_NOSUCHSERVICE(serveur, chan) ":" + serveur + " 408 " + chan + " :No such service"
+# define ERR_NOORIGIN(serveur) ":" + serveur + " 409 :No origin specified"
+# define ERR_NORECIPIENT(serveur) ":" + serveur + " 411 :No recipient given"
+# define ERR_NOTEXTTOSEND(serveur) ":" + serveur + " 412 :No text to send"
+# define ERR_NOTOPLEVEL(serveur, chan) ":" + serveur + " 413 " + chan + " :No toplevel domain specified"
+# define ERR_WILDTOPLEVEL(serveur, chan) ":" + serveur + " 414 " + chan + " :Wildcard in toplevel domain"
+# define ERR_TOOMANYMATCHES(serveur, chan) ":" + serveur + " 416 " + chan + " :Wildcard in toomany matches"
+# define ERR_FILEERROR(serveur, chan) ":" + serveur + " 417 " + chan + " :File error doing"
+# define ERR_NONICKNAMEGIVEN(serveur) ":" + serveur + " 431 :No nickname given"
+# define ERR_ERRONEUSNICKNAME(serveur, nick) ":" + serveur + " 432 " + nick + " :Erroneus nickname"
+# define ERR_NICKNAMEINUSE(serveur, nick) ":" + serveur + " 433 " + nick + " :Nickname is already in use"
+# define ERR_NICKCOLLISION(serveur, nick, usr, host) ":" + serveur + " 436 " + nick + " :Nickname collision KILL from " + usr + "@" + host
+# define ERR_UNAVAILRESOURCE(serveur, nick) ":" + serveur + " 437 " + nick + " :Nick/channel is temporarily unavailable"
+# define ERR_USERNOTINCHANNEL(serveur, nick, chan) ":" + serveur + " 441 " + nick + " " + chan + " :They aren't on that channel"
+# define ERR_NOTONCHANNEL(serveur, chan) ":" + serveur + " 442 " + chan + " :You're not on that channel"
+# define ERR_USERONCHANNEL(serveur, nick, chan) ":" + serveur + " 443 " + nick + " " + chan + " :is already on channel"
+# define ERR_USERDISABLED(serveur, nick) ":" + serveur + " 446 " + nick + " :User has been disabled"
+# define ERR_NEEDMOREPARAMS(serveur, commande) ":" + serveur + " 461 " + commande + " : Not enough parameters"
+# define ERR_ALREADYREGISTRED(serveur) ":" + serveur + " 462 :Unauthorized command (already registered)"
+# define ERR_PASSWDMISMATCH(serveur) ":" + serveur + " 464 :Password incorrect"
+# define ERR_CHANNELISFULL(serveur, chan) ":" + serveur + " 471 " + chan + " :Cannot join channel (+l)"
+# define ERR_INVITEONLYCHAN(serveur, chan) ":" + serveur + " 473 " + chan + " :Cannot join channel (+i)"
+# define ERR_BANNEDFROMCHAN(serveur, chan) ":" + serveur + " 474 " + chan + " :Cannot join channel (+b)"
+# define ERR_BADCHANNELKEY(serveur, chan) ":" + serveur + " 475 " + chan + " :Cannot join channel (+k)"
+# define ERR_BADCHANMASK(serveur, chan) ":" + serveur + " 476 " + chan + " :Bad Channel Mask"
+# define ERR_NOCHANMODES(serveur, chan) ":" + serveur + " 477 " + chan + " :Channel doesn't support modes"
+# define ERR_CHANOPRIVSNEEDED(serveur, chan) ":" + serveur + " 482 " + chan + " :You're not channel operator"
+# define ERR_RESTRICTED(serveur, nick) ":" + serveur + " 484 " + nick + " :Your connection is restricted!"
+# define ERR_NOOPERHOST(serveur) ":" + serveur + " 491 :No O-lines for your host"
 
-# define ERR_BANNEDFROMCHAN
-# define ERR_INVITEONLYCHAN
-# define ERR_CHANNELISFULL
-# define ERR_BADCHANMASK
-
-// PART Error
-
-# define ERR_NOTONCHANNEL   ":" + srv + " 442 :" + chan + " : Not in channel"
-
-// RPL
-
-# define RPL_WELCOME(serv, name, use, hostname)    ":"+serv+" 001 "+name+" :Welcome to the "+serv+" network, "+name+"["+use+"@"+hostname+"]"
+# define ERR_UMODEUNKNOWNFLAG(serveur) ":" + serveur + " 501 :Unknown MODE flag"
+# define ERR_USERSDONTMATCH(serveur) ":" + serveur + " 502 :Cannot change mode for other users"

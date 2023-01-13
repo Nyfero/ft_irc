@@ -9,6 +9,7 @@
 # include <netdb.h>
 # include <cstdlib>
 # include <string.h>
+# include <sstream>
 # include <poll.h>
 # include <vector>
 # include <csignal>
@@ -21,14 +22,25 @@
 # include "server.hpp"
 # include "user.hpp"
 
+typedef struct s_IRCMessage {
+    std::string prefix;
+    std::string command;
+    std::vector<std::string> params;
+}				t_IRCMessage;
+
 int     parsing(int argc, char **argv);
 bool    isNumber(const std::string& s);
 bool    Compare_case_sensitive(std::string str1, std::string str2);
 int     Stoi(std::string str);
 int     Check_valid_channel(std::string str);
 
-bool    User_in_channel(user *user, channel *chan);
-bool    User_in_channel_is_op(user *user, channel *chan);
+bool			User_in_channel(user *user, channel *chan);
+bool			User_in_channel_is_op(user *user, channel *chan);
+user			*Get_user_in_channel(user *use, channel *chan);
+bool			IsInTargetFds(int fd_client, std::vector<int> target_fds);
+t_IRCMessage split_message(std::string& input);
+std::vector<std::string> Split(std::string str, char delimiter);
+std::string		Join(std::vector<std::string> vec, size_t start, size_t end);
 
 // int socket(int domain, int type, int protocol);
 // int setsockopt(int socket, int level, int option_name, const void *option_value, socklen_t option_len);

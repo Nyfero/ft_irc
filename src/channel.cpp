@@ -10,6 +10,12 @@ channel::channel(std::string name, user *creator)
     _list_operator.push_back(creator);
 };
 
+channel::channel(std::string name, user *creator, std::string key)
+    :_channel_name(name), _key(key) {
+    _list_channel_user.push_back(creator);
+    _list_operator.push_back(creator);
+};
+
 /**************************/
 /******* DESTRUCTOR *******/
 /**************************/
@@ -70,7 +76,9 @@ int channel::Remove_user(user *use){
         i++;
         it++;
     }
-        
+    // ajouter oper si vide
+    if (_list_operator.empty() && !_list_channel_user.empty())
+        Add_oper(_list_channel_user.front());
     return 0;
 };
 
@@ -86,6 +94,10 @@ void channel::Add_oper(user *use)
 
 const std::string channel::Get_channel_name() const {
     return _channel_name;
+};
+
+const std::string   channel::Get_channel_key() const {
+    return(_key);
 };
 
 std::vector<user *> channel::Get_list_channel_user() const {
