@@ -34,7 +34,7 @@
 
 # define ERR_NOSUCHNICK(serveur, nick) ":" + serveur + " 401 " + nick + " :No such nick/channel"
 # define ERR_NOSUCHSERVER(serveur, chan) ":" + serveur + " 402 " + chan + " :No such server"
-# define ERR_NOSUCHCHANNEL(serveur, chan) ":" + serveur + " 403 " + chan + " :No such channel"
+# define ERR_NOSUCHCHANNEL(serveur, nick, chan) ":" + serveur + " 403 " + nick + " " + chan + " :No such channel"
 # define ERR_CANNOTSENDTOCHAN(serveur, chan) ":" + serveur + " 404 " + chan + " :Cannot send to channel"
 # define ERR_TOOMANYCHANNELS(serveur, chan) ":" + serveur + " 405 " + chan + " :You have joined too many channels"
 # define ERR_TOOMANYTARGETS(serveur, chan) ":" + serveur + " 407 " + chan + " :Too many targets"
