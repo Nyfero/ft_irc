@@ -56,6 +56,7 @@ class server
         void    _Remove_user(std::vector<user*>::iterator pos);
         void    _Remove_user(std::vector<pollfd>::iterator pos);
 
+
         /* GET USER */
         user   *_Get_user_by_fd(int fd);
         
@@ -69,15 +70,14 @@ class server
         /* DVERS */
         int     _Input_client(std::vector<pollfd>::iterator it);
         int     _Output_client(int fd, std::string msg);
-        void    _Print_channel();
+        int     _Output_channel(channel *chan, std::string msg);
 
         /* GET CHANNEL */
         channel     *_Channel_already_exist(std::string str);
 
         /* COMMAND*/
-        int _Join_treat(user *user, std::string chan, std::string key);
-        int _Join_treat(user *user, std::string chan);
-        int _Join_add(user *use, std::string chan, std::string key);
+        int _Join_treat(user *user, std::vector<std::string> chan, std::vector<std::string> key);
+        int _Join_treat(user *user, std::vector<std::string> chan);
 
     public:
 
@@ -108,22 +108,26 @@ class server
         /*****   COMMAND   *****/
         /***********************/
 
-        int     Check_command(user *user, std::string str);
+        int    Check_command(user *user, std::string str);
         bool    Check_prefix(user *user, std::string str);
 
-        int    Pass_cmd(user *user, std::string cmd);
-        int    User_cmd(user *user, std::string cmd);
-        int    Nick_cmd(user *user, std::string cmd);
-        int    Mode_cmd(user *user, std::string cmd);
-        int     Quit_cmd(user *user, std::string cmd);
-        int    Join_cmd(user *user, std::string cmd);
-        int    Part_cmd(user *user, std::string cmd);
-        int    Names_cmd(user *user, std::string cmd);
-        int    Invite_cmd(user *user, std::string cmd);
-        int    Kick_cmd(user *user, std::string cmd);
-        int    Privmsg_cmd(user *user, std::string cmd);
-        int    Notice_cmd(user *user, std::string cmd);
-        int    Away_cmd(user *user, std::string cmd);
-        int    Users_cmd(user *user, std::string cmd);
-        int    Wallops_cmd(user *user, std::string cmd);
+        void    Pass_cmd(user *user, struct s_IRCMessage cmd);
+        void    Nick_cmd(user *user, struct s_IRCMessage cmd);
+        void    User_cmd(user *user, struct s_IRCMessage cmd);
+        //void    Oper_cmd(user *user, struct s_IRCMessage cmd);
+        void    Mode_cmd(user *user, struct s_IRCMessage cmd);
+        void    Join_cmd(user *user, struct s_IRCMessage cmd);
+        void    Part_cmd(user *user, struct s_IRCMessage cmd);
+        //void   Topic_cmd(user *user, struct s_IRCMessage cmd);
+        int     Quit_cmd(user *user, struct s_IRCMessage cmd);
+        
+        void    Names_cmd(user *user, struct s_IRCMessage cmd);
+        void    Invite_cmd(user *user, struct s_IRCMessage cmd);
+        void    Kick_cmd(user *user, struct s_IRCMessage cmd);
+        void    Privmsg_cmd(user *user, struct s_IRCMessage cmd);
+        void    Notice_cmd(user *user, struct s_IRCMessage cmd);
+        void    Away_cmd(user *user, struct s_IRCMessage cmd);
+        void    Users_cmd(user *user, struct s_IRCMessage cmd);
+        void    Wallops_cmd(user *user, struct s_IRCMessage cmd);
+        void    Pong_cmd(user *user, struct s_IRCMessage cmd);
 };

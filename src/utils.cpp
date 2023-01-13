@@ -70,40 +70,118 @@ int Stoi(std::string str) {
     for (size_t i = 0; i < str.size(); i++) {
         res = res * 10 + (str[i] - '0');
     }
-    std::cout << "res: " << res << std::endl;
     return res;
 };
 
-bool    User_in_channel(user *use, channel *chan)
-{
+bool    User_in_channel(user *use, channel *chan) {
     // chan exist && user exist
     std::vector<user *> list_user;
 
     list_user = chan->Get_list_channel_user();
     size_t  i = 0;
     std::vector<user *>::iterator it = list_user.begin();
-    while (i < list_user.size()){
-        if (list_user[i]->Get_fd_client() == use->Get_fd_client())
+    while (i < list_user.size()) {
+        if (list_user[i]->Get_fd_client() == use->Get_fd_client()) {
             return 1;
+        }
         i++;
         it++;
     }
     return 0;
-}
+};
 
-bool   User_in_channel_is_op(user *use, channel *chan)
-{
+user    *Get_user_in_channel(user *use, channel *chan) {
+    // chan exist && user exist
+    std::vector<user *> list_user;
+
+    list_user = chan->Get_list_channel_user();
+    size_t  i = 0;
+    std::vector<user *>::iterator it = list_user.begin();
+    while (i < list_user.size()) {
+        if (list_user[i]->Get_fd_client() == use->Get_fd_client()) {
+            return list_user[i];
+        }
+        i++;
+        it++;
+    }
+    return NULL;
+};
+
+bool   User_in_channel_is_op(user *use, channel *chan) {
     // chan exist && user exist
     std::vector<user *> list_user;
 
     list_user = chan->Get_list_operator();
     size_t  i = 0;
     std::vector<user *>::iterator it = list_user.begin();
-    while (i < list_user.size()){
-        if (list_user[i]->Get_fd_client() == use->Get_fd_client())
+    while (i < list_user.size()) {
+        if (list_user[i]->Get_fd_client() == use->Get_fd_client()) {
             return 1;
+        }
         i++;
         it++;
     }
     return 0;
+};
+
+bool    IsInTargetFds(int fd_client, std::vector<int> target_fds) {
+    size_t  i = 0;
+    while (i < target_fds.size()) {
+        if (fd_client == target_fds[i]) {
+            return true;
+        }
+        i++;
+    }
+    return false;
+};
+
+t_IRCMessage split_message(std::string& input) {
+    t_IRCMessage msg;
+
+    // Extract the prefix if it exists
+    if (input[0] == ':') {
+        size_t prefixEnd = input.find(' ');
+        msg.prefix = input.substr(1, prefixEnd - 1);
+        input = input.substr(prefixEnd + 1);
+    }
+
+    // Extract the command and parameters
+    std::stringstream ss(input);
+    ss >> msg.command;
+    while (ss) {
+        std::string param;
+        ss >> param;
+        if (!param.empty()) {
+            msg.params.push_back(param);
+        }
+    }
+
+    return msg;
+}
+
+std::vector<std::string> Split(std::string str, char delimiter) {
+    std::vector<std::string> res;
+
+    for (size_t i = 0; i < str.size(); i++) {
+        std::string tmp;
+        while (str[i] != delimiter && i < str.size()) {
+            tmp += str[i];
+            i++;
+        }
+        res.push_back(tmp);
+    }
+
+    return res;
+}
+
+std::string Join(std::vector<std::string> vec, size_t start, size_t end) {
+    std::string res;
+
+    for (size_t i = start; i < end; i++) {
+        res += vec[i];
+        if (i != vec.size() - 1)
+            res += ' ';
+    }
+
+    return res;
 }

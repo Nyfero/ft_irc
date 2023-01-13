@@ -91,7 +91,7 @@ int user::Remove_Channel(channel *chan) {
         i++;
     }
     if (it == ite) {
-        std::cout << "channel not found for user" << std::endl;
+        std::cout << "channel not found" << std::endl;
     }
     return 0;
 };
@@ -174,14 +174,4 @@ void user::Set_realname(std::string realname) {
     _realname = realname;
 };
 
-
-void    user::Print_channel_user()
-{
-    std::cout << "     user channel: " << _channel_register.size() <<std::endl;
-    for (size_t i=0; i< _channel_register.size();i++)
-    {
-        std::cout << i << ": " << _channel_register[i]->Get_channel_name() << std::endl;
-    }
-    std::cout << std::endl;
-}
 

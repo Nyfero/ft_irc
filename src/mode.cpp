@@ -63,6 +63,34 @@ std::string Mode::Get_away_reply() const {
 /***** MODIFIER *****/
 /********************/
 
+int     Mode::Add_mode(char m) {
+    switch (m) {
+        case 'i':
+            _invisible = true;
+            break;
+        case 'w':
+            _wallops = true;
+            break;
+        default:
+            return 1;
+    }
+    return 0;
+};
+
+int     Mode::Remove_mode(char m) {
+    switch (m) {
+        case 'i':
+            _invisible = false;
+            break;
+        case 'w':
+            _wallops = false;
+            break;
+        default:
+            return 1;
+    }
+    return 0;
+};
+
 void    Mode::Set_away(bool away) {
     _away = away;
 };
