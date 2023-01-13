@@ -416,11 +416,13 @@ void server::Privmsg_cmd(user *sender, t_IRCMessage cmd)
     /*                                        Handle Targets                                        */
     // Check if there are any target specified
     if (cmd.params[0][0] == ':')
+    {
         _Output_client(sender->Get_fd_client(), ERR_NORECIPIENT(_name_serveur));
+        return;
+    }
 
     // Create vector of targets
     std::vector<std::string> target;
-    size_t end_otarget;
     target.push_back(cmd.params[0]);
 
     std::stringstream targstream(target[0]);
@@ -431,22 +433,31 @@ void server::Privmsg_cmd(user *sender, t_IRCMessage cmd)
     }
     target.erase(target.begin());
 
+// TODO : Add other prefixes
     /*                        Check if targets are valid & add to fd to send                        */
     std::vector<int> targets_fds;
     for (std::vector<std::string>::iterator it = target.begin(); it != target.end(); ++it)
     {
 
         // CHECK if target is a Channel
+        _Output_client(sender->Get_fd_client(), "is target");
         if ((*it)[0] == '#')
         {
-
+            _Output_client(sender->Get_fd_client(), "is channel type");
             // Check if channel Exist
+            if (_list_channel.empty())
+            {
+                // FIXME : check if is good message error
+                _Output_client(sender->Get_fd_client(), "There are no channels");                
+                _Output_client(sender->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, *it));
+                return;
+            }
             for (size_t i = 0; i < _list_channel.size(); i++)
             {
                 std::string target_channel = _list_channel[i]->Get_channel_name();
                 if (Compare_case_sensitive(target_channel, *it))
                 {
-
+                    _Output_client(sender->Get_fd_client(), "Channel exists");
                     // Check is user is in the channel
                     if (User_in_channel(sender, _list_channel[i]))
                     {
@@ -460,10 +471,18 @@ void server::Privmsg_cmd(user *sender, t_IRCMessage cmd)
                     {
                         std::string chan_name = _list_channel[i]->Get_channel_name();
                         _Output_client(sender->Get_fd_client(), ERR_CANNOTSENDTOCHAN(_name_serveur, chan_name));
+                        return;
                     }
                 }
                 else if (i + 1 == _list_channel.size())
+                {
                     _Output_client(sender->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, *it));
+                    return;
+                }
+                else
+                {
+                    _Output_client(sender->Get_fd_client(), "Channel not exist");
+                }
             }
         }
         else
@@ -478,7 +497,10 @@ void server::Privmsg_cmd(user *sender, t_IRCMessage cmd)
                     // Add user_fd
                     targets_fds.push_back(_list_user[i]->Get_fd_client());
                 else if (i + 1 == _list_user.size())
+                {
                     _Output_client(sender->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur, *it));
+                    return;
+                }
             }
         }
     }
