@@ -11,7 +11,7 @@ void server::Check_command(user *user, std::string str)
     std::cout << "command: " << msg.command << std::endl;
     std::cout << "prefix: " << msg.prefix << std::endl;
     for (size_t i = 0; i < msg.params.size(); i++) {
-        std::cout << "params[" << i << "]: " << msg.params[i] << std::endl;
+        std::cout << "params[" << i << "]: |" << msg.params[i] << "|" << std::endl;
     }
 
     std::string list_command[16] = {"PASS", "USER", "NICK", "MODE", "QUIT", "JOIN", "PART", "NAMES", "INVITE", "KICK", "PRIVMSG", "NOTICE", "AWAY", "USERS", "WALLOPS", "PING"};
@@ -132,8 +132,7 @@ void server::Check_command(user *user, std::string str)
 //     return true;
 // };
 
-void server::Pass_cmd(user *user, t_IRCMessage cmd)
-{
+void server::Pass_cmd(user *user, t_IRCMessage cmd) {
 
     // Verifie les arguments de PASS
     if (cmd.params.empty()) {
@@ -154,8 +153,7 @@ void server::Pass_cmd(user *user, t_IRCMessage cmd)
     }
 };
 
-void server::User_cmd(user *user, t_IRCMessage cmd)
-{
+void server::User_cmd(user *user, t_IRCMessage cmd) {
 
     // Verifie si le user est connecte
     if (!user->Get_is_register() || !user->Get_username().empty()) {
@@ -183,24 +181,22 @@ void server::User_cmd(user *user, t_IRCMessage cmd)
     }
 
     // Verifie le hostname
-    if (cmd.params[2].empty() || cmd.params[2].at(0) == ':')
-    {
+    if (cmd.params[2].empty() || cmd.params[2].at(0) == ':') {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "USER"));
         return;
     }
 
     // Verifie le realname
-    if (cmd.params[3].empty())
-    {
+    if (cmd.params[3].empty()) {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "USER"));
         return;
     }
-    if (cmd.params[3].at(0) != ':')
-    {
+    if (cmd.params[3].at(0) != ':') {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "USER"));
         return;
     }
     std::string realname = Join(cmd.params, 3, cmd.params.end() - cmd.params.begin());
+    realname = realname.substr(1, realname.size());
 
     // Enregistre le user
     user->Set_username(cmd.params[0]);
@@ -216,135 +212,93 @@ void server::User_cmd(user *user, t_IRCMessage cmd)
     _Output_client(user->Get_fd_client(), RPL_WELCOME(_name_serveur, user->Get_realname(), user->Get_username(), user->Get_hostname()));
 };
 
-void server::Nick_cmd(user *user, t_IRCMessage cmd)
-{
+void server::Nick_cmd(user *user, t_IRCMessage cmd) {
 
     // Verifie les arguments de NICK
-    if (cmd.params.size() < 2)
-    {
+    if (cmd.params[0].empty()) {
         _Output_client(user->Get_fd_client(), ERR_NONICKNAMEGIVEN(_name_serveur));
         return;
     }
 
     // Verifie la longueur du nickname
-    if (cmd.params[1].length() > 9 || cmd.params[1].length() < 1)
-    {
+    if (cmd.params[0].length() > 9 || cmd.params[0].length() < 1) {
         _Output_client(user->Get_fd_client(), ERR_ERRONEUSNICKNAME(_name_serveur, user->Get_nickname()));
         return;
     }
 
     // Verifie si le nick contient des caracteres speciaux
-    for (size_t i = 0; i < cmd.params[1].length(); i++)
-    {
-        if (!isalnum(cmd.params[1][i]) && cmd.params[1][i] != '-' && cmd.params[1][i] != '_')
-        {
+    for (size_t i = 0; i < cmd.params[0].length(); i++) {
+        if (!isalnum(cmd.params[0][i]) && cmd.params[0][i] != '-' && cmd.params[0][i] != '_') {
             _Output_client(user->Get_fd_client(), ERR_ERRONEUSNICKNAME(_name_serveur, user->Get_nickname()));
             return;
         }
     }
 
     // Verifie si le nick est deja pris
-    for (size_t i = 0; i < _list_user.size(); i++)
-    {
-        if (Compare_case_sensitive(_list_user[i]->Get_nickname(), cmd.params[1]))
-        {
+    for (size_t i = 0; i < _list_user.size(); i++) {
+        if (Compare_case_sensitive(_list_user[i]->Get_nickname(), cmd.params[0])) {
             _Output_client(user->Get_fd_client(), ERR_NICKNAMEINUSE(_name_serveur, user->Get_nickname()));
             return;
         }
     }
 
-    if (!user->Get_is_register())
-    {
+    if (!user->Get_is_register()) {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
     }
-    else if (!user->Get_username().empty())
-    { // Modifie le nickname
-        user->Set_nickname(cmd.params[1]);
-        _Output_client(user->Get_fd_client(), "Your nickname is now " + cmd.params[1]);
+    else if (!user->Get_username().empty()) { // Modifie le nickname
+        user->Set_nickname(cmd.params[0]);
+        _Output_client(user->Get_fd_client(), "Your nickname is now " + cmd.params[0]);
     }
-    else
-    { // Definit le nickname
-        user->Set_nickname(cmd.params[1]);
-        std::cout << "Introducing new " << cmd.params[1] << " user" << std::endl;
-        _Output_client(user->Get_fd_client(), "Hello " + cmd.params[1] + " !");
+    else { // Definit le nickname
+        user->Set_nickname(cmd.params[0]);
+        std::cout << "Introducing new " << cmd.params[0] << " user" << std::endl;
+        _Output_client(user->Get_fd_client(), "Hello " + cmd.params[0] + " !");
     }
 };
 
-void server::Mode_cmd(user *user, t_IRCMessage cmd)
-{
+void server::Mode_cmd(user *user, t_IRCMessage cmd) {
 
     // Verifie que le user est enregistre
-    if (user->Get_username().empty())
-    {
+    if (user->Get_username().empty()) {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
         return;
     }
 
     // Verifie les arguments de MODE
-    if (cmd.params.size() < 3)
-    {
+    if (cmd.params[0].empty()) {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "MODE"));
         return;
     }
 
-    // Verifie le nickname
-    std::string tmp = user->Get_realname().substr(0, user->Get_realname().find(" ", 0));
-    if (cmd.params[1] != user->Get_nickname() && cmd.params[1] != tmp)
-    {
+    // Verifie que le premier parametre est le nickname ou le realname 
+
+    if (cmd.params[0] != user->Get_nickname() && cmd.params[0] != user->Get_realname().substr(0, user->Get_realname().find(' '))) {
         _Output_client(user->Get_fd_client(), ERR_USERSDONTMATCH(_name_serveur));
         return;
     }
 
-    // Verifie si on affiche le mode ou si on le modifie
-    if (cmd.params.size() == 2)
-    {
+    if (cmd.params.size() == 1) {
         _Output_client(user->Get_fd_client(), user->Get_mode().Print_mode());
-        return;
     }
-
-    // Verifie qu'il n'y a qu'un mode en parametre
-    if (cmd.params.size() > 3)
-    {
-        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur));
-        return;
-    }
-
-    // Verifie que le prefix du mode est correct
-    if (cmd.params[2].at(0) != '+' && cmd.params[2].at(0) != '-')
-    {
-        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur));
-        return;
-    }
-
-    // Verifie que le mode est correct
-    if (cmd.params[2].at(1) == 'i' || cmd.params[2].at(1) == 'w' || cmd.params[2].at(1) == 's')
-    {
-        user->Set_mode(cmd.params[2]);
-        _Output_client(user->Get_fd_client(), "Mode change [" + cmd.params[2] + "] for " + user->Get_nickname());
-    }
-    else if (cmd.params[2].at(1) == 'o' || cmd.params[2].at(1) == 'O' || cmd.params[2].at(1) == 'a')
-    {
-        if (cmd.params[2].at(0) == '-')
-        { // Ignore le mode +o et +O
-            user->Set_mode(cmd.params[2]);
-            _Output_client(user->Get_fd_client(), "Mode change [" + cmd.params[2] + "] for " + user->Get_nickname());
+    else {
+        if (cmd.params[0] == user->Get_nickname() || cmd.params[0] != user->Get_realname().substr(0, user->Get_realname().find(' '))) {
+            if (cmd.params[1].at(0) == '+') {
+                for (size_t i = 1; i < cmd.params[1].size(); i++) {
+                    if (user->Get_mode().Add_mode(cmd.params[1].at(i))) {
+                        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur));
+                    }
+                }
+                _Output_client(user->Get_fd_client(), user->Get_mode().Print_mode());
+            }
+            else {
+                for (size_t i = 1; i < cmd.params[1].size(); i++) {
+                    if (user->Get_mode().Remove_mode(cmd.params[1].at(i))) {
+                        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur));
+                    }
+                }
+                _Output_client(user->Get_fd_client(), user->Get_mode().Print_mode());
+            }
         }
-        else if (cmd.params[2].at(1) == 'a' && cmd.params[2][0] == '+')
-        { // L'utilisateur doit utiliser AWAY
-            _Output_client(user->Get_fd_client(), ERR_USEAWAY);
-        }
-    }
-    else if (cmd.params[2].at(1) == 'r')
-    {
-        if (cmd.params[2].at(0) == '+')
-        { // Ignore le mode -r
-            user->Set_mode(cmd.params[2]);
-            _Output_client(user->Get_fd_client(), "Mode change [" + cmd.params[2] + "] for " + user->Get_nickname());
-        }
-    }
-    else
-    {
-        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur));
     }
 };
 

@@ -29,7 +29,7 @@ int server::_Join_treat(user *user, std::string chan)
         std::cout << "_Join_treat chan ALPHA" << std::endl;
         if (str[0] == ',')
         {
-            _Output_client(user->Get_fd_client(), (ERR_NOSUCHCHANNEL(_name_serveur, chan)));
+            _Output_client(user->Get_fd_client(), (ERR_NOSUCHCHANNEL(_name_serveur, user->Get_nickname(), chan)));
         }
         else
         {
@@ -50,7 +50,7 @@ int server::_Join_treat(user *user, std::string chan)
                 }
             }
             else
-                _Output_client(user->Get_fd_client(), (ERR_NOSUCHCHANNEL(_name_serveur, chan)));
+                _Output_client(user->Get_fd_client(), (ERR_NOSUCHCHANNEL(_name_serveur, user->Get_nickname(), chan)));
         }
         chan.erase(0, pos + 1);
         std::cout << chan << std::endl;
@@ -72,7 +72,7 @@ int server::_Join_treat(user *user, std::string chan)
     else
     {
         std::cout << "***********************8unvalid channel name" << std::endl;
-        _Output_client(user->Get_fd_client(), (ERR_NOSUCHCHANNEL(_name_serveur, chan)));
+        _Output_client(user->Get_fd_client(), (ERR_NOSUCHCHANNEL(_name_serveur, user->Get_nickname(), chan)));
     }
 
     std::cout << "size _list_channel: " << _list_channel.size() << std::endl;
