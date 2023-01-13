@@ -11,7 +11,7 @@ int server::Check_command(user *user, std::string str)
     std::cout << "command: " << msg.command << std::endl;
     std::cout << "prefix: " << msg.prefix << std::endl;
     for (size_t i = 0; i < msg.params.size(); i++) {
-        std::cout << "params[" << i << "]: |" << msg.params[i] << "|" << std::endl;
+        std::cout << "params[" << i << "]: " << msg.params[i] << std::endl;
     }
 
     std::string list_command[16] = {"PASS", "USER", "NICK", "MODE", "QUIT", "JOIN", "PART", "NAMES", "INVITE", "KICK", "PRIVMSG", "NOTICE", "AWAY", "USERS", "WALLOPS", "PING"};
@@ -28,100 +28,100 @@ int server::Check_command(user *user, std::string str)
     switch (i)
     {
     case 0:
-        return Pass_cmd(user, msg);
-
+        Pass_cmd(user, msg);
+        return 0;
     case 1:
-        return User_cmd(user, msg);
-
+        User_cmd(user, msg);
+        return 0;
     case 2:
-        return Nick_cmd(user, msg);
-
+        Nick_cmd(user, msg);
+        return 0;
     case 3:
-        return Mode_cmd(user, msg);
-
+        Mode_cmd(user, msg);
+        return 0;
     case 4:
-        return Quit_cmd(user, msg);
-
+        return (Quit_cmd(user, msg));
     case 5:
-        return Join_cmd(user, msg);
-
+        Join_cmd(user, msg);
+        return 0;
     case 6:
-        return Part_cmd(user, msg);
-
+        Part_cmd(user, msg);
+        return 0;
     case 7:
-        return Names_cmd(user, msg);
-
+        Names_cmd(user, msg);
+        return 0;
     case 8:
-        return Invite_cmd(user, msg);
-
+        Invite_cmd(user, msg);
+        return 0;
     case 9:
-        return Kick_cmd(user, msg);
-
+        Kick_cmd(user, msg);
+        return 0;
     case 10:
-        return Privmsg_cmd(user, msg);
-
+        Privmsg_cmd(user, msg);
+        return 0;
     case 11:
-        return Notice_cmd(user, msg);
-
+        Notice_cmd(user, msg);
+        return 0;
     case 12:
-        return Away_cmd(user, msg);
-
+        Away_cmd(user, msg);
+        return 0;
     case 13:
-        return Users_cmd(user, msg);
-
+        Users_cmd(user, msg);
+        return 0;
     case 14:
-        return Wallops_cmd(user, msg);
-
+        Wallops_cmd(user, msg);
+        return 0;
     case 15:
-        return Pong_cmd(user, msg);
-
+        Pong_cmd(user, msg);
+        return 0;
     default:
         std::cout << "*** server::Check_command - ***" << std::endl;
         break;
     }
-    return 0;
-};
+    return 0
+;};
 
 // NON UTILISE
+// // NON UTILISE
 // bool    server::Check_prefix(user *user, std::string str) {
 
-//     // Verifie si le user est deja connecte
-//     if (user->Get_username().empty()) {
-//         _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
-//         return false;
-//     }
+// //     // Verifie si le user est deja connecte
+// //     if (user->Get_username().empty()) {
+// //         _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
+// //         return false;
+// //     }
 
-//     // Verifie si le prefix correspond au nickname du user
-//     std::string prefix = str.substr(1, str.find(" ") - 1);
-//     std::string check_nick = prefix.substr(0, prefix.find("!"));
-//     if (check_nick != user->Get_nickname()) {
-//         _Output_client(user->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur, check_nick));
-//         return false;
-//     }
+// //     // Verifie si le prefix correspond au nickname du user
+// //     std::string prefix = str.substr(1, str.find(" ") - 1);
+// //     std::string check_nick = prefix.substr(0, prefix.find("!"));
+// //     if (check_nick != user->Get_nickname()) {
+// //         _Output_client(user->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur, check_nick, check_nick));
+// //         return false;
+// //     }
 
-//     // Verifie si le prefix contient un ! apres le nickname
-//     size_t pos = prefix.find("!");
-//     if (pos == std::string::npos) {
-//         if (pos + 1 == 0) {
-//             return true;
-//         }
-//         _Output_client(user->Get_fd_client(), ERR_PARSINGPREFIX);
-//         return false;
-//     }
+// //     // Verifie si le prefix contient un ! apres le nickname
+// //     size_t pos = prefix.find("!");
+// //     if (pos == std::string::npos) {
+// //         if (pos + 1 == 0) {
+// //             return true;
+// //         }
+// //         _Output_client(user->Get_fd_client(), ERR_PARSINGPREFIX);
+// //         return false;
+// //     }
 
-//     // Verifie si le prefix contient un @ apres le username
-//     size_t pos2 = prefix.find("@");
-//     if (pos2 == std::string::npos) {
-//         _Output_client(user->Get_fd_client(), ERR_PARSINGPREFIX);
-//         return false;
-//     }
+// //     // Verifie si le prefix contient un @ apres le username
+// //     size_t pos2 = prefix.find("@");
+// //     if (pos2 == std::string::npos) {
+// //         _Output_client(user->Get_fd_client(), ERR_PARSINGPREFIX);
+// //         return false;
+// //     }
 
-//     // Verifie si le prefix correspond au username du user
-//     std::string check_user = prefix.substr(pos + 1, pos2 - pos - 1);
-//     if (check_user != user->Get_username()) {
-//         _Output_client(user->Get_fd_client(), ERR_NOSUCHUSER);
-//         return false;
-//     }
+// //     // Verifie si le prefix correspond au username du user
+// //     std::string check_user = prefix.substr(pos + 1, pos2 - pos - 1);
+// //     if (check_user != user->Get_username()) {
+// //         _Output_client(user->Get_fd_client(), ERR_NOSUCHUSER);
+// //         return false;
+// //     }
 
 //     // Verifie si le prefix correspond au hostname du user
 //     std::string check_host = prefix.substr(pos2 + 1, prefix.size());
@@ -152,7 +152,6 @@ void server::Pass_cmd(user *user, t_IRCMessage cmd) {
         _Output_client(user->Get_fd_client(), "Welcome to the IRC server");
         user->Set_is_register(true);
     }
-    return 0;
 };
 
 void server::User_cmd(user *user, t_IRCMessage cmd) {
@@ -160,7 +159,7 @@ void server::User_cmd(user *user, t_IRCMessage cmd) {
     // Verifie si le user est connecte
     if (!user->Get_is_register() || !user->Get_username().empty()) {
         _Output_client(user->Get_fd_client(), ERR_ALREADYREGISTRED(_name_serveur));
-        return 0;
+        return;
     }
 
     // Verifie les arguments de USER
@@ -212,7 +211,6 @@ void server::User_cmd(user *user, t_IRCMessage cmd) {
     }
 
     _Output_client(user->Get_fd_client(), RPL_WELCOME(_name_serveur, user->Get_realname(), user->Get_username(), user->Get_hostname()));
-    return 0;
 };
 
 void server::Nick_cmd(user *user, t_IRCMessage cmd) {
@@ -220,20 +218,20 @@ void server::Nick_cmd(user *user, t_IRCMessage cmd) {
     // Verifie les arguments de NICK
     if (cmd.params[0].empty()) {
         _Output_client(user->Get_fd_client(), ERR_NONICKNAMEGIVEN(_name_serveur));
-        return 0;
+        return;
     }
 
     // Verifie la longueur du nickname
     if (cmd.params[0].length() > 9 || cmd.params[0].length() < 1) {
         _Output_client(user->Get_fd_client(), ERR_ERRONEUSNICKNAME(_name_serveur, user->Get_nickname()));
-        return 0;
+        return;
     }
 
     // Verifie si le nick contient des caracteres speciaux
     for (size_t i = 0; i < cmd.params[0].length(); i++) {
         if (!isalnum(cmd.params[0][i]) && cmd.params[0][i] != '-' && cmd.params[0][i] != '_') {
             _Output_client(user->Get_fd_client(), ERR_ERRONEUSNICKNAME(_name_serveur, user->Get_nickname()));
-            return 0;
+            return;
         }
     }
 
@@ -241,7 +239,7 @@ void server::Nick_cmd(user *user, t_IRCMessage cmd) {
     for (size_t i = 0; i < _list_user.size(); i++) {
         if (Compare_case_sensitive(_list_user[i]->Get_nickname(), cmd.params[0])) {
             _Output_client(user->Get_fd_client(), ERR_NICKNAMEINUSE(_name_serveur, user->Get_nickname()));
-            return 0;
+            return;
         }
     }
 
@@ -257,7 +255,6 @@ void server::Nick_cmd(user *user, t_IRCMessage cmd) {
         std::cout << "Introducing new " << cmd.params[0] << " user" << std::endl;
         _Output_client(user->Get_fd_client(), "Hello " + cmd.params[0] + " !");
     }
-    return 0;
 };
 
 void server::Mode_cmd(user *user, t_IRCMessage cmd) {
@@ -311,7 +308,6 @@ int server::Quit_cmd(user *user, t_IRCMessage cmd)
     std::cout << "COMMANDE -> QUIT" << std::endl;
     (void)cmd;
     (void)user;
-
     return -2;
 };
 
@@ -319,8 +315,39 @@ void server::Join_cmd(user *user, t_IRCMessage cmd)
 { // jgour
     std::cout << "COMMANDE -> JOIN" << std::endl;
 
+        // ERR_NEEDMOREPARAMS              ERR_BANNEDFROMCHAN
+        // ERR_INVITEONLYCHAN              ERR_BADCHANNELKEY
+        // ERR_CHANNELISFULL               ERR_BADCHANMASK
+        // ERR_NOSUCHCHANNEL               ERR_TOOMANYCHANNELS
+        // ERR_TOOMANYTARGETS              ERR_UNAVAILRESOURCE
+        // RPL_TOPIC
+
     (void)user;
     (void)cmd;
+    std::vector<std::string>    chan;
+    std::vector<std::string>    key;
+
+    if (cmd.params.empty()) { //vide
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, user->Get_nickname()));
+        return;
+    }
+    else if (cmd.params.size() == 1 && cmd.params[0] == "0") {
+        // join 0
+    }
+    else if (cmd.params.size() == 1) {
+        // join channel
+        chan = Split(cmd.params[0], ',');
+        _Join_treat(user, chan);
+
+    }
+    else if (cmd.params.size() >= 2) {
+        // join channel key
+        chan = Split(cmd.params[0], ',');
+        key = Split(cmd.params[1], ',');
+        _Join_treat(user, chan, key);
+
+    }
+    //  check param < 3 ?
 
 };
 
@@ -329,6 +356,54 @@ void server::Part_cmd(user *user, t_IRCMessage cmd)
     std::cout << "COMMANDE -> PART" << std::endl;
     (void)cmd;
     (void)user;
+    std::vector<std::string> v_chan;
+    channel *chan;
+
+    // ERR_NEEDMOREPARAMS
+    // ERR_NOSUCHCHANNEL
+    // ERR_NOTONCHANNEL
+
+    // <channel> *( "," <channel> ) [ <Part Message> ]
+
+    // PART #oz-ops,&group5 
+    // PART #playzone :I lost
+    if (cmd.params.empty()){
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, user->Get_nickname()));
+    }
+    else if (cmd.params.size() == 1) // NO MSG
+    {
+        v_chan = Split(cmd.params[0], ',');
+        while (!v_chan.empty())
+        {
+            if ((chan = _Channel_already_exist(v_chan[0])) == NULL)
+            {
+                _Output_client(user->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, user->Get_nickname(), v_chan[0]));
+            }
+            else if (User_in_channel(user, chan))
+            {
+                user->Remove_Channel(chan);
+                chan->Remove_user(user);
+                _Output_client(user->Get_fd_client(), "PART " + chan->Get_channel_name()+ " : bye bye");
+                if (chan->Get_list_channel_user().empty()) {
+                // si chan vide degager
+                    _Remove_channel(chan);
+                }
+            }
+            else
+            {
+                 _Output_client(user->Get_fd_client(), ERR_NOTONCHANNEL(_name_serveur, v_chan[0]));
+            }
+            v_chan.erase(v_chan.begin());
+        }
+    }
+    else if (cmd.params.size() >= 2) // MSG
+    {
+        // check no channel list
+    }
+
+    // Servers MUST be able to parse arguments in the form of a list of
+    // target, but SHOULD NOT use lists when sending PART messages to
+    // clients.
 };
 
 void server::Names_cmd(user *user, t_IRCMessage cmd)
@@ -502,6 +577,9 @@ void server::Notice_cmd(user *user, t_IRCMessage cmd)
     // std::cout << "Notice_cmd" << std::endl;
 
     // // Verifie que le user est enregistre
+    // if // std::cout << "Notice_cmd" << std::endl;
+
+    // // Verifie que le user est enregistre
     // if (user->Get_username().empty())
     // {
     //     return;
@@ -516,20 +594,46 @@ void server::Notice_cmd(user *user, t_IRCMessage cmd)
 
     // // Recupere les destinataires
     // std::string dest = cmd.substr(pos, cmd.find(" ", pos) - pos);
-    // std::vector<std::string> target;
-    // for (size_t i = 0; i < dest.size(); i++)
+    // std::user->Get_username().empty())
+    // {
+    //     return;
+    // }
+
+    // // Verifie les arguments de NOTICE
+    // size_t pos = cmd.find_first_not_of(" ", 6);
+    // if (pos == std::string::npos)
+    // {
+    //     return;
+    // }
+
+    // // Recupere les destinataires
+    // std::string dest = cmd.substr(pos, cmd.find(" ", pos) - pos);
+    // std::vectector<std::strr<std::string> target;
+    // for (size_t i = 0; i < ng> target;
+    // for (size_t i = 0; i < dest.size(est.size();; i++)
     // {
     //     if (dest[i] == ',')
     //     {
     //         for (size_t j = 0; j < target.size(); j++)
     //         {
-    //             if (target[j] == dest.substr(0, i))
+    //             if (target[j] == dest.si++)
+    // {
+    //     if (dest[i] == ',')
+    //     {
+    //         for (size_t j = 0; j < target.size(); j++)
+    //         {
+    //             if (target[j] == dest.subbstr(0, i))
     //             {
-    //                 dest = dest.substr(i + 1, dest.size() - i);
+    //                 dtr(0, i))
+    //             {
+    //                 dest = dest.substst = dest.substr(i + 1, dest.size() - i)(i + 1, dest.size() - i);
     //             }
     //             else
     //             {
-    //                 target.push_back(dest.substr(0, i));
+    //                 ta//             }
+    //             else
+    //             {
+    //                 targget.p.push_back(dest.substsh_back(dest.substr(0, i));
     //                 dest = dest.substr(i + 1, dest.size() - i);
     //             }
     //             i = 0;
@@ -539,7 +643,23 @@ void server::Notice_cmd(user *user, t_IRCMessage cmd)
     // target.push_back(dest);
 
     // // Recupere le message
-    // size_t strt_omsg = cmd.find_first_not_of(" ", cmd.find(" ", pos));
+    // size_t strt_omsg = cmd.fi(0, i));
+    //                 dest = dest.substr(i + 1, dest.size() - i);
+    //             }
+    //             i = 0;
+    //         }
+    //     }
+    // }
+    // target.push_back(dest);
+
+    // // Recupere le message
+    // size_t strt_omsg = cmd.find_first_not_of("d_first_not_of(" ", cmd.find(" ", pos));
+    // if (strt_omsg == std::string::npos)
+    // {
+    //     return;
+    // }
+    // std::string msg = cmd.substr(strt_omsg, cmd.size() - strt_omsg);
+    // if (msg[", cmd.find(" ", pos));
     // if (strt_omsg == std::string::npos)
     // {
     //     return;
@@ -547,7 +667,57 @@ void server::Notice_cmd(user *user, t_IRCMessage cmd)
     // std::string msg = cmd.substr(strt_omsg, cmd.size() - strt_omsg);
     // if (msg[0] != ':')
     // {
+    //     return] != ':')
+    // {
     //     return;
+    // }
+
+    // // Envoie le message
+    // for (size_t j = 0; j < target.size(); j++)
+    // {
+    //     dest = target[j];
+    //     std::string real_msg = ":" + user->Get_nickname() + "!" + user->Get_username() + "@" + user->Get_hostname() + " :NOTICE " + dest + " " + msg;
+    //     std::cout << "real_msg = " << real_msg << std::endl;
+    //     if (dest[0] == '#')
+    //     {
+    //         // Si le destinataire est un channel
+    //         for (size_t i = 0; i < _list_channel.size(); i++)
+    //         {
+    //             if (Compare_case_sensitive(_list_channel[i]->Get_channel_name(), dest))
+    //             {
+    //                 // Verifie que le user est dans le channel (sinon, il ne peut pas envoyer de message)
+    //                 if (!User_in_channel(user, _list_channel[i]))
+    //                 {
+    //                     ;
+    //                 }
+    //                 // Verifie que le user n'est pas restreint (flag +r)
+    //                 else if (Get_user_in_channel(user, _list_channel[i])->Get_mode().Get_restricted())
+    //                 {
+    //                     ;
+    //                 }
+    //                 // Envoie le message
+    //                 else
+    //                 {
+    //                     _Output_channel(_list_channel[i], msg);
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     else
+    //     {
+    //         // Si le destinataire est un user
+    //         for (size_t i = 0; i < _list_user.size(); i++)
+    //         {
+    //             if (Compare_case_sensitive(_list_user[i]->Get_nickname(), dest))
+    //             {
+    //                 // Envoie le message
+    //                 std::cout << _list_user[i]->Get_nickname() << std::endl;
+    //                 std::cout << _list_user[i]->Get_fd_client() << std::endl;
+    //                 _Output_client(_list_user[i]->Get_fd_client(), msg);
+    //             }
+    //         }
+    //     }
+    // }
     // }
 
     // // Envoie le message
@@ -615,7 +785,7 @@ void server::Away_cmd(user *user, t_IRCMessage cmd)
         user->Set_mode("+a");
         user->Get_mode().Set_away_reply("");
         _Output_client(user->Get_fd_client(), "Changed away status to away with no message");
-        return 0;
+        return;
     }
 
     // Si l'utilisateur passe un parametre, le message d'absence est celui passe en parametre
@@ -633,7 +803,6 @@ void server::Away_cmd(user *user, t_IRCMessage cmd)
     user->Set_mode("+a");
     user->Get_mode().Set_away_reply(away);
     _Output_client(user->Get_fd_client(), "Changed away status to away with message: " + away);
-    return 0;
 };
 
 void server::Users_cmd(user *user, t_IRCMessage cmd)
@@ -666,7 +835,6 @@ void server::Users_cmd(user *user, t_IRCMessage cmd)
     {
         _Output_client(user->Get_fd_client(), "\n***\n-" + _list_user[i]->Get_username() + "\n-" + _list_user[i]->Get_hostname() + "\n-" + _list_user[i]->Get_realname() + "\n-" + _list_user[i]->Get_mode().Print_mode() + "\n***");
     }
-    return 0;
 };
 
 void server::Wallops_cmd(user *user, t_IRCMessage cmd)
@@ -687,6 +855,7 @@ void server::Wallops_cmd(user *user, t_IRCMessage cmd)
     }
 
     // FIXME : A corriger, c'est pas clair ce que la commande doit faire ?
+    // FIXME : A corriger, c'est pas clair ce que la commande doit faire ?
     // Envoie le message a tous les utilisateurs connectes avec le mode +w
     std::string message = cmd.params[0];
     for (size_t i = 1; i < cmd.params.size(); i++) {
@@ -699,15 +868,31 @@ void server::Wallops_cmd(user *user, t_IRCMessage cmd)
     }
     message = message.substr(1, message.size());
     for (size_t i = 0; i < _list_user.size(); i++)
+   
     {
         if (_list_user[i]->Get_mode().Get_wallops())
+       
         {
             _Output_client(_list_user[i]->Get_fd_client(), "WALLOPS: " + message);
         }
     }
-    return 0;
 };
 
+void server::Pong_cmd(user *user, t_IRCMessage cmd)
+{
+    std::cout << "PONG" << std::endl;
+
+    // Verifie les arguments de PONG
+    if (cmd.params.empty())
+    {
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PONG"));
+        return;
+    }
+
+    std::string pong = cmd.params[0];
+    std::cout << ":" + user->Get_nickname() + " PONG " + user->Get_nickname() + " :" + pong + "\r\n"
+              << std::endl;
+};
 void server::Pong_cmd(user *user, t_IRCMessage cmd)
 {
     std::cout << "PONG" << std::endl;

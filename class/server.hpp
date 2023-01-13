@@ -56,6 +56,7 @@ class server
         void    _Remove_user(std::vector<user*>::iterator pos);
         void    _Remove_user(std::vector<pollfd>::iterator pos);
 
+
         /* GET USER */
         user   *_Get_user_by_fd(int fd);
         
@@ -76,9 +77,8 @@ class server
         channel     *_Channel_already_exist(std::string str);
 
         /* COMMAND*/
-        int _Join_treat(user *user, std::string chan, std::string key);
-        int _Join_treat(user *user, std::string chan);
-        int _Join_add(user *use, std::string chan, std::string key);
+        int _Join_treat(user *user, std::vector<std::string> chan, std::vector<std::string> key);
+        int _Join_treat(user *user, std::vector<std::string> chan);
 
     public:
 
@@ -109,7 +109,7 @@ class server
         /*****   COMMAND   *****/
         /***********************/
 
-        int     Check_command(user *user, std::string str);
+        int    Check_command(user *user, std::string str);
         bool    Check_prefix(user *user, std::string str);
 
         void    Pass_cmd(user *user, struct s_IRCMessage cmd);
@@ -120,7 +120,7 @@ class server
         void    Join_cmd(user *user, struct s_IRCMessage cmd);
         void    Part_cmd(user *user, struct s_IRCMessage cmd);
         //void   Topic_cmd(user *user, struct s_IRCMessage cmd);
-        void    Quit_cmd(user *user, struct s_IRCMessage cmd);
+        int     Quit_cmd(user *user, struct s_IRCMessage cmd);
         
         void    Names_cmd(user *user, struct s_IRCMessage cmd);
         void    Invite_cmd(user *user, struct s_IRCMessage cmd);
