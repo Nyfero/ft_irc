@@ -173,3 +173,15 @@ std::vector<std::string> Split(std::string str, char delimiter) {
 
     return res;
 }
+
+std::string Join(std::vector<std::string> vec, size_t start, size_t end) {
+    std::string res;
+
+    for (size_t i = start; i < end; i++) {
+        res += vec[i];
+        if (i != vec.size() - 1)
+            res += ' ';
+    }
+
+    return res;
+}

@@ -11,8 +11,6 @@ server::server(char *port, char *password)
     int res;
     g_stop = 1;
 
-    std::cout << "*** server Constructor ***" << std::endl;
-
     memset(&_hints, 0, sizeof(struct addrinfo));
     _hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
     _hints.ai_socktype = SOCK_STREAM; /* TCP socket */
@@ -24,7 +22,7 @@ server::server(char *port, char *password)
 
     (void)_password;
     if ((res = _Init_server()) < 0 ) {
-        std::cout << "Error Init server:" << res << std::endl; 
+        ;
     }
     else {
         //socket creer et server en ecoute
@@ -47,7 +45,6 @@ server::~server() {
 /***************************/
 
 int    server::_Init_server() {
-    std::cout << "*** _Init_server ***" << std::endl;
     if (getaddrinfo(_node, _port, &_hints, &_addrinfo)) {
         std::cout << "Error: getaddrinfo" << std::endl;
         return -1;
@@ -59,7 +56,6 @@ int    server::_Init_server() {
         freeaddrinfo(_addrinfo);
         return -2;
     }
-    std::cout << "Socket serv:" << _socket_serv << std::endl;
     // SOCKET OPTION
     // BIND
     if (bind(_socket_serv, _addrinfo->ai_addr, _addrinfo->ai_addrlen)) {
@@ -87,7 +83,6 @@ int    server::_Init_server() {
 /***************************/
 
 void    server::_Launch_server() {
-    std::cout << "*** Infinit_while ***" << std::endl;
     std::vector<pollfd>::iterator it;
     // Gerer l'ajout d'USER
     // Gerer les commandes des USERS
@@ -103,15 +98,12 @@ void    server::_Launch_server() {
         it = _list_poll_fd.begin();
         // check tous les fds
         while (it != _list_poll_fd.end()) {
-            std::cout << "it->fd: " << it->fd<< " revents: " << it->revents << std::endl;
             
             if (it->revents & POLLHUP) { // deconnexion
-                std::cout << "*******DECO FD********" << std::endl; 
                 _Remove_user(it);
                 break;
             }
             if (it->revents & POLLIN) { // données en attente de lecture...
-                std::cout << "POLL revents fd:" << it->fd << std::endl;
                 if (it->fd == _socket_serv) { // sur la socket server
                     _Add_user();
                     break;
@@ -124,7 +116,6 @@ void    server::_Launch_server() {
             }
             it++;
         }
-        std::cout << "fds: size: " << _list_poll_fd.size() << std::endl;
     }
     std::vector<user*>::iterator ituser;
     for (ituser = _list_user.begin(); ituser != _list_user.end(); ituser = _list_user.begin()) {
@@ -270,7 +261,6 @@ void    server::_Remove_channel(channel *chan) {
 /****************/
 
 int server::_Input_client(std::vector<pollfd>::iterator it) {
-    std::cout << std::endl << "*** _Input_client: " << it->fd << "***" << std::endl;
     int         fd = it->fd;
     char        inpt[SIZE_INPT];
     ssize_t     ret = -1;
@@ -290,7 +280,6 @@ int server::_Input_client(std::vector<pollfd>::iterator it) {
     // append inpt dans str de user
     test->str.append(inpt);
     while ((found = test->str.find("\n", 0)) != std::string::npos) { // ligne complete -> traite -> delete
-        std::cout << "  b_str:" << test->str << std::endl; // Just to show in server terminal
         
         
         res = test->str.substr(0, found); // get first line in res
@@ -300,12 +289,10 @@ int server::_Input_client(std::vector<pollfd>::iterator it) {
             res.erase(found);
         Check_command(test, res); // check si cmd valide
     }
-    std::cout << "*** _END inpt"  << std::endl;
     return 0;
 };
 
 int server::_Output_client(int fd, std::string msg) {
-    std::cout << "*** _Output_client: " << fd << "***" << std::endl;
     ssize_t ret;
 
     msg.append("\r\n"); // voir si on ajoute ici ou dans les cmd de bases
@@ -315,7 +302,6 @@ int server::_Output_client(int fd, std::string msg) {
 };
 
 int server::_Output_channel(channel *chan, std::string msg) {
-    std::cout << "*** _Output_channel: " << chan->Get_channel_name() << "***" << std::endl;
     std::vector<user *> list = chan->Get_list_channel_user();
     std::vector<user *>::iterator it;
 
