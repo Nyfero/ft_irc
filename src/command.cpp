@@ -475,16 +475,13 @@ void server::Privmsg_cmd(user *sender, t_IRCMessage cmd)
     {
 
         // CHECK if target is a Channel
-        _Output_client(sender->Get_fd_client(), "is target");
         if ((*it)[0] == '#')
         {
-            _Output_client(sender->Get_fd_client(), "is channel type");
             // Check if channel Exist
             if (_list_channel.empty())
             {
-                // FIXME : check if is good message error
-                _Output_client(sender->Get_fd_client(), "There are no channels");                
-                _Output_client(sender->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, *it));
+                // FIXME : check if is good message error              
+                _Output_client(sender->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, sender->Get_nickname(), *it));
                 return;
             }
             for (size_t i = 0; i < _list_channel.size(); i++)
@@ -492,7 +489,6 @@ void server::Privmsg_cmd(user *sender, t_IRCMessage cmd)
                 std::string target_channel = _list_channel[i]->Get_channel_name();
                 if (Compare_case_sensitive(target_channel, *it))
                 {
-                    _Output_client(sender->Get_fd_client(), "Channel exists");
                     // Check is user is in the channel
                     if (User_in_channel(sender, _list_channel[i]))
                     {
@@ -511,18 +507,13 @@ void server::Privmsg_cmd(user *sender, t_IRCMessage cmd)
                 }
                 else if (i + 1 == _list_channel.size())
                 {
-                    _Output_client(sender->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, *it));
+                    _Output_client(sender->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, sender->Get_nickname(), *it));
                     return;
-                }
-                else
-                {
-                    _Output_client(sender->Get_fd_client(), "Channel not exist");
                 }
             }
         }
         else
         {
-
             // Check if target is user
             for (size_t i = 0; i < _list_user.size(); i++)
             {
@@ -878,21 +869,6 @@ void server::Wallops_cmd(user *user, t_IRCMessage cmd)
     }
 };
 
-void server::Pong_cmd(user *user, t_IRCMessage cmd)
-{
-    std::cout << "PONG" << std::endl;
-
-    // Verifie les arguments de PONG
-    if (cmd.params.empty())
-    {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PONG"));
-        return;
-    }
-
-    std::string pong = cmd.params[0];
-    std::cout << ":" + user->Get_nickname() + " PONG " + user->Get_nickname() + " :" + pong + "\r\n"
-              << std::endl;
-};
 void server::Pong_cmd(user *user, t_IRCMessage cmd)
 {
     std::cout << "PONG" << std::endl;
