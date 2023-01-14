@@ -5,9 +5,6 @@
 int server::_Join_treat(user *user, std::vector<std::string> chan, std::vector<std::string> key)
 {
     std::cout << "_Join_treat key-chan" << std::endl;
-    (void) user;
-    (void) chan;
-    (void) key;
 
     channel *res;
 

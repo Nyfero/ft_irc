@@ -72,6 +72,7 @@ class server
         int     _Output_client(int fd, std::string msg);
         int     _Output_channel(channel *chan, std::string msg);
         void    _Print_channel();
+        void    _Print_user();
 
         /* GET CHANNEL */
         channel     *_Channel_already_exist(std::string str);

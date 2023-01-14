@@ -93,8 +93,8 @@ void    server::_Launch_server() {
 
     while (g_stop) {
 
-        std::cout << "nb chan:" << _list_channel.size() << std::endl;
-        std::cout << "nb user:" << _list_user.size() << std::endl;
+        _Print_user();
+        _Print_channel();
 
 
         // poll(tab pollfd, size tab, timer)
@@ -344,7 +344,7 @@ int server::_Output_channel(channel *chan, std::string msg) {
     return 0;
 };
 
-/* void    server::_Print_channel()
+void    server::_Print_channel()
 {
     std::cout << "nombrechannel: " << _list_channel.size() <<std::endl;
     for (size_t i=0; i< _list_channel.size();i++)
@@ -353,5 +353,18 @@ int server::_Output_channel(channel *chan, std::string msg) {
         _list_channel[i]->print_user_channel();
         _list_channel[i]->print_oper_channel();
     }
-    return 0;
-}; */
+};
+
+void    server::_Print_user()
+{
+    std::cout << "nombre user: " << _list_user.size() <<std::endl;
+
+    std::vector<channel *> chan;
+    for (size_t i=0; i< _list_user.size();i++)
+    {
+        std::cout << i << ": fd " << _list_user[i]->Get_fd_client() << ":" << _list_user[i]->Get_nickname() << std::endl;
+        chan = _list_user[i]->Get_channel_register();
+        for (size_t i = 0; i < chan.size(); i++)
+            std::cout << "   " << i << ":" << chan[i]->Get_channel_name() << std::endl;
+    }
+};

@@ -382,11 +382,12 @@ void server::Part_cmd(user *user, t_IRCMessage cmd)
             {
                 user->Remove_Channel(chan);
                 chan->Remove_user(user);
-                _Output_client(user->Get_fd_client(), "PART " + chan->Get_channel_name()+ " : bye bye");
+                _Output_client(user->Get_fd_client(), ":" + user->Get_nickname() + " PART " + chan->Get_channel_name()+ " :");
                 if (chan->Get_list_channel_user().empty()) {
                 // si chan vide degager
                     _Remove_channel(chan);
                 }
+                //:jgourlin!jgourlin@localhost PART #qw :
             }
             else
             {
