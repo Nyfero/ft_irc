@@ -306,7 +306,7 @@ int server::_Input_client(std::vector<pollfd>::iterator it) {
     inpt[ret] = 0;
     // append inpt dans str de user
     test->str.append(inpt);
-    while ((found = test->str.find("\n", 0)) != std::string::npos) { // ligne complete -> traite -> delete
+    while ((found = test->str.find("\r\n", 0)) != std::string::npos) { // ligne complete -> traite -> delete
         
         
         res = test->str.substr(0, found); // get first line in res
