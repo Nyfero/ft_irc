@@ -80,6 +80,7 @@ class server
         /* COMMAND*/
         int _Join_treat(user *user, std::vector<std::string> chan, std::vector<std::string> key);
         int _Join_treat(user *user, std::vector<std::string> chan);
+        void    _Join_rpl(user *user, channel *chan);
 
     public:
 

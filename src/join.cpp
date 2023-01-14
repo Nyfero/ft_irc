@@ -2,6 +2,62 @@
 
 /* utils command */
 
+//  If a JOIN is successful, the user receives a JOIN message as
+//  confirmation and is then sent the channel's topic (using RPL_TOPIC) and
+//  the list of users who are on the channel (using RPL_NAMREPLY), which
+//  MUST include the user joining.
+
+// :onichan!alpha@localhost JOIN :#qwe
+// :InRealunControl 353 onichan = #qwe :@onichan 
+// :InRealunControl 366 onichan #qwe :End of NAMES list
+
+// :jgourlin JOIN :#qwe
+// :localhost 353 jgourlin = #qwe :jgourlin
+// :localhost 366 #qwe :End of NAMES list
+
+
+// 4 >>                 :jgourlin JOIN :#qwe
+// 4 >>                 :localhost 353 jgourlin = #qwe :jgourlin
+// 4 >>                 :localhost 366 jgourlin #qwe :End of NAMES list
+
+
+// Response (fd = 4):   :jgourlin!jgourlin@localhost JOIN :#qwe
+// Response (fd = 4):   :InRealunControl 353 jgourlin = #qwe :@jgourlin 
+// Response (fd = 4):   :InRealunControl 366 jgourlin #qwe :End of NAMES list
+
+
+
+void    server::_Join_rpl(user *use, channel *chan){
+    std::string names;
+    std::vector<user *> res;
+    std::vector<user *> ope;
+
+    ope = chan->Get_list_operator();
+    
+    res = chan->Get_list_channel_user();
+    if (res.size())
+    {
+        if (use->Is_op_channel(chan))
+            names += "@";
+        names += res[0]->Get_nickname();
+    }
+    for (size_t i = 1; i < res.size(); i++)
+    {
+        names += " ";
+        if (use->Is_op_channel(chan))
+            names += "@";
+        names += res[i]->Get_nickname();
+    }
+    // :onichan!alpha@localhost JOIN :#qwe
+
+    _Output_client(use->Get_fd_client(), ":" + use->Get_nickname() + " JOIN " + ":" + chan->Get_channel_name());
+    
+    //_Output_client(use->Get_fd_client(), ":" + _name_serveur + " 353 " + use->Get_nickname() + " = " + chan->Get_channel_name() + " :" + names);
+
+    _Output_client(use->Get_fd_client(), RPL_NAMREPLY(_name_serveur, use->Get_nickname(), "=", chan->Get_channel_name(), names));
+    _Output_client(use->Get_fd_client(), RPL_ENDOFNAMES(_name_serveur, use->Get_nickname(),chan->Get_channel_name()));
+}
+
 int server::_Join_treat(user *user, std::vector<std::string> chan, std::vector<std::string> key)
 {
     std::cout << "_Join_treat key-chan" << std::endl;
@@ -25,18 +81,21 @@ int server::_Join_treat(user *user, std::vector<std::string> chan, std::vector<s
 
             if ((res = _Channel_already_exist(chan[0])) == NULL) // channel a creer
             {
-                std::cout << "Already exist channel" << std::endl;
+                std::cout << "Create new channel" << std::endl;
                 res = _Add_channel(chan[0], user, key[0]);
                 user->Add_channel(res);
+                _Join_rpl(user, res);
             }
             else // channel existe
             {
                 std::cout << "Create new channel" << std::endl;
+                std::cout << "Already exist channel" << std::endl;
                 // check key
                 if (key[0] == res->Get_channel_key() || res->Get_channel_key().empty())
                 {
                     user->Add_channel(res); // ajouter channel dans user
                     res->Add_user(user); // ajouter user dans channel
+                    _Join_rpl(user, res);
                 }
                 else
                     _Output_client(user->Get_fd_client(), (ERR_BADCHANNELKEY(_name_serveur, chan[0])));
@@ -72,16 +131,18 @@ int server::_Join_treat(user *user, std::vector<std::string> chan)
 
             if ((res = _Channel_already_exist(chan[i])) == NULL) // channel a creer
             {
-                std::cout << "Already exist channel" << std::endl;
+                std::cout << "Create new channel" << std::endl;
                 res = _Add_channel(chan[i], user);
                 user->Add_channel(res);
+                _Join_rpl(user, res);
             }
             else // channel existe
             {
-                std::cout << "Create new channel" << std::endl;
+                std::cout << "Already exist channel" << std::endl;
                 if (res->Get_channel_key().empty()){
                     user->Add_channel(res); // ajouter channel dans user
                     res->Add_user(user); // ajouter user dans channel
+                    _Join_rpl(user, res);
                 }
                 else
                     _Output_client(user->Get_fd_client(), (ERR_BADCHANNELKEY(_name_serveur, chan[i])));
