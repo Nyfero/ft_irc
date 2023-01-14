@@ -758,9 +758,9 @@ void server::Notice_cmd(user *user, t_IRCMessage cmd)
     // }
 };
 
-void server::Away_cmd(user *user, t_IRCMessage cmd)
-{
+void server::Away_cmd(user *user, t_IRCMessage cmd) {
 
+    std::cout << "AWAY" << std::endl;
     // Verifie que le user est enregistre
     if (user->Get_username().empty()) {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
@@ -768,28 +768,24 @@ void server::Away_cmd(user *user, t_IRCMessage cmd)
     }
 
     // Verifie les arguments de AWAY
-    // Si l'utilisateur ne passe pas de parametre, le message d'absence est vide
+    // Si l'utilisateur ne passe pas de parametre, l'indicateur d'absence est supprime
     if (cmd.params.empty()) {
-        user->Set_mode("+a");
+        user->Set_mode("-a");
         user->Get_mode().Set_away_reply("");
-        _Output_client(user->Get_fd_client(), RPL_AWAY(_name_serveur, user->Get_nickname(), ""));
+        _Output_client(user->Get_fd_client(), RPL_UNAWAY(_name_serveur, user->Get_nickname()));
         return;
     }
 
     // Si l'utilisateur passe un parametre, le message d'absence est celui passe en parametre
-    std::string away = cmd.params[0];
-    for (size_t i = 1; i < cmd.params.size(); i++) {
-        away += " " + cmd.params[i];
-    }
-
-    if (away[0] != ':') {
+    if (cmd.params[0].at(0) != ':') {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "AWAY"));
         return;
     }
-    away = away.substr(1, away.size());
+    std::string away_msg = Join(cmd.params, 0, cmd.params.size());
+    away_msg = away_msg.substr(1, away_msg.size());
     user->Set_mode("+a");
-    user->Get_mode().Set_away_reply(away);
-    _Output_client(user->Get_fd_client(), RPL_AWAY(_name_serveur, user->Get_nickname(), away));
+    user->Get_mode().Set_away_reply(away_msg);
+    _Output_client(user->Get_fd_client(), RPL_NOWAWAY(_name_serveur, user->Get_nickname()));
 };
 
 void server::Users_cmd(user *user, t_IRCMessage cmd)
