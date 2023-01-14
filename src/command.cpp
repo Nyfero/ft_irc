@@ -82,46 +82,45 @@ int server::Check_command(user *user, std::string str)
 ;};
 
 // NON UTILISE
-// // NON UTILISE
 // bool    server::Check_prefix(user *user, std::string str) {
 
-// //     // Verifie si le user est deja connecte
-// //     if (user->Get_username().empty()) {
-// //         _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
-// //         return false;
-// //     }
+//     // Verifie si le user est deja connecte
+//     if (user->Get_username().empty()) {
+//         _Output_client(user->Get_fd_client(), ERR_RESTRICTED);
+//         return false;
+//     }
 
-// //     // Verifie si le prefix correspond au nickname du user
-// //     std::string prefix = str.substr(1, str.find(" ") - 1);
-// //     std::string check_nick = prefix.substr(0, prefix.find("!"));
-// //     if (check_nick != user->Get_nickname()) {
-// //         _Output_client(user->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur, check_nick, check_nick));
-// //         return false;
-// //     }
+//     // Verifie si le prefix correspond au nickname du user
+//     std::string prefix = str.substr(1, str.find(" ") - 1);
+//     std::string check_nick = prefix.substr(0, prefix.find("!"));
+//     if (check_nick != user->Get_nickname()) {
+//         _Output_client(user->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur, check_nick));
+//         return false;
+//     }
 
-// //     // Verifie si le prefix contient un ! apres le nickname
-// //     size_t pos = prefix.find("!");
-// //     if (pos == std::string::npos) {
-// //         if (pos + 1 == 0) {
-// //             return true;
-// //         }
-// //         _Output_client(user->Get_fd_client(), ERR_PARSINGPREFIX);
-// //         return false;
-// //     }
+//     // Verifie si le prefix contient un ! apres le nickname
+//     size_t pos = prefix.find("!");
+//     if (pos == std::string::npos) {
+//         if (pos + 1 == 0) {
+//             return true;
+//         }
+//         _Output_client(user->Get_fd_client(), ERR_PARSINGPREFIX);
+//         return false;
+//     }
 
-// //     // Verifie si le prefix contient un @ apres le username
-// //     size_t pos2 = prefix.find("@");
-// //     if (pos2 == std::string::npos) {
-// //         _Output_client(user->Get_fd_client(), ERR_PARSINGPREFIX);
-// //         return false;
-// //     }
+//     // Verifie si le prefix contient un @ apres le username
+//     size_t pos2 = prefix.find("@");
+//     if (pos2 == std::string::npos) {
+//         _Output_client(user->Get_fd_client(), ERR_PARSINGPREFIX);
+//         return false;
+//     }
 
-// //     // Verifie si le prefix correspond au username du user
-// //     std::string check_user = prefix.substr(pos + 1, pos2 - pos - 1);
-// //     if (check_user != user->Get_username()) {
-// //         _Output_client(user->Get_fd_client(), ERR_NOSUCHUSER);
-// //         return false;
-// //     }
+//     // Verifie si le prefix correspond au username du user
+//     std::string check_user = prefix.substr(pos + 1, pos2 - pos - 1);
+//     if (check_user != user->Get_username()) {
+//         _Output_client(user->Get_fd_client(), ERR_NOSUCHUSER);
+//         return false;
+//     }
 
 //     // Verifie si le prefix correspond au hostname du user
 //     std::string check_host = prefix.substr(pos2 + 1, prefix.size());
@@ -760,19 +759,17 @@ void server::Away_cmd(user *user, t_IRCMessage cmd)
 {
 
     // Verifie que le user est enregistre
-    if (user->Get_username().empty())
-    {
+    if (user->Get_username().empty()) {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
         return;
     }
 
     // Verifie les arguments de AWAY
     // Si l'utilisateur ne passe pas de parametre, le message d'absence est vide
-    if (cmd.params.empty())
-    {
+    if (cmd.params.empty()) {
         user->Set_mode("+a");
         user->Get_mode().Set_away_reply("");
-        _Output_client(user->Get_fd_client(), "Changed away status to away with no message");
+        _Output_client(user->Get_fd_client(), RPL_AWAY(_name_serveur, user->Get_nickname(), ""));
         return;
     }
 
@@ -782,15 +779,14 @@ void server::Away_cmd(user *user, t_IRCMessage cmd)
         away += " " + cmd.params[i];
     }
 
-    if (away[0] != ':')
-    {
+    if (away[0] != ':') {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "AWAY"));
         return;
     }
     away = away.substr(1, away.size());
     user->Set_mode("+a");
     user->Get_mode().Set_away_reply(away);
-    _Output_client(user->Get_fd_client(), "Changed away status to away with message: " + away);
+    _Output_client(user->Get_fd_client(), RPL_AWAY(_name_serveur, user->Get_nickname(), away));
 };
 
 void server::Users_cmd(user *user, t_IRCMessage cmd)
