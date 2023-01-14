@@ -763,19 +763,17 @@ void server::Away_cmd(user *user, t_IRCMessage cmd)
 {
 
     // Verifie que le user est enregistre
-    if (user->Get_username().empty())
-    {
+    if (user->Get_username().empty()) {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
         return;
     }
 
     // Verifie les arguments de AWAY
     // Si l'utilisateur ne passe pas de parametre, le message d'absence est vide
-    if (cmd.params.empty())
-    {
+    if (cmd.params.empty()) {
         user->Set_mode("+a");
         user->Get_mode().Set_away_reply("");
-        _Output_client(user->Get_fd_client(), "Changed away status to away with no message");
+        _Output_client(user->Get_fd_client(), RPL_AWAY(_name_serveur, user->Get_nickname(), ""));
         return;
     }
 
@@ -785,15 +783,14 @@ void server::Away_cmd(user *user, t_IRCMessage cmd)
         away += " " + cmd.params[i];
     }
 
-    if (away[0] != ':')
-    {
+    if (away[0] != ':') {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "AWAY"));
         return;
     }
     away = away.substr(1, away.size());
     user->Set_mode("+a");
     user->Get_mode().Set_away_reply(away);
-    _Output_client(user->Get_fd_client(), "Changed away status to away with message: " + away);
+    _Output_client(user->Get_fd_client(), RPL_AWAY(_name_serveur, user->Get_nickname(), away));
 };
 
 void server::Users_cmd(user *user, t_IRCMessage cmd)
