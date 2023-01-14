@@ -107,3 +107,15 @@ std::vector<user *> channel::Get_list_channel_user() const {
 std::vector<user *> channel::Get_list_operator() const {
     return(_list_operator);
 };
+
+
+void    channel::print_user_channel(){
+    std::cout << "   user:" << std::endl;
+    for (size_t i = 0; i < _list_channel_user.size(); i++)
+        std::cout << "      " << i << ": fd." << _list_channel_user[i]->Get_fd_client() << " " << _list_channel_user[i]->Get_nickname() << std::endl; 
+};
+void    channel::print_oper_channel(){
+    std::cout << "   oper:" << std::endl;
+    for (size_t i = 0; i < _list_operator.size(); i++)
+        std::cout << "      " << i << ": fd." << _list_operator[i]->Get_fd_client() << " " << _list_operator[i]->Get_nickname() << std::endl; 
+};
