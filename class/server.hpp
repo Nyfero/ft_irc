@@ -28,6 +28,8 @@ class server
         const std::string   _name_serveur;
         // Mot de passe du serveur
         const std::string _password;
+        // Mot de passe de l'admin du serveur
+        const std::string _admin_password;
         // Port du serveur
         const char  *_port;
         // Adresse reseau du serveur
@@ -115,7 +117,7 @@ class server
         void    Pass_cmd(user *user, struct s_IRCMessage cmd);
         void    Nick_cmd(user *user, struct s_IRCMessage cmd);
         void    User_cmd(user *user, struct s_IRCMessage cmd);
-        //void    Oper_cmd(user *user, struct s_IRCMessage cmd);
+        void    Oper_cmd(user *user, struct s_IRCMessage cmd);
         void    Mode_cmd(user *user, struct s_IRCMessage cmd);
         void    Join_cmd(user *user, struct s_IRCMessage cmd);
         void    Part_cmd(user *user, struct s_IRCMessage cmd);

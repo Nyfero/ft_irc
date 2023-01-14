@@ -185,3 +185,8 @@ std::string Join(std::vector<std::string> vec, size_t start, size_t end) {
 
     return res;
 }
+
+std::string getEnvVar( std::string const & key ) {
+    char * val = getenv( key.c_str() );
+    return val == NULL ? std::string("") : std::string(val);
+}

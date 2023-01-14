@@ -48,7 +48,7 @@ OBJS =     $(patsubst $(SRCS_PATH)%.cpp,    $(OBJS_PATH)%.o,    $(SRCS))
 #    Rules
 all: $(NAME)
 
-$(NAME): $(OBJS_PATH) $(OBJS) $(CLASS)
+$(NAME): $(OBJS_PATH) $(OBJS) $(CLASS) .env
 	@ echo "$(BLUE)\n         ***Make $(NAME) ***\n$(END)"
 	$(HIDE) $(CXX) $(CFLAGS) $(OBJS) -o $(NAME)
 	@ echo "$(GREEN)\n        ---$(NAME) created ---\n$(END)"

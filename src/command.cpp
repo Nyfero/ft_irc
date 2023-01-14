@@ -14,10 +14,10 @@ int server::Check_command(user *user, std::string str)
         std::cout << "params[" << i << "]: " << msg.params[i] << std::endl;
     }
 
-    std::string list_command[16] = {"PASS", "USER", "NICK", "MODE", "QUIT", "JOIN", "PART", "NAMES", "INVITE", "KICK", "PRIVMSG", "NOTICE", "AWAY", "USERS", "WALLOPS", "PING"};
+    std::string list_command[17] = {"PASS", "USER", "NICK", "MODE", "QUIT", "JOIN", "PART", "NAMES", "INVITE", "KICK", "PRIVMSG", "NOTICE", "AWAY", "USERS", "WALLOPS", "PING", "OPER"};
 
     int i = 0;
-    while (i < 15)
+    while (i < 17)
     {
         if (msg.command == list_command[i])
         {
@@ -73,6 +73,9 @@ int server::Check_command(user *user, std::string str)
         return 0;
     case 15:
         Pong_cmd(user, msg);
+        return 0;
+    case 16:
+        Oper_cmd(user, msg);
         return 0;
     default:
         std::cout << "*** server::Check_command - ***" << std::endl;
@@ -875,4 +878,38 @@ void server::Pong_cmd(user *user, t_IRCMessage cmd)
     std::string pong = cmd.params[0];
     std::cout << ":" + user->Get_nickname() + " PONG " + user->Get_nickname() + " :" + pong + "\r\n"
               << std::endl;
+};
+
+void server::Oper_cmd(user *user, t_IRCMessage cmd) {
+    
+    std::cout << "OPER" << std::endl;
+    std::cout << "Admin password : " << _admin_password << std::endl;
+    // Verifie que le user est enregistre
+    if (user->Get_username().empty()) {
+        _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
+        return;
+    }
+
+    // Verifie les arguments de OPER
+    if (cmd.params.size() < 2) {
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "OPER"));
+        return;
+    }
+
+    // Verifie que le nom d'utilisateur et le mot de passe sont corrects
+    std::string username = cmd.params[0];
+    if (username != user->Get_username().substr(0, user->Get_username().find(' ', 0)) && username != user->Get_nickname()) {
+        _Output_client(user->Get_fd_client(), ERR_NOOPERHOST(_name_serveur));
+        return;
+    }
+
+    std::string password = cmd.params[1];
+    if (password != _admin_password) {
+        _Output_client(user->Get_fd_client(), ERR_PASSWDMISMATCH(_name_serveur));
+        return;
+    }
+
+    // Si tout est correct, l'utilisateur devient operateur
+    user->Set_mode("+o");
+    _Output_client(user->Get_fd_client(), RPL_YOUREOPER(_name_serveur, user->Get_nickname()));
 };
