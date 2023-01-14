@@ -1,3 +1,4 @@
 *.o
 ircserv
 .vscode
+.env
