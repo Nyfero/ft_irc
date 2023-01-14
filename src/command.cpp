@@ -436,10 +436,7 @@ void server::Kick_cmd(user *user, t_IRCMessage cmd)
 */
 void server::Privmsg_cmd(user *sender, t_IRCMessage cmd)
 {
-    (void)cmd;
-    (void)sender;
     std::cout << "COMMANDE -> PRIVMSG" << std::endl;
-    (void)sender;
 
     /*                       Check si il y a des arguments                       */
     if (cmd.params.empty())
