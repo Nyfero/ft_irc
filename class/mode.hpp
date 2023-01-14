@@ -55,6 +55,9 @@ class Mode
     /*******   MODIFIER   **************/
     /***********************************/
 
+        int     Add_mode(char m);
+        int     Remove_mode(char m);
+
         void    Set_away(bool away);
         void    Set_invisible(bool invisible);
         void    Set_wallops(bool wallops);

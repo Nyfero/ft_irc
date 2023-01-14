@@ -124,7 +124,7 @@ bool   User_in_channel_is_op(user *use, channel *chan) {
     return 0;
 };
 
-bool    IsInTargetFds(int fd_client, std::vector<int> target_fds) {
+/* bool    IsInTargetFds(int fd_client, std::vector<int> target_fds) {
     size_t  i = 0;
     while (i < target_fds.size()) {
         if (fd_client == target_fds[i]) {
@@ -133,7 +133,7 @@ bool    IsInTargetFds(int fd_client, std::vector<int> target_fds) {
         i++;
     }
     return false;
-};
+}; */
 
 t_IRCMessage split_message(std::string& input) {
     t_IRCMessage msg;

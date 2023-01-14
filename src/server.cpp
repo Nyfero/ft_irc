@@ -343,3 +343,15 @@ int server::_Output_channel(channel *chan, std::string msg) {
     }
     return 0;
 };
+
+/* void    server::_Print_channel()
+{
+    std::cout << "nombrechannel: " << _list_channel.size() <<std::endl;
+    for (size_t i=0; i< _list_channel.size();i++)
+    {
+        std::cout << i << ": " << _list_channel[i]->Get_channel_name() << std::endl;
+        _list_channel[i]->print_user_channel();
+        _list_channel[i]->print_oper_channel();
+    }
+    return 0;
+}; */

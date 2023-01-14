@@ -132,8 +132,7 @@ int server::Check_command(user *user, std::string str)
 //     return true;
 // };
 
-void server::Pass_cmd(user *user, t_IRCMessage cmd)
-{
+void server::Pass_cmd(user *user, t_IRCMessage cmd) {
 
     // Verifie les arguments de PASS
     if (cmd.params.empty()) {
@@ -154,8 +153,7 @@ void server::Pass_cmd(user *user, t_IRCMessage cmd)
     }
 };
 
-void server::User_cmd(user *user, t_IRCMessage cmd)
-{
+void server::User_cmd(user *user, t_IRCMessage cmd) {
 
     // Verifie si le user est connecte
     if (!user->Get_is_register() || !user->Get_username().empty()) {
@@ -183,24 +181,22 @@ void server::User_cmd(user *user, t_IRCMessage cmd)
     }
 
     // Verifie le hostname
-    if (cmd.params[2].empty() || cmd.params[2].at(0) == ':')
-    {
+    if (cmd.params[2].empty() || cmd.params[2].at(0) == ':') {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "USER"));
         return;
     }
 
     // Verifie le realname
-    if (cmd.params[3].empty())
-    {
+    if (cmd.params[3].empty()) {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "USER"));
         return;
     }
-    if (cmd.params[3].at(0) != ':')
-    {
+    if (cmd.params[3].at(0) != ':') {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "USER"));
         return;
     }
     std::string realname = Join(cmd.params, 3, cmd.params.end() - cmd.params.begin());
+    realname = realname.substr(1, realname.size());
 
     // Enregistre le user
     user->Set_username(cmd.params[0]);
@@ -216,144 +212,102 @@ void server::User_cmd(user *user, t_IRCMessage cmd)
     _Output_client(user->Get_fd_client(), RPL_WELCOME(_name_serveur, user->Get_realname(), user->Get_username(), user->Get_hostname()));
 };
 
-void server::Nick_cmd(user *user, t_IRCMessage cmd)
-{
+void server::Nick_cmd(user *user, t_IRCMessage cmd) {
 
     // Verifie les arguments de NICK
-    if (cmd.params.size() < 2)
-    {
+    if (cmd.params[0].empty()) {
         _Output_client(user->Get_fd_client(), ERR_NONICKNAMEGIVEN(_name_serveur));
         return;
     }
 
     // Verifie la longueur du nickname
-    if (cmd.params[1].length() > 9 || cmd.params[1].length() < 1)
-    {
+    if (cmd.params[0].length() > 9 || cmd.params[0].length() < 1) {
         _Output_client(user->Get_fd_client(), ERR_ERRONEUSNICKNAME(_name_serveur, user->Get_nickname()));
         return;
     }
 
     // Verifie si le nick contient des caracteres speciaux
-    for (size_t i = 0; i < cmd.params[1].length(); i++)
-    {
-        if (!isalnum(cmd.params[1][i]) && cmd.params[1][i] != '-' && cmd.params[1][i] != '_')
-        {
+    for (size_t i = 0; i < cmd.params[0].length(); i++) {
+        if (!isalnum(cmd.params[0][i]) && cmd.params[0][i] != '-' && cmd.params[0][i] != '_') {
             _Output_client(user->Get_fd_client(), ERR_ERRONEUSNICKNAME(_name_serveur, user->Get_nickname()));
             return;
         }
     }
 
     // Verifie si le nick est deja pris
-    for (size_t i = 0; i < _list_user.size(); i++)
-    {
-        if (Compare_case_sensitive(_list_user[i]->Get_nickname(), cmd.params[1]))
-        {
+    for (size_t i = 0; i < _list_user.size(); i++) {
+        if (Compare_case_sensitive(_list_user[i]->Get_nickname(), cmd.params[0])) {
             _Output_client(user->Get_fd_client(), ERR_NICKNAMEINUSE(_name_serveur, user->Get_nickname()));
             return;
         }
     }
 
-    if (!user->Get_is_register())
-    {
+    if (!user->Get_is_register()) {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
     }
-    else if (!user->Get_username().empty())
-    { // Modifie le nickname
-        user->Set_nickname(cmd.params[1]);
-        _Output_client(user->Get_fd_client(), "Your nickname is now " + cmd.params[1]);
+    else if (!user->Get_username().empty()) { // Modifie le nickname
+        user->Set_nickname(cmd.params[0]);
+        _Output_client(user->Get_fd_client(), "Your nickname is now " + cmd.params[0]);
     }
-    else
-    { // Definit le nickname
-        user->Set_nickname(cmd.params[1]);
-        std::cout << "Introducing new " << cmd.params[1] << " user" << std::endl;
-        _Output_client(user->Get_fd_client(), "Hello " + cmd.params[1] + " !");
+    else { // Definit le nickname
+        user->Set_nickname(cmd.params[0]);
+        std::cout << "Introducing new " << cmd.params[0] << " user" << std::endl;
+        _Output_client(user->Get_fd_client(), "Hello " + cmd.params[0] + " !");
     }
 };
 
-void server::Mode_cmd(user *user, t_IRCMessage cmd)
-{
+void server::Mode_cmd(user *user, t_IRCMessage cmd) {
 
     // Verifie que le user est enregistre
-    if (user->Get_username().empty())
-    {
+    if (user->Get_username().empty()) {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
         return;
     }
 
     // Verifie les arguments de MODE
-    if (cmd.params.size() < 3)
-    {
+    if (cmd.params[0].empty()) {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "MODE"));
         return;
     }
 
-    // Verifie le nickname
-    std::string tmp = user->Get_realname().substr(0, user->Get_realname().find(" ", 0));
-    if (cmd.params[1] != user->Get_nickname() && cmd.params[1] != tmp)
-    {
+    // Verifie que le premier parametre est le nickname ou le realname 
+
+    if (cmd.params[0] != user->Get_nickname() && cmd.params[0] != user->Get_realname().substr(0, user->Get_realname().find(' '))) {
         _Output_client(user->Get_fd_client(), ERR_USERSDONTMATCH(_name_serveur));
         return;
     }
 
-    // Verifie si on affiche le mode ou si on le modifie
-    if (cmd.params.size() == 2)
-    {
+    if (cmd.params.size() == 1) {
         _Output_client(user->Get_fd_client(), user->Get_mode().Print_mode());
-        return;
     }
-
-    // Verifie qu'il n'y a qu'un mode en parametre
-    if (cmd.params.size() > 3)
-    {
-        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur));
-        return;
-    }
-
-    // Verifie que le prefix du mode est correct
-    if (cmd.params[2].at(0) != '+' && cmd.params[2].at(0) != '-')
-    {
-        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur));
-        return;
-    }
-
-    // Verifie que le mode est correct
-    if (cmd.params[2].at(1) == 'i' || cmd.params[2].at(1) == 'w' || cmd.params[2].at(1) == 's')
-    {
-        user->Set_mode(cmd.params[2]);
-        _Output_client(user->Get_fd_client(), "Mode change [" + cmd.params[2] + "] for " + user->Get_nickname());
-    }
-    else if (cmd.params[2].at(1) == 'o' || cmd.params[2].at(1) == 'O' || cmd.params[2].at(1) == 'a')
-    {
-        if (cmd.params[2].at(0) == '-')
-        { // Ignore le mode +o et +O
-            user->Set_mode(cmd.params[2]);
-            _Output_client(user->Get_fd_client(), "Mode change [" + cmd.params[2] + "] for " + user->Get_nickname());
+    else {
+        if (cmd.params[0] == user->Get_nickname() || cmd.params[0] != user->Get_realname().substr(0, user->Get_realname().find(' '))) {
+            if (cmd.params[1].at(0) == '+') {
+                for (size_t i = 1; i < cmd.params[1].size(); i++) {
+                    if (user->Get_mode().Add_mode(cmd.params[1].at(i))) {
+                        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur));
+                    }
+                }
+                _Output_client(user->Get_fd_client(), user->Get_mode().Print_mode());
+            }
+            else {
+                for (size_t i = 1; i < cmd.params[1].size(); i++) {
+                    if (user->Get_mode().Remove_mode(cmd.params[1].at(i))) {
+                        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur));
+                    }
+                }
+                _Output_client(user->Get_fd_client(), user->Get_mode().Print_mode());
+            }
         }
-        else if (cmd.params[2].at(1) == 'a' && cmd.params[2][0] == '+')
-        { // L'utilisateur doit utiliser AWAY
-            _Output_client(user->Get_fd_client(), ERR_USEAWAY);
-        }
-    }
-    else if (cmd.params[2].at(1) == 'r')
-    {
-        if (cmd.params[2].at(0) == '+')
-        { // Ignore le mode -r
-            user->Set_mode(cmd.params[2]);
-            _Output_client(user->Get_fd_client(), "Mode change [" + cmd.params[2] + "] for " + user->Get_nickname());
-        }
-    }
-    else
-    {
-        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur));
     }
 };
 
 int server::Quit_cmd(user *user, t_IRCMessage cmd)
 { // jgour
     std::cout << "COMMANDE -> QUIT" << std::endl;
-    return -2;
     (void)cmd;
     (void)user;
+    return -2;
 };
 
 void server::Join_cmd(user *user, t_IRCMessage cmd)
@@ -483,122 +437,127 @@ void server::Privmsg_cmd(user *sender, t_IRCMessage cmd)
 {
     (void)cmd;
     (void)sender;
-    // std::cout << "COMMANDE -> PRIVMSG" << std::endl;
-    // (void)sender;
+    std::cout << "COMMANDE -> PRIVMSG" << std::endl;
+    (void)sender;
 
-    // /*                       Check si il y a des arguments                       */
-    // if (cmd.params.empty())
-    // {
-    //     _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PRIVMSG"));
-    //     return;
-    // }
+    /*                       Check si il y a des arguments                       */
+    if (cmd.params.empty())
+    {
+        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PRIVMSG"));
+        return;
+    }
 
-    // /*                                        Handle Targets                                        */
-    // // Check if there are any target specified
-    // if (cmd.params[0][0] == ':')
-    //     _Output_client(sender->Get_fd_client(), ERR_NORECIPIENT(_name_serveur));
+    /*                                        Handle Targets                                        */
+    // Check if there are any target specified
+    if (cmd.params[0][0] == ':')
+    {
+        _Output_client(sender->Get_fd_client(), ERR_NORECIPIENT(_name_serveur));
+        return;
+    }
 
-    // // Create vector of targets
-    // std::vector<std::string> target;
-    // size_t end_otarget;
-    // end_otarget = cmd.find(" ", pos);
-    // target.push_back(cmd.substr(pos, end_otarget - pos));
+    // Create vector of targets
+    std::vector<std::string> target;
+    target.push_back(cmd.params[0]);
 
-    // std::stringstream targstream(target[0]);
-    // std::string newtarget;
-    // while (std::getline(targstream, newtarget, ','))
-    // {
-    //     target.push_back(newtarget);
-    // }
-    // target.erase(target.begin());
+    std::stringstream targstream(target[0]);
+    std::string newtarget;
+    while (std::getline(targstream, newtarget, ','))
+    {
+        target.push_back(newtarget);
+    }
+    target.erase(target.begin());
 
-    // /*                        Check if targets are valid & add to fd to send                        */
-    // std::vector<int> targets_fds;
-    // for (std::vector<std::string>::iterator it = target.begin(); it != target.end(); ++it)
-    // {
+// TODO : Add other prefixes
+    /*                        Check if targets are valid & add to fd to send                        */
+    std::vector<int> targets_fds;
+    for (std::vector<std::string>::iterator it = target.begin(); it != target.end(); ++it)
+    {
 
-    //     // CHECK if target is a Channel
-    //     if ((*it)[0] == '#')
-    //     {
+        // CHECK if target is a Channel
+        if ((*it)[0] == '#')
+        {
+            // Check if channel Exist
+            if (_list_channel.empty())
+            {
+                // FIXME : check if is good message error              
+                _Output_client(sender->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, sender->Get_nickname(), *it));
+                return;
+            }
+            for (size_t i = 0; i < _list_channel.size(); i++)
+            {
+                std::string target_channel = _list_channel[i]->Get_channel_name();
+                if (Compare_case_sensitive(target_channel, *it))
+                {
+                    // Check is user is in the channel
+                    if (User_in_channel(sender, _list_channel[i]))
+                    {
+                        std::vector<user *> channel_users = _list_channel[i]->Get_list_channel_user();
 
-    //         // Check if channel Exist
-    //         for (size_t i = 0; i < _list_channel.size(); i++)
-    //         {
-    //             std::string target_channel = _list_channel[i]->Get_channel_name();
-    //             if (Compare_case_sensitive(target_channel, *it))
-    //             {
+                        // Add all channel_users_fd
+                        for (size_t i = 0; i < channel_users.size(); i++)
+                                targets_fds.push_back(channel_users[i]->Get_fd_client());
+                    }
+                    else
+                    {
+                        std::string chan_name = _list_channel[i]->Get_channel_name();
+                        _Output_client(sender->Get_fd_client(), ERR_CANNOTSENDTOCHAN(_name_serveur, chan_name));
+                        return;
+                    }
+                }
+                else if (i + 1 == _list_channel.size())
+                {
+                    _Output_client(sender->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, sender->Get_nickname(), *it));
+                    return;
+                }
+            }
+        }
+        else
+        {
+            // Check if target is user
+            for (size_t i = 0; i < _list_user.size(); i++)
+            {
 
-    //                 // Check is user is in the channel
-    //                 if (User_in_channel(sender, _list_channel[i]))
-    //                 {
-    //                     std::vector<user *> channel_users = _list_channel[i]->Get_list_channel_user();
+                // Check if username exists
+                if (Compare_case_sensitive(_list_user[i]->Get_nickname(), *it))
+                    // Add user_fd
+                    targets_fds.push_back(_list_user[i]->Get_fd_client());
+                else if (i + 1 == _list_user.size())
+                {
+                    _Output_client(sender->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur, *it));
+                    return;
+                }
+            }
+        }
+    }
 
-    //                     // Add all channel_users_fd, but don't copy doublons (fd already present in target_fds)
-    //                     for (size_t i = 0; i < channel_users.size(); i++)
-    //                     {
-    //                         if (IsInTargetFds(channel_users[i]->Get_fd_client(), targets_fds) == false)
-    //                             targets_fds.push_back(channel_users[i]->Get_fd_client());
-    //                     }
-    //                 }
-    //                 else
-    //                 {
-    //                     std::string chan_name = _list_channel[i]->Get_channel_name();
-    //                     _Output_client(sender->Get_fd_client(), ERR_CANNOTSENDTOCHAN(_name_serveur, chan_name));
-    //                 }
-    //             }
-    //             else if (i + 1 == _list_channel.size())
-    //                 _Output_client(sender->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, *it));
-    //         }
-    //     }
-    //     else
-    //     {
+    /*                             Parse Message (exist, lenght, prefix?)                             */
+    // Check if a message is specified
+    if (cmd.params.size() == 1)
+    {
+        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PRIVMSG"));
+        return;
+    }
 
-    //         // Check if target is user
-    //         for (size_t i = 0; i < _list_user.size(); i++)
-    //         {
+    // merge all params in one message if more than 1 word
+    std::string message = cmd.params[1];
+    for (size_t i = 2; i < cmd.params.size(); i++) {
+        message += " " + cmd.params[i];
+    }
+    // Check if message start with ':' and delete ":"
+    if (message[0] != ':')
+    {
+        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PRIVMSG"));
+        return;
+    }
+    message = message.substr(1, message.size());
 
-    //             // Check if username exists
-    //             if (Compare_case_sensitive(_list_user[i]->Get_nickname(), *it))
-    //             {
+    /*                                           Send message                                           */
+    std::vector<int>::iterator dest;
+    for (dest = targets_fds.begin(); dest != targets_fds.end(); dest++)
+        _Output_client(*dest, message);
 
-    //                 // Add user_fd, but don't copy doublons (fd already present in target_fds)
-    //                 if (IsInTargetFds(_list_user[i]->Get_fd_client(), targets_fds) == false)
-    //                     targets_fds.push_back(_list_user[i]->Get_fd_client());
-    //             }
-    //             else if (i + 1 == _list_user.size())
-    //                 _Output_client(sender->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur, *it));
-    //         }
-    //     }
-    // }
-
-    // /*                             Parse Message (exist, lenght, prefix?)                             */
-    // // Check if a message is specified
-    // size_t strt_omsg = cmd.find_first_not_of(" ", end_otarget);
-    // if (strt_omsg == std::string::npos)
-    // {
-    //     _Output_client(sender->Get_fd_client(), ERR_NOTEXTTOSEND(_name_serveur));
-    //     return;
-    // }
-
-    // // Check if message start with ':'
-    // if (cmd.at(strt_omsg) != ':')
-    // {
-    //     _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PRIVMSG"));
-    //     return;
-    // }
-
-    // // Create message
-    // std::string msg = cmd.substr(strt_omsg, cmd.size() - strt_omsg);
-
-    // /*                                           Send message                                           */
-    // std::vector<int>::iterator dest;
-    // for (dest = targets_fds.begin(); dest != targets_fds.end(); dest++)
-    // {
-    //     _Output_client(*dest, msg);
-    // }
-
-    // // Notify message well sent
-    // _Output_client(sender->Get_fd_client(), "Message has been successfully sent");
+    // Notify message well sent
+    _Output_client(sender->Get_fd_client(), "Message has been successfully sent");
 };
 
 void server::Notice_cmd(user *user, t_IRCMessage cmd)
@@ -606,6 +565,9 @@ void server::Notice_cmd(user *user, t_IRCMessage cmd)
     (void) user;
     (void) cmd;
     // std::cout << "Notice_cmd" << std::endl;
+
+    // // Verifie que le user est enregistre
+    // if // std::cout << "Notice_cmd" << std::endl;
 
     // // Verifie que le user est enregistre
     // if (user->Get_username().empty())
@@ -622,20 +584,46 @@ void server::Notice_cmd(user *user, t_IRCMessage cmd)
 
     // // Recupere les destinataires
     // std::string dest = cmd.substr(pos, cmd.find(" ", pos) - pos);
-    // std::vector<std::string> target;
-    // for (size_t i = 0; i < dest.size(); i++)
+    // std::user->Get_username().empty())
+    // {
+    //     return;
+    // }
+
+    // // Verifie les arguments de NOTICE
+    // size_t pos = cmd.find_first_not_of(" ", 6);
+    // if (pos == std::string::npos)
+    // {
+    //     return;
+    // }
+
+    // // Recupere les destinataires
+    // std::string dest = cmd.substr(pos, cmd.find(" ", pos) - pos);
+    // std::vectector<std::strr<std::string> target;
+    // for (size_t i = 0; i < ng> target;
+    // for (size_t i = 0; i < dest.size(est.size();; i++)
     // {
     //     if (dest[i] == ',')
     //     {
     //         for (size_t j = 0; j < target.size(); j++)
     //         {
-    //             if (target[j] == dest.substr(0, i))
+    //             if (target[j] == dest.si++)
+    // {
+    //     if (dest[i] == ',')
+    //     {
+    //         for (size_t j = 0; j < target.size(); j++)
+    //         {
+    //             if (target[j] == dest.subbstr(0, i))
     //             {
-    //                 dest = dest.substr(i + 1, dest.size() - i);
+    //                 dtr(0, i))
+    //             {
+    //                 dest = dest.substst = dest.substr(i + 1, dest.size() - i)(i + 1, dest.size() - i);
     //             }
     //             else
     //             {
-    //                 target.push_back(dest.substr(0, i));
+    //                 ta//             }
+    //             else
+    //             {
+    //                 targget.p.push_back(dest.substsh_back(dest.substr(0, i));
     //                 dest = dest.substr(i + 1, dest.size() - i);
     //             }
     //             i = 0;
@@ -645,7 +633,23 @@ void server::Notice_cmd(user *user, t_IRCMessage cmd)
     // target.push_back(dest);
 
     // // Recupere le message
-    // size_t strt_omsg = cmd.find_first_not_of(" ", cmd.find(" ", pos));
+    // size_t strt_omsg = cmd.fi(0, i));
+    //                 dest = dest.substr(i + 1, dest.size() - i);
+    //             }
+    //             i = 0;
+    //         }
+    //     }
+    // }
+    // target.push_back(dest);
+
+    // // Recupere le message
+    // size_t strt_omsg = cmd.find_first_not_of("d_first_not_of(" ", cmd.find(" ", pos));
+    // if (strt_omsg == std::string::npos)
+    // {
+    //     return;
+    // }
+    // std::string msg = cmd.substr(strt_omsg, cmd.size() - strt_omsg);
+    // if (msg[", cmd.find(" ", pos));
     // if (strt_omsg == std::string::npos)
     // {
     //     return;
@@ -653,7 +657,57 @@ void server::Notice_cmd(user *user, t_IRCMessage cmd)
     // std::string msg = cmd.substr(strt_omsg, cmd.size() - strt_omsg);
     // if (msg[0] != ':')
     // {
+    //     return] != ':')
+    // {
     //     return;
+    // }
+
+    // // Envoie le message
+    // for (size_t j = 0; j < target.size(); j++)
+    // {
+    //     dest = target[j];
+    //     std::string real_msg = ":" + user->Get_nickname() + "!" + user->Get_username() + "@" + user->Get_hostname() + " :NOTICE " + dest + " " + msg;
+    //     std::cout << "real_msg = " << real_msg << std::endl;
+    //     if (dest[0] == '#')
+    //     {
+    //         // Si le destinataire est un channel
+    //         for (size_t i = 0; i < _list_channel.size(); i++)
+    //         {
+    //             if (Compare_case_sensitive(_list_channel[i]->Get_channel_name(), dest))
+    //             {
+    //                 // Verifie que le user est dans le channel (sinon, il ne peut pas envoyer de message)
+    //                 if (!User_in_channel(user, _list_channel[i]))
+    //                 {
+    //                     ;
+    //                 }
+    //                 // Verifie que le user n'est pas restreint (flag +r)
+    //                 else if (Get_user_in_channel(user, _list_channel[i])->Get_mode().Get_restricted())
+    //                 {
+    //                     ;
+    //                 }
+    //                 // Envoie le message
+    //                 else
+    //                 {
+    //                     _Output_channel(_list_channel[i], msg);
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     else
+    //     {
+    //         // Si le destinataire est un user
+    //         for (size_t i = 0; i < _list_user.size(); i++)
+    //         {
+    //             if (Compare_case_sensitive(_list_user[i]->Get_nickname(), dest))
+    //             {
+    //                 // Envoie le message
+    //                 std::cout << _list_user[i]->Get_nickname() << std::endl;
+    //                 std::cout << _list_user[i]->Get_fd_client() << std::endl;
+    //                 _Output_client(_list_user[i]->Get_fd_client(), msg);
+    //             }
+    //         }
+    //     }
+    // }
     // }
 
     // // Envoie le message
@@ -708,19 +762,17 @@ void server::Away_cmd(user *user, t_IRCMessage cmd)
 {
 
     // Verifie que le user est enregistre
-    if (user->Get_username().empty())
-    {
+    if (user->Get_username().empty()) {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
         return;
     }
 
     // Verifie les arguments de AWAY
     // Si l'utilisateur ne passe pas de parametre, le message d'absence est vide
-    if (cmd.params.empty())
-    {
+    if (cmd.params.empty()) {
         user->Set_mode("+a");
         user->Get_mode().Set_away_reply("");
-        _Output_client(user->Get_fd_client(), "Changed away status to away with no message");
+        _Output_client(user->Get_fd_client(), RPL_AWAY(_name_serveur, user->Get_nickname(), ""));
         return;
     }
 
@@ -730,15 +782,14 @@ void server::Away_cmd(user *user, t_IRCMessage cmd)
         away += " " + cmd.params[i];
     }
 
-    if (away[0] != ':')
-    {
+    if (away[0] != ':') {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "AWAY"));
         return;
     }
     away = away.substr(1, away.size());
     user->Set_mode("+a");
     user->Get_mode().Set_away_reply(away);
-    _Output_client(user->Get_fd_client(), "Changed away status to away with message: " + away);
+    _Output_client(user->Get_fd_client(), RPL_AWAY(_name_serveur, user->Get_nickname(), away));
 };
 
 void server::Users_cmd(user *user, t_IRCMessage cmd)
@@ -791,6 +842,7 @@ void server::Wallops_cmd(user *user, t_IRCMessage cmd)
     }
 
     // FIXME : A corriger, c'est pas clair ce que la commande doit faire ?
+    // FIXME : A corriger, c'est pas clair ce que la commande doit faire ?
     // Envoie le message a tous les utilisateurs connectes avec le mode +w
     std::string message = cmd.params[0];
     for (size_t i = 1; i < cmd.params.size(); i++) {
@@ -803,8 +855,10 @@ void server::Wallops_cmd(user *user, t_IRCMessage cmd)
     }
     message = message.substr(1, message.size());
     for (size_t i = 0; i < _list_user.size(); i++)
+   
     {
         if (_list_user[i]->Get_mode().Get_wallops())
+       
         {
             _Output_client(_list_user[i]->Get_fd_client(), "WALLOPS: " + message);
         }
