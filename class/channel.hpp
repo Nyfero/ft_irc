@@ -53,7 +53,6 @@ class channel
         const std::string       Get_channel_key() const;
         std::vector<user *>     Get_list_channel_user() const;
         std::vector<user *>     Get_list_operator() const;
-        const std::string       Get_channel_key() const;
 
         void    print_user_channel();
         void    print_oper_channel();

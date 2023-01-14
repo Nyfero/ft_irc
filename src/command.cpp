@@ -430,346 +430,62 @@ void server::Kick_cmd(user *user, t_IRCMessage cmd)
   - Check if User is restricted/muted in the channel -> ERR_CANNOTSENDTOCHAN
   - Handle wildcard and send message to mask with a wild-card for a top level domain + ERR_WILDTOPLEVEL + ERR_NOTOPLEVEL
   - Handle ERR_TOOMANYTARGETS (how could this happen actually ?)
-  - Improve message sent back to user
-  - Handle AWAY response if user mode a
 */
 void server::Privmsg_cmd(user *sender, t_IRCMessage cmd)
 {
     std::cout << "COMMANDE -> PRIVMSG" << std::endl;
 
-    /*                       Check si il y a des arguments                       */
-    if (cmd.params.empty())
-    {
-        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PRIVMSG"));
+    if (_parse_privmsg(sender, cmd))                                                // Parse PRIVMSG command
         return;
-    }
+    std::vector<std::string> target = _target_handle(cmd);                          // Create a vector of targets
+    std::vector<int> targets_fds = _targetfds_creator_privmsg(sender, target);      // Check targets and put all target fds in a vector
+    std::string message = _create_msg(cmd);                                         // Merge all parameters in one Message String
 
-    /*                                        Handle Targets                                        */
-    // Check if there are any target specified
-    if (cmd.params[0][0] == ':')
-    {
-        _Output_client(sender->Get_fd_client(), ERR_NORECIPIENT(_name_serveur));
-        return;
-    }
-
-    // Create vector of targets
-    std::vector<std::string> target;
-    target.push_back(cmd.params[0]);
-
-    std::stringstream targstream(target[0]);
-    std::string newtarget;
-    while (std::getline(targstream, newtarget, ','))
-    {
-        target.push_back(newtarget);
-    }
-    target.erase(target.begin());
-
-// TODO : Add other prefixes
-    /*                        Check if targets are valid & add to fd to send                        */
-    std::vector<int> targets_fds;
-    for (std::vector<std::string>::iterator it = target.begin(); it != target.end(); ++it)
-    {
-
-        // CHECK if target is a Channel
-        if ((*it)[0] == '#')
-        {
-            // Check if channel Exist
-            if (_list_channel.empty())
-            {
-                // FIXME : check if is good message error              
-                _Output_client(sender->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, sender->Get_nickname(), *it));
-                return;
-            }
-            for (size_t i = 0; i < _list_channel.size(); i++)
-            {
-                std::string target_channel = _list_channel[i]->Get_channel_name();
-                if (Compare_case_sensitive(target_channel, *it))
-                {
-                    // Check is user is in the channel
-                    if (User_in_channel(sender, _list_channel[i]))
-                    {
-                        std::vector<user *> channel_users = _list_channel[i]->Get_list_channel_user();
-
-                        // Add all channel_users_fd
-                        for (size_t i = 0; i < channel_users.size(); i++)
-                                targets_fds.push_back(channel_users[i]->Get_fd_client());
-                    }
-                    else
-                    {
-                        std::string chan_name = _list_channel[i]->Get_channel_name();
-                        _Output_client(sender->Get_fd_client(), ERR_CANNOTSENDTOCHAN(_name_serveur, chan_name));
-                        return;
-                    }
-                }
-                else if (i + 1 == _list_channel.size())
-                {
-                    _Output_client(sender->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, sender->Get_nickname(), *it));
-                    return;
-                }
-            }
-        }
-        else
-        {
-            // Check if target is user
-            for (size_t i = 0; i < _list_user.size(); i++)
-            {
-
-                // Check if username exists
-                if (Compare_case_sensitive(_list_user[i]->Get_nickname(), *it))
-                    // Add user_fd
-                    targets_fds.push_back(_list_user[i]->Get_fd_client());
-                else if (i + 1 == _list_user.size())
-                {
-                    _Output_client(sender->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur, *it));
-                    return;
-                }
-            }
-        }
-    }
-
-    /*                             Parse Message (exist, lenght, prefix?)                             */
-    // Check if a message is specified
-    if (cmd.params.size() == 1)
-    {
-        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PRIVMSG"));
-        return;
-    }
-
-    // merge all params in one message if more than 1 word
-    std::string message = cmd.params[1];
-    for (size_t i = 2; i < cmd.params.size(); i++) {
-        message += " " + cmd.params[i];
-    }
-    // Check if message start with ':' and delete ":"
-    if (message[0] != ':')
-    {
-        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PRIVMSG"));
-        return;
-    }
-    message = message.substr(1, message.size());
-
-    /*                                           Send message                                           */
     std::vector<int>::iterator dest;
     for (dest = targets_fds.begin(); dest != targets_fds.end(); dest++)
+    {
         _Output_client(*dest, message);
-
-    // Notify message well sent
-    _Output_client(sender->Get_fd_client(), "Message has been successfully sent");
+        std::string success_msg = "Message sent to ";
+        std::cout << success_msg << *dest << std::endl;
+    }
 };
 
-void server::Notice_cmd(user *user, t_IRCMessage cmd)
+void server::Notice_cmd(user *sender, t_IRCMessage cmd)
 {
-    (void) user;
-    (void) cmd;
-    // std::cout << "Notice_cmd" << std::endl;
+    std::cout << "COMMANDE -> NOTICE" << std::endl;
 
-    // // Verifie que le user est enregistre
-    // if // std::cout << "Notice_cmd" << std::endl;
+    if (_parse_notice_wallops(cmd))                                                 // Parse PRIVMSG command
+        return;
+    std::vector<std::string> target = _target_handle(cmd);                          // Create a vector of targets
+    std::vector<int> targets_fds = _targetfds_creator_notice(sender, target);       // Check targets and put all target fds in a vector
+    std::string message = _create_msg(cmd);                                         // Merge all parameters in one Message String
 
-    // // Verifie que le user est enregistre
-    // if (user->Get_username().empty())
-    // {
-    //     return;
-    // }
-
-    // // Verifie les arguments de NOTICE
-    // size_t pos = cmd.find_first_not_of(" ", 6);
-    // if (pos == std::string::npos)
-    // {
-    //     return;
-    // }
-
-    // // Recupere les destinataires
-    // std::string dest = cmd.substr(pos, cmd.find(" ", pos) - pos);
-    // std::user->Get_username().empty())
-    // {
-    //     return;
-    // }
-
-    // // Verifie les arguments de NOTICE
-    // size_t pos = cmd.find_first_not_of(" ", 6);
-    // if (pos == std::string::npos)
-    // {
-    //     return;
-    // }
-
-    // // Recupere les destinataires
-    // std::string dest = cmd.substr(pos, cmd.find(" ", pos) - pos);
-    // std::vectector<std::strr<std::string> target;
-    // for (size_t i = 0; i < ng> target;
-    // for (size_t i = 0; i < dest.size(est.size();; i++)
-    // {
-    //     if (dest[i] == ',')
-    //     {
-    //         for (size_t j = 0; j < target.size(); j++)
-    //         {
-    //             if (target[j] == dest.si++)
-    // {
-    //     if (dest[i] == ',')
-    //     {
-    //         for (size_t j = 0; j < target.size(); j++)
-    //         {
-    //             if (target[j] == dest.subbstr(0, i))
-    //             {
-    //                 dtr(0, i))
-    //             {
-    //                 dest = dest.substst = dest.substr(i + 1, dest.size() - i)(i + 1, dest.size() - i);
-    //             }
-    //             else
-    //             {
-    //                 ta//             }
-    //             else
-    //             {
-    //                 targget.p.push_back(dest.substsh_back(dest.substr(0, i));
-    //                 dest = dest.substr(i + 1, dest.size() - i);
-    //             }
-    //             i = 0;
-    //         }
-    //     }
-    // }
-    // target.push_back(dest);
-
-    // // Recupere le message
-    // size_t strt_omsg = cmd.fi(0, i));
-    //                 dest = dest.substr(i + 1, dest.size() - i);
-    //             }
-    //             i = 0;
-    //         }
-    //     }
-    // }
-    // target.push_back(dest);
-
-    // // Recupere le message
-    // size_t strt_omsg = cmd.find_first_not_of("d_first_not_of(" ", cmd.find(" ", pos));
-    // if (strt_omsg == std::string::npos)
-    // {
-    //     return;
-    // }
-    // std::string msg = cmd.substr(strt_omsg, cmd.size() - strt_omsg);
-    // if (msg[", cmd.find(" ", pos));
-    // if (strt_omsg == std::string::npos)
-    // {
-    //     return;
-    // }
-    // std::string msg = cmd.substr(strt_omsg, cmd.size() - strt_omsg);
-    // if (msg[0] != ':')
-    // {
-    //     return] != ':')
-    // {
-    //     return;
-    // }
-
-    // // Envoie le message
-    // for (size_t j = 0; j < target.size(); j++)
-    // {
-    //     dest = target[j];
-    //     std::string real_msg = ":" + user->Get_nickname() + "!" + user->Get_username() + "@" + user->Get_hostname() + " :NOTICE " + dest + " " + msg;
-    //     std::cout << "real_msg = " << real_msg << std::endl;
-    //     if (dest[0] == '#')
-    //     {
-    //         // Si le destinataire est un channel
-    //         for (size_t i = 0; i < _list_channel.size(); i++)
-    //         {
-    //             if (Compare_case_sensitive(_list_channel[i]->Get_channel_name(), dest))
-    //             {
-    //                 // Verifie que le user est dans le channel (sinon, il ne peut pas envoyer de message)
-    //                 if (!User_in_channel(user, _list_channel[i]))
-    //                 {
-    //                     ;
-    //                 }
-    //                 // Verifie que le user n'est pas restreint (flag +r)
-    //                 else if (Get_user_in_channel(user, _list_channel[i])->Get_mode().Get_restricted())
-    //                 {
-    //                     ;
-    //                 }
-    //                 // Envoie le message
-    //                 else
-    //                 {
-    //                     _Output_channel(_list_channel[i], msg);
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     else
-    //     {
-    //         // Si le destinataire est un user
-    //         for (size_t i = 0; i < _list_user.size(); i++)
-    //         {
-    //             if (Compare_case_sensitive(_list_user[i]->Get_nickname(), dest))
-    //             {
-    //                 // Envoie le message
-    //                 std::cout << _list_user[i]->Get_nickname() << std::endl;
-    //                 std::cout << _list_user[i]->Get_fd_client() << std::endl;
-    //                 _Output_client(_list_user[i]->Get_fd_client(), msg);
-    //             }
-    //         }
-    //     }
-    // }
-    // }
-
-    // // Envoie le message
-    // for (size_t j = 0; j < target.size(); j++)
-    // {
-    //     dest = target[j];
-    //     std::string real_msg = ":" + user->Get_nickname() + "!" + user->Get_username() + "@" + user->Get_hostname() + " :NOTICE " + dest + " " + msg;
-    //     std::cout << "real_msg = " << real_msg << std::endl;
-    //     if (dest[0] == '#')
-    //     {
-    //         // Si le destinataire est un channel
-    //         for (size_t i = 0; i < _list_channel.size(); i++)
-    //         {
-    //             if (Compare_case_sensitive(_list_channel[i]->Get_channel_name(), dest))
-    //             {
-    //                 // Verifie que le user est dans le channel (sinon, il ne peut pas envoyer de message)
-    //                 if (!User_in_channel(user, _list_channel[i]))
-    //                 {
-    //                     ;
-    //                 }
-    //                 // Verifie que le user n'est pas restreint (flag +r)
-    //                 else if (Get_user_in_channel(user, _list_channel[i])->Get_mode().Get_restricted())
-    //                 {
-    //                     ;
-    //                 }
-    //                 // Envoie le message
-    //                 else
-    //                 {
-    //                     _Output_channel(_list_channel[i], msg);
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     else
-    //     {
-    //         // Si le destinataire est un user
-    //         for (size_t i = 0; i < _list_user.size(); i++)
-    //         {
-    //             if (Compare_case_sensitive(_list_user[i]->Get_nickname(), dest))
-    //             {
-    //                 // Envoie le message
-    //                 std::cout << _list_user[i]->Get_nickname() << std::endl;
-    //                 std::cout << _list_user[i]->Get_fd_client() << std::endl;
-    //                 _Output_client(_list_user[i]->Get_fd_client(), msg);
-    //             }
-    //         }
-    //     }
-    // }
+    std::vector<int>::iterator dest;
+    for (dest = targets_fds.begin(); dest != targets_fds.end(); dest++)
+    {
+        _Output_client(*dest, message);
+        std::string success_msg = "Notice sent to ";
+        std::cout << success_msg << *dest << std::endl;
+    }
 };
 
 void server::Away_cmd(user *user, t_IRCMessage cmd)
 {
 
     // Verifie que le user est enregistre
-    if (user->Get_username().empty()) {
+    if (user->Get_username().empty())
+    {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
         return;
     }
 
     // Verifie les arguments de AWAY
     // Si l'utilisateur ne passe pas de parametre, le message d'absence est vide
-    if (cmd.params.empty()) {
+    if (cmd.params.empty())
+    {
         user->Set_mode("+a");
         user->Get_mode().Set_away_reply("");
-        _Output_client(user->Get_fd_client(), RPL_AWAY(_name_serveur, user->Get_nickname(), ""));
+        _Output_client(user->Get_fd_client(), "Changed away status to away with no message");
         return;
     }
 
@@ -779,14 +495,15 @@ void server::Away_cmd(user *user, t_IRCMessage cmd)
         away += " " + cmd.params[i];
     }
 
-    if (away[0] != ':') {
+    if (away[0] != ':')
+    {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "AWAY"));
         return;
     }
     away = away.substr(1, away.size());
     user->Set_mode("+a");
     user->Get_mode().Set_away_reply(away);
-    _Output_client(user->Get_fd_client(), RPL_AWAY(_name_serveur, user->Get_nickname(), away));
+    _Output_client(user->Get_fd_client(), "Changed away status to away with message: " + away);
 };
 
 void server::Users_cmd(user *user, t_IRCMessage cmd)
@@ -821,44 +538,27 @@ void server::Users_cmd(user *user, t_IRCMessage cmd)
     }
 };
 
-void server::Wallops_cmd(user *user, t_IRCMessage cmd)
+void server::Wallops_cmd(user *sender, t_IRCMessage cmd)
 {
+    std::cout << "COMMANDE -> WALLOPS" << std::endl;
 
-    // Verifie que le user est enregistre
-    if (user->Get_username().empty() || !user->Get_mode().Get_operator())
+    if (_parse_notice_wallops(cmd))                                                 // Parse WALLOPS command
+        return;
+    if (sender->Get_mode().Get_operator() == false)                                 // Check is user is an Operator
     {
-        _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
+        std::cout << "ERROR : User is not OPERATOR" << std::endl;
         return;
     }
+    std::vector<std::string> target = _target_handle(cmd);                           // Create a vector of targets
+    std::vector<int> targets_fds = _targetfds_creator_wallops(sender, target);       // Check targets and put all target fds in a vector
+    std::string message = _create_msg(cmd);                                          // Merge all parameters in one Message String
 
-    // Verifie les arguments de WALLOPS
-    if (cmd.params.empty())
+    std::vector<int>::iterator dest;
+    for (dest = targets_fds.begin(); dest != targets_fds.end(); dest++)
     {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "WALLOPS"));
-        return;
-    }
-
-    // FIXME : A corriger, c'est pas clair ce que la commande doit faire ?
-    // FIXME : A corriger, c'est pas clair ce que la commande doit faire ?
-    // Envoie le message a tous les utilisateurs connectes avec le mode +w
-    std::string message = cmd.params[0];
-    for (size_t i = 1; i < cmd.params.size(); i++) {
-        message += " " + cmd.params[i];
-    }
-    if (message[0] != ':')
-    {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "WALLOPS"));
-        return;
-    }
-    message = message.substr(1, message.size());
-    for (size_t i = 0; i < _list_user.size(); i++)
-   
-    {
-        if (_list_user[i]->Get_mode().Get_wallops())
-       
-        {
-            _Output_client(_list_user[i]->Get_fd_client(), "WALLOPS: " + message);
-        }
+        _Output_client(*dest, message);
+        std::string success_msg = "Wallops sent to ";
+        std::cout << success_msg << *dest << std::endl;
     }
 };
 
