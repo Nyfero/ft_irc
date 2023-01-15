@@ -6,7 +6,7 @@ int server::Check_command(user *user, std::string str)
 {
     std::cout << "Check_command: " << str << std::endl;
 
-    t_IRCMessage msg = split_message(str);
+    t_IRCMessage msg = split_message(user, str);
 
     std::cout << "command: " << msg.command << std::endl;
     std::cout << "prefix: " << msg.prefix << std::endl;

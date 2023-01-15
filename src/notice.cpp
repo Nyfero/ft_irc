@@ -6,7 +6,7 @@
 /*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/14 17:54:33 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/14 20:03:26 by egiacomi         ###   ########.fr       */
+/*   Updated: 2023/01/14 23:00:28 by egiacomi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,8 +59,11 @@ bool	server::_add_channel_targetfds_notice(user *sender, std::vector<int> *targe
 			if (User_in_channel(sender, _list_channel[i]))											// Check if User is in the Channel
 			{
 				std::vector<user *> channel_users = _list_channel[i]->Get_list_channel_user();
-				for (size_t i = 0; i < channel_users.size(); i++)									// Add all channel user's fd
-					targets_fds->push_back(channel_users[i]->Get_fd_client());
+				for (size_t i = 0; i < channel_users.size(); i++)									// Add all channel_users_fd
+				{
+					if (channel_users[i]->Get_fd_client() != sender->Get_fd_client())
+						targets_fds->push_back(channel_users[i]->Get_fd_client());
+				}
 			}
 			return false;
 		}

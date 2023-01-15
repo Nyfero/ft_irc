@@ -6,7 +6,7 @@
 /*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/14 17:54:33 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/14 20:05:27 by egiacomi         ###   ########.fr       */
+/*   Updated: 2023/01/14 22:58:57 by egiacomi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,7 @@ bool	server::_add_user_targetfds_privmsg(user *sender, std::vector<int> *targets
 			return false;
 		}
 	}
+	_Output_client(sender->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur, target));
 	return true;
 }
 
@@ -81,7 +82,10 @@ bool	server::_add_channel_targetfds_privmsg(user *sender, std::vector<int> *targ
 			{
 				std::vector<user *> channel_users = _list_channel[i]->Get_list_channel_user();
 				for (size_t i = 0; i < channel_users.size(); i++)										// Add all channel_users_fd
-					targets_fds->push_back(channel_users[i]->Get_fd_client());
+				{
+					if (channel_users[i]->Get_fd_client() != sender->Get_fd_client())
+						targets_fds->push_back(channel_users[i]->Get_fd_client());
+				}
 			}
 			else
 			{
@@ -100,7 +104,7 @@ std::vector<int> server::_targetfds_creator_privmsg(user *sender, std::vector<st
 	std::vector<int> targets_fds;
     for (std::vector<std::string>::iterator it = target.begin(); it != target.end(); ++it)
 	{
-        if ((*it)[0] == '#')
+		if ((*it)[0] == '#')
 		{
 			if (_list_channel.empty())
             {
@@ -118,10 +122,10 @@ std::vector<int> server::_targetfds_creator_privmsg(user *sender, std::vector<st
 
 std::string server::_create_msg(t_IRCMessage cmd)
 {
-    std::string message = cmd.params[1];
-    for (size_t i = 2; i < cmd.params.size(); i++) {
+	std::string message = cmd.prefix + " " + cmd.command + " " + cmd.params[0];	
+    for (size_t i = 1; i < cmd.params.size(); i++) {
         message += " " + cmd.params[i];
 	}
-    message = message.substr(1, message.size());		// Delete the ":"
+	std::cout << message << std::endl;
 	return message;
 }

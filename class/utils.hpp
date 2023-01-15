@@ -38,7 +38,7 @@ bool			User_in_channel(user *user, channel *chan);
 bool			User_in_channel_is_op(user *user, channel *chan);
 user			*Get_user_in_channel(user *use, channel *chan);
 bool			IsInTargetFds(int fd_client, std::vector<int> target_fds);
-t_IRCMessage split_message(std::string& input);
+t_IRCMessage    split_message(user *user, std::string& input);
 std::vector<std::string> Split(std::string str, char delimiter);
 std::string		Join(std::vector<std::string> vec, size_t start, size_t end);
 
