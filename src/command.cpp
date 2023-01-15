@@ -417,6 +417,13 @@ void server::Invite_cmd(user *user, t_IRCMessage cmd)
     std::cout << "COMMANDE -> INVITE" << std::endl;
     (void)cmd;
     (void)user;
+
+    // Parse (Check enough param == 2
+    // Check is a Nickname, Check Inviter is part of channel, Check dest is already in the channel
+    // Check if channel exists, if not create
+    // Check if privilege needed
+    // Check if user is away or Invite user
+    // Sedn REPLY INVITE to ender
 };
 
 void server::Kick_cmd(user *user, t_IRCMessage cmd)
@@ -430,6 +437,7 @@ void server::Kick_cmd(user *user, t_IRCMessage cmd)
   - Check if User is restricted/muted in the channel -> ERR_CANNOTSENDTOCHAN
   - Handle wildcard and send message to mask with a wild-card for a top level domain + ERR_WILDTOPLEVEL + ERR_NOTOPLEVEL
   - Handle ERR_TOOMANYTARGETS (how could this happen actually ?)
+  - Check for correct ERR MESSAGE
 */
 void server::Privmsg_cmd(user *sender, t_IRCMessage cmd)
 {
@@ -566,14 +574,13 @@ void server::Pong_cmd(user *user, t_IRCMessage cmd)
 {
     std::cout << "PONG" << std::endl;
 
-    // Verifie les arguments de PONG
     if (cmd.params.empty())
     {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PONG"));
         return;
     }
-
-    std::string pong = cmd.params[0];
-    std::cout << ":" + user->Get_nickname() + " PONG " + user->Get_nickname() + " :" + pong + "\r\n"
+    std::string pong = "PONG " + cmd.params[0];
+    std::cout << ":" + user->Get_nickname() + " :" + pong + "\r\n"
               << std::endl;
+    _Output_client(user->Get_fd_client(), pong);
 };
