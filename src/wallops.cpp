@@ -6,7 +6,7 @@
 /*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/14 17:54:33 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/14 23:02:40 by egiacomi         ###   ########.fr       */
+/*   Updated: 2023/01/15 04:09:07 by egiacomi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ std::vector<int> server::_targetfds_creator_wallops(user *sender, std::vector<st
 	std::vector<int> targets_fds;
     for (std::vector<std::string>::iterator it = target.begin(); it != target.end(); ++it)
 	{
-        if ((*it)[0] == '#')
+        if (Check_valid_channel(*it))
 		{
 			if (_list_channel.empty())
 			{

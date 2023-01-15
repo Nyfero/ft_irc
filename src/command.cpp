@@ -412,18 +412,30 @@ void server::Names_cmd(user *user, t_IRCMessage cmd)
     (void)user;
 };
 
-void server::Invite_cmd(user *user, t_IRCMessage cmd)
+/*  
+TODO :   
+    Parse (Check enough param == 2
+    Check is a Nickname, Check Inviter is part of channel, Check dest is already in the channel
+    Check if channel exists, if not create
+    Check if privilege needed
+    Check if user is away or Invite user
+    Send REPLY INVITE to ender */
+void server::Invite_cmd(user *sender, t_IRCMessage cmd)
 { // jgoru
     std::cout << "COMMANDE -> INVITE" << std::endl;
-    (void)cmd;
-    (void)user;
 
-    // Parse (Check enough param == 2
-    // Check is a Nickname, Check Inviter is part of channel, Check dest is already in the channel
-    // Check if channel exists, if not create
-    // Check if privilege needed
-    // Check if user is away or Invite user
-    // Sedn REPLY INVITE to ender
+    if (_parse_invite(sender, cmd))         // Parse INVITE command
+        return;
+    user *target_nick = _check_nick_invite(sender, cmd); 
+    if (target_nick == NULL)                // Check that the param 1 : Nickname is correct
+        return;
+    channel *target_chan = _check_chan_invite(sender, cmd);
+    if (target_chan == NULL)
+        return;
+    if (_user_already_member(target_nick, target_chan))
+    {
+		_Output_client(sender->Get_fd_client(), ERR_USERONCHANNEL(_name_serveur, target_nick->Get_nickname(), target_chan->Get_channel_name()));
+    }
 };
 
 void server::Kick_cmd(user *user, t_IRCMessage cmd)

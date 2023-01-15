@@ -6,7 +6,7 @@
 /*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/14 17:54:33 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/15 02:59:51 by egiacomi         ###   ########.fr       */
+/*   Updated: 2023/01/15 04:52:49 by egiacomi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,10 +88,7 @@ bool	server::_add_channel_targetfds_privmsg(user *sender, std::vector<int> *targ
 				}
 			}
 			else
-			{
-				std::string chan_found = _list_channel[i]->Get_channel_name();
-				_Output_client(sender->Get_fd_client(), ERR_CANNOTSENDTOCHAN(_name_serveur, chan_found));
-			}
+				_Output_client(sender->Get_fd_client(), ERR_CANNOTSENDTOCHAN(_name_serveur, channel_test));
 			return false;
 		}
 	}	
@@ -104,7 +101,7 @@ std::vector<int> server::_targetfds_creator_privmsg(user *sender, std::vector<st
 	std::vector<int> targets_fds;
     for (std::vector<std::string>::iterator it = target.begin(); it != target.end(); ++it)
 	{
-		if ((*it)[0] == '#')
+		if (Check_valid_channel(*it))
 		{
 			if (_list_channel.empty())
             {

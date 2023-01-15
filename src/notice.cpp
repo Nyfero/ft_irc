@@ -6,7 +6,7 @@
 /*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/14 17:54:33 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/14 23:00:28 by egiacomi         ###   ########.fr       */
+/*   Updated: 2023/01/15 04:09:17 by egiacomi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,7 @@ std::vector<int> server::_targetfds_creator_notice(user *sender, std::vector<std
 	std::vector<int> targets_fds;
     for (std::vector<std::string>::iterator it = target.begin(); it != target.end(); ++it)
 	{
-        if ((*it)[0] == '#')
+        if (Check_valid_channel(*it))
 		{
 			if (_list_channel.empty())
 			{
