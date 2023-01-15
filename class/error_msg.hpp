@@ -24,8 +24,15 @@
 # define RPL_NOTOPIC(serveur, chan) ":" + serveur + " 331 " + chan + " :No topic is set"
 # define RPL_TOPIC(serveur, chan, topic) ":" + serveur + " 332 " + chan + " :" + topic
 # define RPL_INVITING(serveur, nick, chan) ":" + serveur + " 341 " + nick + " " + chan
-# define RPL_NAMREPLY(serveur, chan, names) ":" + serveur + " 353 " + chan + " :" + names
-# define RPL_ENDOFNAMES(serveur, chan) ":" + serveur + " 366 " + chan + " :End of NAMES list"
+
+// # define RPL_NAMREPLY(serveur, chan, names) ":" + serveur + " 353 " + chan + " :" + names
+# define RPL_NAMREPLY(serveur, nick, mod, chan, names)	":" + serveur + " 353 " + nick + " " + mod + " " + chan + " :" + names
+
+
+
+# define RPL_ENDOFNAMES(serveur, nick, chan) ":" + serveur + " 366 " + nick + " " + chan + " :End of NAMES list"
+
+
 # define RPL_YOUREOPER(serveur, nick) ":" + serveur + " 381 " + nick + " :You are now an IRC operator"
 # define RPL_USERSSTART(serveur) ":" + serveur + " 392 :UserID Terminal Host"
 # define RPL_USERS(serveur, nick, usr, host) ":" + serveur + " 393 " + nick + " " + usr + " " + host

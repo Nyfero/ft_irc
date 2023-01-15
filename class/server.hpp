@@ -72,6 +72,7 @@ class server
         int     _Output_client(int fd, std::string msg);
         int     _Output_channel(channel *chan, std::string msg);
         void    _Print_channel();
+        void    _Print_user();
 
         /* GET CHANNEL */
         channel     *_Channel_already_exist(std::string str);
@@ -79,6 +80,7 @@ class server
         /* COMMAND*/
         int                      _Join_treat(user *user, std::vector<std::string> chan, std::vector<std::string> key);
         int                      _Join_treat(user *user, std::vector<std::string> chan);
+        void                     _Join_rpl(user *user, channel *chan);
         bool                     _parse_privmsg(user *sender, struct s_IRCMessage cmd);
         std::vector<std::string> _target_handle(struct s_IRCMessage cmd);
         std::vector<int>         _targetfds_creator_privmsg(user *sender, std::vector<std::string> target);

@@ -66,6 +66,16 @@ std::vector<channel *>  user::Get_channel_register() const{
     return _channel_register;
 };
 
+bool user::Is_op_channel(channel *chan) const{
+    std::vector<user *> list;
+
+    list = chan->Get_list_operator();
+    for (size_t i = 0; i < list.size(); i++)
+        if (_nickname == list[i]->Get_nickname())
+            return true;
+    return false;
+}
+
 
 /**************/
 /****  MOD ****/

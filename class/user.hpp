@@ -68,6 +68,7 @@ class user
         Mode    Get_mode() const;
         std::string Get_realname() const;
         std::vector<channel *>  Get_channel_register() const;
+        bool Is_op_channel(channel *chan) const;
 
         /**************/
         /****  MOD ****/
