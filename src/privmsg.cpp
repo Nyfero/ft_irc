@@ -6,7 +6,7 @@
 /*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/14 17:54:33 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/16 16:13:46 by egiacomi         ###   ########.fr       */
+/*   Updated: 2023/01/16 20:12:09 by egiacomi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,8 +62,7 @@ bool	server::_add_user_targetfds_privmsg(user *sender, std::vector<int> *targets
 		{
 			if (_list_user[i]->Get_mode().Get_away())													// Check if user is away, if so : send away reply
 				_Output_client(sender->Get_fd_client(), RPL_AWAY(_name_serveur, sender->Get_nickname(), _list_user[i]->Get_nickname(), _list_user[i]->Get_mode().Get_away_reply()));
-			else
-				targets_fds->push_back(_list_user[i]->Get_fd_client());									// Add user_fd if he's not away
+			targets_fds->push_back(_list_user[i]->Get_fd_client());										// Add user_fd
 			return false;
 		}
 	}
