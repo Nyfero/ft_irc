@@ -6,7 +6,7 @@
 /*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/15 03:52:17 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/15 04:58:39 by egiacomi         ###   ########.fr       */
+/*   Updated: 2023/01/16 16:15:01 by egiacomi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ user *server::_check_nick_invite(user *sender, t_IRCMessage cmd)
 		{
 			if (_list_user[i]->Get_mode().Get_away())								// Check if user is away, if so : send away reply
 			{
-				_Output_client(sender->Get_fd_client(), RPL_AWAY(_name_serveur, _list_user[i]->Get_nickname(), _list_user[i]->Get_mode().Get_away_reply()));
+				_Output_client(sender->Get_fd_client(), RPL_AWAY(_name_serveur, sender->Get_nickname(), _list_user[i]->Get_nickname(), _list_user[i]->Get_mode().Get_away_reply()));
 				return NULL;
 			}
 			else

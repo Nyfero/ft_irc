@@ -450,9 +450,11 @@ void server::Kick_cmd(user *user, t_IRCMessage cmd)
 
 /* TODO :
   - Check if User is restricted/muted in the channel -> ERR_CANNOTSENDTOCHAN
-  - Handle wildcard and send message to mask with a wild-card for a top level domain + ERR_WILDTOPLEVEL + ERR_NOTOPLEVEL
-  - Handle ERR_TOOMANYTARGETS (how could this happen actually ?)
+  - Check if /msg #chan,nick
+  - Check away message + send message anyway
+  
   - Check for correct ERR MESSAGE
+  - Handle ERR_TOOMANYTARGETS (how could this happen actually ?)
 */
 void server::Privmsg_cmd(user *sender, t_IRCMessage cmd)
 {
