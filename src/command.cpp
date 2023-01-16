@@ -219,7 +219,7 @@ void server::Nick_cmd(user *user, t_IRCMessage cmd) {
 
     if (isRestricted(user))
     {
-        _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
+        _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
         return ;
     } 
     // Verifie les arguments de NICK
@@ -322,7 +322,7 @@ void server::Join_cmd(user *user, t_IRCMessage cmd)
 { // jgour
     if (isRestricted(user))
     {
-        _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
+        _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
         return ;
     }
     std::cout << "COMMANDE -> JOIN" << std::endl;
