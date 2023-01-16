@@ -1,0 +1,127 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   privmsg.cpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/01/14 17:54:33 by egiacomi          #+#    #+#             */
+/*   Updated: 2023/01/14 20:05:27 by egiacomi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../class/server.hpp"
+#include "../class/utils.hpp"
+#include "../class/user.hpp"
+
+bool	server::_parse_privmsg(user *sender, t_IRCMessage cmd)
+{
+    if (cmd.params.empty())																				// Check if command takes parameters
+    {
+        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PRIVMSG"));
+        return true;
+    }
+	if (cmd.params.size() == 1)																			// Check if I have minimum 2 parameters (target + message)
+    {
+        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PRIVMSG"));
+        return true;
+    }
+    if (cmd.params[0][0] == ':')																		// Check if any target is specified
+    {
+        _Output_client(sender->Get_fd_client(), ERR_NORECIPIENT(_name_serveur));
+        return true;
+    }
+    if (cmd.params[1][0] != ':')																		// Check message start with a ":"
+    {
+        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PRIVMSG"));
+        return true;
+    }	
+	return false;
+}
+
+std::vector<std::string> server::_target_handle(t_IRCMessage cmd)
+{
+    std::vector<std::string> target;
+    target.push_back(cmd.params[0]);
+
+    std::stringstream targstream(target[0]);
+    std::string newtarget;
+    while (std::getline(targstream, newtarget, ','))
+    {
+        target.push_back(newtarget);
+    }
+    target.erase(target.begin());	
+	return (target);
+}
+
+bool	server::_add_user_targetfds_privmsg(user *sender, std::vector<int> *targets_fds, std::string target)
+{
+	for (size_t i = 0; i < _list_user.size(); i++)
+	{
+		if (Compare_case_sensitive(_list_user[i]->Get_nickname(), target))								// Check if username exists
+		{
+			if (_list_user[i]->Get_mode().Get_away())													// Check if user is away, if so : send away reply
+				_Output_client(sender->Get_fd_client(), _list_user[i]->Get_mode().Get_away_reply());
+			else
+				targets_fds->push_back(_list_user[i]->Get_fd_client());									// Add user_fd if he's not away
+			return false;
+		}
+	}
+	return true;
+}
+
+bool	server::_add_channel_targetfds_privmsg(user *sender, std::vector<int> *targets_fds, std::string target)
+{
+	for (size_t i = 0; i < _list_channel.size(); i++)
+	{
+		std::string channel_test = _list_channel[i]->Get_channel_name();
+		if (Compare_case_sensitive(channel_test, target))
+		{
+			if (User_in_channel(sender, _list_channel[i]))												// Check is user is in the channel
+			{
+				std::vector<user *> channel_users = _list_channel[i]->Get_list_channel_user();
+				for (size_t i = 0; i < channel_users.size(); i++)										// Add all channel_users_fd
+					targets_fds->push_back(channel_users[i]->Get_fd_client());
+			}
+			else
+			{
+				std::string chan_found = _list_channel[i]->Get_channel_name();
+				_Output_client(sender->Get_fd_client(), ERR_CANNOTSENDTOCHAN(_name_serveur, chan_found));
+			}
+			return false;
+		}
+	}	
+	_Output_client(sender->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, sender->Get_nickname(), target));
+	return true;
+}
+
+std::vector<int> server::_targetfds_creator_privmsg(user *sender, std::vector<std::string> target)
+{
+	std::vector<int> targets_fds;
+    for (std::vector<std::string>::iterator it = target.begin(); it != target.end(); ++it)
+	{
+        if ((*it)[0] == '#')
+		{
+			if (_list_channel.empty())
+            {
+                _Output_client(sender->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, sender->Get_nickname(), *it));
+                continue;
+            }
+			else
+				_add_channel_targetfds_privmsg(sender, &targets_fds, *it);
+		}
+		else
+			_add_user_targetfds_privmsg(sender, &targets_fds, *it);
+	}
+	return (targets_fds);
+}
+
+std::string server::_create_msg(t_IRCMessage cmd)
+{
+    std::string message = cmd.params[1];
+    for (size_t i = 2; i < cmd.params.size(); i++) {
+        message += " " + cmd.params[i];
+	}
+    message = message.substr(1, message.size());		// Delete the ":"
+	return message;
+}

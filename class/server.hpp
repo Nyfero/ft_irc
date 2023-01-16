@@ -78,9 +78,21 @@ class server
         channel     *_Channel_already_exist(std::string str);
 
         /* COMMAND*/
-        int _Join_treat(user *user, std::vector<std::string> chan, std::vector<std::string> key);
-        int _Join_treat(user *user, std::vector<std::string> chan);
-        void    _Join_rpl(user *user, channel *chan);
+        int                     _Join_treat(user *user, std::vector<std::string> chan, std::vector<std::string> key);
+        int                     _Join_treat(user *user, std::vector<std::string> chan);
+        void                    _Join_rpl(user *user, channel *chan);
+        bool                     _parse_privmsg(user *sender, struct s_IRCMessage cmd);
+        std::vector<std::string> _target_handle(struct s_IRCMessage cmd);
+        std::vector<int>         _targetfds_creator_privmsg(user *sender, std::vector<std::string> target);
+        bool                     _add_channel_targetfds_privmsg(user *sender, std::vector<int> *targets_fds, std::string target);
+        bool                     _add_user_targetfds_privmsg(user *sender, std::vector<int> *targets_fds, std::string target);
+        std::string              _create_msg(struct s_IRCMessage cmd);
+        bool                     _parse_notice_wallops(struct s_IRCMessage cmd);
+        std::vector<int>         _targetfds_creator_notice(user *sender, std::vector<std::string> target);
+        bool	                 _add_channel_targetfds_notice(user *sender, std::vector<int> *targets_fds, std::string target);
+        bool	                 _add_user_targetfds_notice(std::vector<int> *targets_fds, std::string target);
+        std::vector<int>         _targetfds_creator_wallops(user *sender, std::vector<std::string> target);
+        bool	                 _add_channel_targetfds_wallops(user *sender, std::vector<int> *targets_fds, std::string target);
 
     public:
 
@@ -89,7 +101,6 @@ class server
         /*********************/
 
         server(char *port, char *password);
-        
 
 
         /********************/
