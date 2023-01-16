@@ -387,6 +387,7 @@ void server::Part_cmd(user *user, t_IRCMessage cmd)
                 // si chan vide degager
                     _Remove_channel(chan);
                 }
+                //:jgourlin!jgourlin@localhost PART #qw :
             }
             else
             {
