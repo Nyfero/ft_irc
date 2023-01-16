@@ -34,7 +34,7 @@ int server::Check_command(user *user, std::string str)
         User_cmd(user, msg);
         return 0;
     case 2:
-        Nick_cmd(user, msg);
+        Nick_cmd(user, msg); // Add Restricted
         return 0;
     case 3:
         Mode_cmd(user, msg);
@@ -42,7 +42,7 @@ int server::Check_command(user *user, std::string str)
     case 4:
         return (Quit_cmd(user, msg));
     case 5:
-        Join_cmd(user, msg);
+        Join_cmd(user, msg); // Add Restricted
         return 0;
     case 6:
         Part_cmd(user, msg);
@@ -51,16 +51,16 @@ int server::Check_command(user *user, std::string str)
         Names_cmd(user, msg);
         return 0;
     case 8:
-        Invite_cmd(user, msg);
+        Invite_cmd(user, msg); // Add Restricted
         return 0;
     case 9:
-        Kick_cmd(user, msg);
+        Kick_cmd(user, msg); // Add Restricted
         return 0;
     case 10:
-        Privmsg_cmd(user, msg);
+        Privmsg_cmd(user, msg); // Add Restricted
         return 0;
     case 11:
-        Notice_cmd(user, msg);
+        Notice_cmd(user, msg); // Add Restricted
         return 0;
     case 12:
         Away_cmd(user, msg);
@@ -69,7 +69,7 @@ int server::Check_command(user *user, std::string str)
         Users_cmd(user, msg);
         return 0;
     case 14:
-        Wallops_cmd(user, msg);
+        Wallops_cmd(user, msg); // Add Restricted
         return 0;
     case 15:
         Pong_cmd(user, msg);
@@ -217,6 +217,11 @@ void server::User_cmd(user *user, t_IRCMessage cmd) {
 
 void server::Nick_cmd(user *user, t_IRCMessage cmd) {
 
+    if (isRestricted(user))
+    {
+        _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
+        return ;
+    } 
     // Verifie les arguments de NICK
     if (cmd.params[0].empty()) {
         _Output_client(user->Get_fd_client(), ERR_NONICKNAMEGIVEN(_name_serveur));
@@ -315,6 +320,11 @@ int server::Quit_cmd(user *user, t_IRCMessage cmd)
 
 void server::Join_cmd(user *user, t_IRCMessage cmd)
 { // jgour
+    if (isRestricted(user))
+    {
+        _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
+        return ;
+    }
     std::cout << "COMMANDE -> JOIN" << std::endl;
 
         // ERR_NEEDMOREPARAMS              ERR_BANNEDFROMCHAN
@@ -425,9 +435,14 @@ TODO :
     Check if user is away or Invite user
     Send REPLY INVITE to ender */
 void server::Invite_cmd(user *sender, t_IRCMessage cmd)
-{ // jgoru
+{
     std::cout << "COMMANDE -> INVITE" << std::endl;
 
+    if (isRestricted(sender))
+    {
+        _Output_client(sender->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
+        return ;
+    } 
     if (_parse_invite(sender, cmd))         // Parse INVITE command
         return;
     user *target_nick = _check_nick_invite(sender, cmd); 
@@ -442,15 +457,19 @@ void server::Invite_cmd(user *sender, t_IRCMessage cmd)
     }
 };
 
-void server::Kick_cmd(user *user, t_IRCMessage cmd)
+void server::Kick_cmd(user *sender, t_IRCMessage cmd)
 { // jgour
+    if (isRestricted(sender))
+    {
+        _Output_client(sender->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
+        return ;
+    } 
     std::cout << "COMMANDE -> KICK" << std::endl;
     (void)cmd;
-    (void)user;
+    (void)sender;
 };
 
 /* TODO :
-  - Check if User is restricted/muted in the channel -> ERR_CANNOTSENDTOCHAN
   - Check if /msg #chan,nick
   - Check away message + send message anyway
   
@@ -461,6 +480,11 @@ void server::Privmsg_cmd(user *sender, t_IRCMessage cmd)
 {
     std::cout << "COMMANDE -> PRIVMSG" << std::endl;
 
+    if (isRestricted(sender))
+    {
+        _Output_client(sender->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
+        return ;
+    } 
     if (_parse_privmsg(sender, cmd))                                                // Parse PRIVMSG command
         return;
     std::vector<std::string> target = _target_handle(cmd);                          // Create a vector of targets
@@ -480,6 +504,11 @@ void server::Notice_cmd(user *sender, t_IRCMessage cmd)
 {
     std::cout << "COMMANDE -> NOTICE" << std::endl;
 
+    if (isRestricted(sender))
+    {
+        _Output_client(sender->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
+        return ;
+    }
     if (_parse_notice_wallops(cmd))                                                 // Parse PRIVMSG command
         return;
     std::vector<std::string> target = _target_handle(cmd);                          // Create a vector of targets
@@ -499,12 +528,11 @@ void server::Away_cmd(user *user, t_IRCMessage cmd) {
 
     std::cout << "AWAY" << std::endl;
     // Verifie que le user est enregistre
-    if (user->Get_username().empty())
+    if (user->Get_username().empty() || isRestricted(user))
     {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
         return;
-    }
-
+    } 
     // Verifie les arguments de AWAY
     // Si l'utilisateur ne passe pas de parametre, l'indicateur d'absence est supprime
     if (cmd.params.empty()) {
@@ -562,6 +590,11 @@ void server::Wallops_cmd(user *sender, t_IRCMessage cmd)
 {
     std::cout << "COMMANDE -> WALLOPS" << std::endl;
 
+    if (isRestricted(sender))
+    {
+        _Output_client(sender->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
+        return ;
+    }
     if (_parse_notice_wallops(cmd))                                                 // Parse WALLOPS command
         return;
     if (sender->Get_mode().Get_operator() == false)                                 // Check is user is an Operator

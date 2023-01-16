@@ -192,3 +192,10 @@ std::string getEnvVar( std::string const & key ) {
     char * val = getenv( key.c_str() );
     return val == NULL ? std::string("") : std::string(val);
 }
+
+bool    isRestricted(user *sender)
+{
+    if(sender->Get_mode().Get_restricted())
+        return true;
+    return false;
+}
