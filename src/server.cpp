@@ -367,4 +367,8 @@ void    server::_Print_user()
         for (size_t i = 0; i < chan.size(); i++)
             std::cout << "   " << i << ":" << chan[i]->Get_channel_name() << std::endl;
     }
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> 893f785622bde1e6ac26a4e48efb3a3250f34a8c
