@@ -326,7 +326,7 @@ int server::_Input_client(std::vector<pollfd>::iterator it) {
 int server::_Output_client(int fd, std::string msg) {
     ssize_t ret;
 
-    msg.append("\r\n"); // voir si on ajoute ici ou dans les cmd de bases
+    msg.append("\r\n");
 
     std::cout << fd << " >> " << msg << std::endl;
     ret = send(fd, msg.c_str(), msg.size(), 0);

@@ -80,11 +80,9 @@ class server
         channel     *_Channel_already_exist(std::string str);
 
         /* COMMAND*/
-                    /* Join */
         int                      _Join_treat(user *user, std::vector<std::string> chan, std::vector<std::string> key);
         int                      _Join_treat(user *user, std::vector<std::string> chan);
         void                     _Join_rpl(user *user, channel *chan);
-                    /* Privmsg */
         bool                     _parse_privmsg(user *sender, struct s_IRCMessage cmd);
         std::vector<std::string> _target_handle(struct s_IRCMessage cmd);
         std::vector<int>         _targetfds_creator_privmsg(user *sender, std::vector<std::string> target);
@@ -144,7 +142,7 @@ class server
         void    Mode_cmd(user *user, struct s_IRCMessage cmd);
         void    Join_cmd(user *user, struct s_IRCMessage cmd);
         void    Part_cmd(user *user, struct s_IRCMessage cmd);
-        //void   Topic_cmd(user *user, struct s_IRCMessage cmd);
+        void    Topic_cmd(user *user, struct s_IRCMessage cmd);
         int     Quit_cmd(user *user, struct s_IRCMessage cmd);
         
         void    Names_cmd(user *user, struct s_IRCMessage cmd);

@@ -21,6 +21,9 @@ class channel
         // Key channel
         std::string _key;
 
+        // Channel's topic
+        std::string _topic;
+
 
 
     public:
@@ -51,6 +54,7 @@ class channel
 
         const std::string       Get_channel_name() const;
         const std::string       Get_channel_key() const;
+        const std::string       Get_channel_topic() const;
         std::vector<user *>     Get_list_channel_user() const;
         std::vector<user *>     Get_list_operator() const;
 
