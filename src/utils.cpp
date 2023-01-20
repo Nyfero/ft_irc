@@ -1,22 +1,19 @@
 #include "../class/utils.hpp"
 
+/*********************/
+/****** PARSING ******/
+/*********************/
+
 int parsing(int argc, char **argv) {
 
-
-    /*
-    **  3 Arg
-    */
-
+   // 3 Arguments
     if (argc != 3) {
         std::cerr << "The executable will run as follows:\n\t./ircserv <port> <password>" << std::endl;
         return 1;
     }
 
-    /*
-    **  Port only contain number (0 - 9)
-    **  Port's range (1024 - 65535) 16-bits
-    */
-   
+    // Port only contain number (0 - 9)
+    // Port's range (1024 - 65535) 16-bits
     std::string valid_port(argv[1]);
     if (!isNumber(valid_port)) {
         std::cerr << "The port must be an int" << std::endl;
@@ -28,11 +25,8 @@ int parsing(int argc, char **argv) {
         return 1;
     }
 
-    /*
-    **  password lenght: 1 - 12 char
-    **  only 0-9 a-z A-Z
-    */
-   
+    // password lenght: 1 - 12 char
+    // only 0-9 a-z A-Z
     std::string password(argv[2]);
     if (password.length() < 1 || password.length() > 12) {
         std::cerr << "Password's lenght must be between 1 and 12" << std::endl;
@@ -72,6 +66,12 @@ int Stoi(std::string str) {
     }
     return res;
 };
+
+
+
+/**********************/
+/****** CHANNELS ******/
+/**********************/
 
 bool    User_in_channel(user *use, channel *chan) {
     // chan exist && user exist
@@ -124,28 +124,17 @@ bool   User_in_channel_is_op(user *use, channel *chan) {
     return 0;
 };
 
-/* bool    IsInTargetFds(int fd_client, std::vector<int> target_fds) {
-    size_t  i = 0;
-    while (i < target_fds.size()) {
-        if (fd_client == target_fds[i]) {
-            return true;
-        }
-        i++;
-    }
-    return false;
-}; */
 
+
+/**********************/
+/****** COMMANDE ******/
+/**********************/
+
+// Creer et rempli une structure_IRCMessage
 t_IRCMessage split_message(user *user, std::string& input) {
     t_IRCMessage msg;
 
-/*     // Extract the prefix if it exists
-    if (input[0] == ':') {
-        size_t prefixEnd = input.find(' ');
-        msg.prefix = input.substr(1, prefixEnd - 1);
-        input = input.substr(prefixEnd + 1);
-    } */
-
-    msg.prefix += ":" + user->Get_nickname() + "!" + user->Get_username() + "@" + user->Get_hostname();
+    msg.prefix = ":" + user->Get_nickname() + "!" + user->Get_username() + "@" + user->Get_hostname();
 
     // Extract the command and parameters
     std::stringstream ss(input);
@@ -186,11 +175,6 @@ std::string Join(std::vector<std::string> vec, size_t start, size_t end) {
     }
 
     return res;
-}
-
-std::string getEnvVar( std::string const & key ) {
-    char * val = getenv( key.c_str() );
-    return val == NULL ? std::string("") : std::string(val);
 }
 
 bool    isRestricted(user *sender)

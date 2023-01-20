@@ -45,10 +45,6 @@ void    server::_Join_rpl(user *use, channel *chan){
     }
     std::string prefix = use->Get_nickname() + "!" + use->Get_username() + "@" + use->Get_hostname();
 
-    // _Output_channel(chan, ":" + prefix + " JOIN " + ":" + chan->Get_channel_name());
-
-    //_Output_client(use->Get_fd_client(), RPL_TOPIC(_name_serveur, chan->Get_channel_name(), chan->Get_channel_topic()));
-    
     _Output_client(use->Get_fd_client(), RPL_NAMREPLY(_name_serveur, chan->Get_channel_name(), names));
     _Output_client(use->Get_fd_client(), RPL_ENDOFNAMES(_name_serveur, use->Get_nickname(),chan->Get_channel_name()));
 }

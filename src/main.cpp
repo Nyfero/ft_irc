@@ -2,8 +2,7 @@
 
 extern bool g_stop;
 
-void    Sig(int sig)
-{
+void    Sig(int sig) {
     (void) sig;
     g_stop = 0;
 }
