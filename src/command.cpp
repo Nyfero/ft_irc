@@ -405,12 +405,16 @@ void server::Names_cmd(user *user, t_IRCMessage cmd) {
 
 /*  
 TODO :   
+    ( Check if privilege needed
+    Do we do Flags in channel ? Invite only )
+
+    Check if channel exists, if not create and add sender to newchannel
+    Add target to channel
+
     Parse (Check enough param == 2
     Check is a Nickname, Check Inviter is part of channel, Check dest is already in the channel
-    Check if channel exists, if not create
-    Check if privilege needed
     Check if user is away or Invite user
-    Send REPLY INVITE to ender */
+    Send REPLY INVITE to sender */
 void server::Invite_cmd(user *sender, t_IRCMessage cmd) {
     
     // Verifie que le user est enregistre
@@ -418,7 +422,6 @@ void server::Invite_cmd(user *sender, t_IRCMessage cmd) {
         _Output_client(sender->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
         return;
     }
-
     if (isRestricted(sender))
     {
         _Output_client(sender->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
@@ -435,7 +438,10 @@ void server::Invite_cmd(user *sender, t_IRCMessage cmd) {
     if (_user_already_member(target_nick, target_chan))
     {
 		_Output_client(sender->Get_fd_client(), ERR_USERONCHANNEL(_name_serveur, target_nick->Get_nickname(), target_chan->Get_channel_name()));
+        return;
     }
+    // Add target_nick to target_chan
+    _invite_success(sender, cmd);
 };
 
 void server::Kick_cmd(user *sender, t_IRCMessage cmd) {

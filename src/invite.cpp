@@ -70,3 +70,11 @@ bool	server::_user_already_member(user *target_nick, channel *target_chan)
 	}
 	return false;
 }
+
+void	server::_invite_success(user *sender, s_IRCMessage cmd)
+{
+	_Output_client(sender->Get_fd_client(), RPL_INVITING(_name_serveur, cmd.params[0], cmd.params[1]));
+	std::string invited_message = cmd.prefix + " " + cmd.command + " " + cmd.params[0] + " " + cmd.params[1];	
+	std::cout << invited_message << std::endl;
+	_Output_client(sender->Get_fd_client(), invited_message);
+}

@@ -104,6 +104,7 @@ class server
         user	                 *_check_nick_invite(user *sender, struct s_IRCMessage cmd);
         channel	                 *_check_chan_invite(user *sender, struct s_IRCMessage cmd);
         bool                     _user_already_member(user *target_nick, channel *target_chan);
+        void                     _invite_success(user *sender, s_IRCMessage cmd);
 
     public:
 
