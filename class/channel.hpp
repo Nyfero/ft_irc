@@ -48,6 +48,8 @@ class channel
 
         void Add_oper(user *use);
 
+        void Mod_topic(std::string str);
+
         /************************/
         /******* ACCESSOR *******/
         /************************/

@@ -368,3 +368,14 @@ void    server::_Print_user()
             std::cout << "   " << i << ":" << chan[i]->Get_channel_name() << std::endl;
     }
 };
+
+bool    server::_User_is_in_chan(user *use, channel *chan){
+    std::vector<user*> liste;
+
+    liste = chan->Get_list_channel_user();
+    for (size_t i = 0; i < liste.size(); i++){
+        if (liste[i]->Get_fd_client() == use->Get_fd_client())
+            return true;
+    }
+    return false;
+}

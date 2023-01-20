@@ -25,9 +25,7 @@
 # define RPL_TOPIC(serveur, chan, topic) ":" + serveur + " 332 " + chan + " :" + topic
 # define RPL_INVITING(serveur, nick, chan) ":" + serveur + " 341 " + nick + " " + chan
 
-// # define RPL_NAMREPLY(serveur, chan, names) ":" + serveur + " 353 " + chan + " :" + names
-# define RPL_NAMREPLY(serveur, nick, mod, chan, names)	":" + serveur + " 353 " + nick + " " + mod + " " + chan + " :" + names
-
+# define RPL_NAMREPLY(serveur, chan, names) ":" + serveur + " 353 " + chan + " :" + names
 
 
 # define RPL_ENDOFNAMES(serveur, nick, chan) ":" + serveur + " 366 " + nick + " " + chan + " :End of NAMES list"

@@ -25,7 +25,8 @@
 // Response (fd = 4):   :InRealunControl 353 jgourlin = #qwe :@jgourlin 
 // Response (fd = 4):   :InRealunControl 366 jgourlin #qwe :End of NAMES list
 
-
+// :InRealunControl 332 nick42 #qwe :12345;
+// # define RPL_TOPIC(serveur, chan, topic) ":" + serveur + " 332 " + chan + " :" + topic;
 
 void    server::_Join_rpl(user *use, channel *chan){
     std::string names;
@@ -33,27 +34,22 @@ void    server::_Join_rpl(user *use, channel *chan){
     std::vector<user *> ope;
 
     ope = chan->Get_list_operator();
-    
     res = chan->Get_list_channel_user();
-    if (res.size())
+    for (size_t i = 0; i < res.size(); i++)
     {
-        if (res[0]->Is_op_channel(chan))
-            names += "@";
-        names += res[0]->Get_nickname();
-    }
-    for (size_t i = 1; i < res.size(); i++)
-    {
-        names += " ";
         if (res[i]->Is_op_channel(chan))
             names += "@";
         names += res[i]->Get_nickname();
+        if (i + 1 < res.size())
+            names += " ";
     }
     std::string prefix = use->Get_nickname() + "!" + use->Get_username() + "@" + use->Get_hostname();
-    //_Output_client(use->Get_fd_client(), ":" + prefix + " JOIN " + ":" + chan->Get_channel_name());
 
-    _Output_channel(chan, ":" + prefix + " JOIN " + ":" + chan->Get_channel_name());
+    // _Output_channel(chan, ":" + prefix + " JOIN " + ":" + chan->Get_channel_name());
 
-    _Output_client(use->Get_fd_client(), RPL_NAMREPLY(_name_serveur, use->Get_nickname(), "=", chan->Get_channel_name(), names));
+    //_Output_client(use->Get_fd_client(), RPL_TOPIC(_name_serveur, chan->Get_channel_name(), chan->Get_channel_topic()));
+    
+    _Output_client(use->Get_fd_client(), RPL_NAMREPLY(_name_serveur, chan->Get_channel_name(), names));
     _Output_client(use->Get_fd_client(), RPL_ENDOFNAMES(_name_serveur, use->Get_nickname(),chan->Get_channel_name()));
 }
 
