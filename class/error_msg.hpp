@@ -61,6 +61,7 @@
 # define ERR_USERNOTINCHANNEL(serveur, nick, chan) ":" + serveur + " 441 " + nick + " " + chan + " :They aren't on that channel"
 # define ERR_NOTONCHANNEL(serveur, chan) ":" + serveur + " 442 " + chan + " :You're not on that channel"
 # define ERR_USERONCHANNEL(serveur, nick, chan) ":" + serveur + " 443 " + nick + " " + chan + " :is already on channel"
+# define ERR_NOLOGIN(serveur, usr) ":" + serveur + " 444 " + usr " :User not logged in"
 # define ERR_USERDISABLED(serveur, nick) ":" + serveur + " 446 " + nick + " :User has been disabled"
 # define ERR_NEEDMOREPARAMS(serveur, commande) ":" + serveur + " 461 " + commande + " : Not enough parameters"
 # define ERR_ALREADYREGISTRED(serveur) ":" + serveur + " 462 :Unauthorized command (already registered)"

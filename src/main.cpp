@@ -11,8 +11,6 @@ void    Sig(int sig)
 int main(int argc, char **argv) {
     std::cout << "BEGIN MAIN" << std::endl;
 
-    std::cout << "mdp admin: |" << getEnvVar("MDP") << "|"  << std::endl;
-
     if (parsing(argc, argv)) {
         return 1;
     }
