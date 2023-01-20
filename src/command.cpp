@@ -457,7 +457,7 @@ void server::Kick_cmd(user *sender, t_IRCMessage cmd) {
 
 /* TODO :
   - Check if /msg #chan,nick
-  - Check away message + send message anyway
+  - Check away message
   
   - Check for correct ERR MESSAGE
   - Handle ERR_TOOMANYTARGETS (how could this happen actually ?)
