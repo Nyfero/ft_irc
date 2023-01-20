@@ -24,8 +24,7 @@ class user
         // Channels du client
         std::vector<channel *> _channel_register;
 
-        // Si le client est enregistre sur le serveur
-        bool                _is_register;
+        int             _login_status;
 
         // Structure des requetes du client et son fd
         struct pollfd   _fd_poll_client;
