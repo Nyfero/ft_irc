@@ -20,15 +20,33 @@ endif
 #    Includes
 CLASS_PATH = class
 
-CFILES =	utils.hpp server.hpp user.hpp channel.hpp error_msg.hpp mode.hpp
+CFILES =	utils.hpp 		\
+			server.hpp 		\
+			user.hpp 		\
+			channel.hpp		\
+			error_msg.hpp 	\
+			mode.hpp 		\
+			\
 
 CLASS = $(addprefix $(CLASS_PATH)/, $(CFILES))
 
 #    Files
 SRCS_PATH = src
 
-FILES = main.cpp \
-		user.cpp server.cpp utils.cpp channel.cpp command.cpp mode.cpp join.cpp privmsg.cpp notice.cpp wallops.cpp
+FILES = main.cpp 	\
+		user.cpp 	\
+		server.cpp 	\
+		utils.cpp 	\
+		channel.cpp \
+		command.cpp \
+		mode.cpp 	\
+		join.cpp 	\
+		privmsg.cpp \
+		notice.cpp 	\
+		wallops.cpp	\
+		invite.cpp	\
+		\
+
 
 SRCS = $(addprefix $(SRCS_PATH)/, $(FILES))
 

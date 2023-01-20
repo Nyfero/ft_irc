@@ -1,18 +1,4 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   privmsg.cpp                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/01/14 17:54:33 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/14 20:05:27 by egiacomi         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-#include "../class/server.hpp"
 #include "../class/utils.hpp"
-#include "../class/user.hpp"
 
 bool	server::_parse_privmsg(user *sender, t_IRCMessage cmd)
 {
@@ -33,7 +19,7 @@ bool	server::_parse_privmsg(user *sender, t_IRCMessage cmd)
     }
     if (cmd.params[1][0] != ':')																		// Check message start with a ":"
     {
-        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PRIVMSG"));
+        _Output_client(sender->Get_fd_client(), ERR_NOTEXTTOSEND(_name_serveur));
         return true;
     }	
 	return false;
@@ -61,12 +47,13 @@ bool	server::_add_user_targetfds_privmsg(user *sender, std::vector<int> *targets
 		if (Compare_case_sensitive(_list_user[i]->Get_nickname(), target))								// Check if username exists
 		{
 			if (_list_user[i]->Get_mode().Get_away())													// Check if user is away, if so : send away reply
-				_Output_client(sender->Get_fd_client(), _list_user[i]->Get_mode().Get_away_reply());
+				_Output_client(sender->Get_fd_client(), RPL_AWAY(_name_serveur, sender->Get_nickname(), _list_user[i]->Get_nickname(), _list_user[i]->Get_mode().Get_away_reply()));
 			else
 				targets_fds->push_back(_list_user[i]->Get_fd_client());									// Add user_fd if he's not away
 			return false;
 		}
 	}
+	_Output_client(sender->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur, target));
 	return true;
 }
 
@@ -81,13 +68,13 @@ bool	server::_add_channel_targetfds_privmsg(user *sender, std::vector<int> *targ
 			{
 				std::vector<user *> channel_users = _list_channel[i]->Get_list_channel_user();
 				for (size_t i = 0; i < channel_users.size(); i++)										// Add all channel_users_fd
-					targets_fds->push_back(channel_users[i]->Get_fd_client());
+				{
+					if (channel_users[i]->Get_fd_client() != sender->Get_fd_client())
+						targets_fds->push_back(channel_users[i]->Get_fd_client());
+				}
 			}
 			else
-			{
-				std::string chan_found = _list_channel[i]->Get_channel_name();
-				_Output_client(sender->Get_fd_client(), ERR_CANNOTSENDTOCHAN(_name_serveur, chan_found));
-			}
+				_Output_client(sender->Get_fd_client(), ERR_CANNOTSENDTOCHAN(_name_serveur, channel_test));
 			return false;
 		}
 	}	
@@ -100,7 +87,7 @@ std::vector<int> server::_targetfds_creator_privmsg(user *sender, std::vector<st
 	std::vector<int> targets_fds;
     for (std::vector<std::string>::iterator it = target.begin(); it != target.end(); ++it)
 	{
-        if ((*it)[0] == '#')
+		if (Check_valid_channel(*it))
 		{
 			if (_list_channel.empty())
             {
@@ -118,10 +105,10 @@ std::vector<int> server::_targetfds_creator_privmsg(user *sender, std::vector<st
 
 std::string server::_create_msg(t_IRCMessage cmd)
 {
-    std::string message = cmd.params[1];
-    for (size_t i = 2; i < cmd.params.size(); i++) {
+	std::string message = cmd.prefix + " " + cmd.command + " " + cmd.params[0];	
+    for (size_t i = 1; i < cmd.params.size(); i++) {
         message += " " + cmd.params[i];
 	}
-    message = message.substr(1, message.size());		// Delete the ":"
+	std::cout << message << std::endl;
 	return message;
 }

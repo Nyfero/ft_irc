@@ -135,15 +135,17 @@ bool   User_in_channel_is_op(user *use, channel *chan) {
     return false;
 }; */
 
-t_IRCMessage split_message(std::string& input) {
+t_IRCMessage split_message(user *user, std::string& input) {
     t_IRCMessage msg;
 
-    // Extract the prefix if it exists
+/*     // Extract the prefix if it exists
     if (input[0] == ':') {
         size_t prefixEnd = input.find(' ');
         msg.prefix = input.substr(1, prefixEnd - 1);
         input = input.substr(prefixEnd + 1);
-    }
+    } */
+
+    msg.prefix += ":" + user->Get_nickname() + "!" + user->Get_username() + "@" + user->Get_hostname();
 
     // Extract the command and parameters
     std::stringstream ss(input);
@@ -184,4 +186,16 @@ std::string Join(std::vector<std::string> vec, size_t start, size_t end) {
     }
 
     return res;
+}
+
+std::string getEnvVar( std::string const & key ) {
+    char * val = getenv( key.c_str() );
+    return val == NULL ? std::string("") : std::string(val);
+}
+
+bool    isRestricted(user *sender)
+{
+    if(sender->Get_mode().Get_restricted())
+        return true;
+    return false;
 }

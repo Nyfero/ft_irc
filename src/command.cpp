@@ -1,12 +1,10 @@
-#include "../class/server.hpp"
 #include "../class/utils.hpp"
-#include "../class/user.hpp"
 
 int server::Check_command(user *user, std::string str)
 {
     std::cout << std::endl << "Check_command: " << str << std::endl;
 
-    t_IRCMessage msg = split_message(str);
+    t_IRCMessage msg = split_message(user, str);
 
     std::cout << "command: " << msg.command << std::endl;
     std::cout << "prefix: " << msg.prefix << std::endl;
@@ -14,10 +12,10 @@ int server::Check_command(user *user, std::string str)
         std::cout << "params[" << i << "]: " << msg.params[i] << std::endl;
     }
 
-    std::string list_command[16] = {"PASS", "USER", "NICK", "MODE", "QUIT", "JOIN", "PART", "NAMES", "INVITE", "KICK", "PRIVMSG", "NOTICE", "AWAY", "USERS", "WALLOPS", "PING"};
+    std::string list_command[18] = {"PASS", "USER", "NICK", "MODE", "QUIT", "JOIN", "PART", "NAMES", "INVITE", "KICK", "PRIVMSG", "NOTICE", "AWAY", "USERS", "WALLOPS", "PING", "OPER", "TOPIC"};
 
     int i = 0;
-    while (i < 15)
+    while (i < 18)
     {
         if (msg.command == list_command[i])
         {
@@ -34,7 +32,7 @@ int server::Check_command(user *user, std::string str)
         User_cmd(user, msg);
         return 0;
     case 2:
-        Nick_cmd(user, msg);
+        Nick_cmd(user, msg); // Add Restricted
         return 0;
     case 3:
         Mode_cmd(user, msg);
@@ -42,7 +40,7 @@ int server::Check_command(user *user, std::string str)
     case 4:
         return (Quit_cmd(user, msg));
     case 5:
-        Join_cmd(user, msg);
+        Join_cmd(user, msg); // Add Restricted
         return 0;
     case 6:
         Part_cmd(user, msg);
@@ -51,16 +49,16 @@ int server::Check_command(user *user, std::string str)
         Names_cmd(user, msg);
         return 0;
     case 8:
-        Invite_cmd(user, msg);
+        Invite_cmd(user, msg); // Add Restricted
         return 0;
     case 9:
-        Kick_cmd(user, msg);
+        Kick_cmd(user, msg); // Add Restricted
         return 0;
     case 10:
-        Privmsg_cmd(user, msg);
+        Privmsg_cmd(user, msg); // Add Restricted
         return 0;
     case 11:
-        Notice_cmd(user, msg);
+        Notice_cmd(user, msg); // Add Restricted
         return 0;
     case 12:
         Away_cmd(user, msg);
@@ -69,10 +67,16 @@ int server::Check_command(user *user, std::string str)
         Users_cmd(user, msg);
         return 0;
     case 14:
-        Wallops_cmd(user, msg);
+        Wallops_cmd(user, msg); // Add Restricted
         return 0;
     case 15:
         Pong_cmd(user, msg);
+        return 0;
+    case 16:
+        Oper_cmd(user, msg);
+        return 0;
+    case 17:
+        Topic_cmd(user, msg);
         return 0;
     default:
         std::cout << "*** server::Check_command - ***" << std::endl;
@@ -214,6 +218,11 @@ void server::User_cmd(user *user, t_IRCMessage cmd) {
 
 void server::Nick_cmd(user *user, t_IRCMessage cmd) {
 
+    if (isRestricted(user))
+    {
+        _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
+        return ;
+    } 
     // Verifie les arguments de NICK
     if (cmd.params[0].empty()) {
         _Output_client(user->Get_fd_client(), ERR_NONICKNAMEGIVEN(_name_serveur));
@@ -312,6 +321,11 @@ int server::Quit_cmd(user *user, t_IRCMessage cmd)
 
 void server::Join_cmd(user *user, t_IRCMessage cmd)
 { // jgour
+    if (isRestricted(user))
+    {
+        _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
+        return ;
+    }
     std::cout << "COMMANDE -> JOIN" << std::endl;
 
         // ERR_NEEDMOREPARAMS              ERR_BANNEDFROMCHAN
@@ -419,29 +433,65 @@ void server::Names_cmd(user *user, t_IRCMessage cmd)
     (void)user;
 };
 
-void server::Invite_cmd(user *user, t_IRCMessage cmd)
-{ // jgoru
+/*  
+TODO :   
+    Parse (Check enough param == 2
+    Check is a Nickname, Check Inviter is part of channel, Check dest is already in the channel
+    Check if channel exists, if not create
+    Check if privilege needed
+    Check if user is away or Invite user
+    Send REPLY INVITE to ender */
+void server::Invite_cmd(user *sender, t_IRCMessage cmd)
+{
     std::cout << "COMMANDE -> INVITE" << std::endl;
-    (void)cmd;
-    (void)user;
+
+    if (isRestricted(sender))
+    {
+        _Output_client(sender->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
+        return ;
+    } 
+    if (_parse_invite(sender, cmd))         // Parse INVITE command
+        return;
+    user *target_nick = _check_nick_invite(sender, cmd); 
+    if (target_nick == NULL)                // Check that the param 1 : Nickname is correct
+        return;
+    channel *target_chan = _check_chan_invite(sender, cmd);
+    if (target_chan == NULL)
+        return;
+    if (_user_already_member(target_nick, target_chan))
+    {
+		_Output_client(sender->Get_fd_client(), ERR_USERONCHANNEL(_name_serveur, target_nick->Get_nickname(), target_chan->Get_channel_name()));
+    }
 };
 
-void server::Kick_cmd(user *user, t_IRCMessage cmd)
+void server::Kick_cmd(user *sender, t_IRCMessage cmd)
 { // jgour
+    if (isRestricted(sender))
+    {
+        _Output_client(sender->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
+        return ;
+    } 
     std::cout << "COMMANDE -> KICK" << std::endl;
     (void)cmd;
-    (void)user;
+    (void)sender;
 };
 
 /* TODO :
-  - Check if User is restricted/muted in the channel -> ERR_CANNOTSENDTOCHAN
-  - Handle wildcard and send message to mask with a wild-card for a top level domain + ERR_WILDTOPLEVEL + ERR_NOTOPLEVEL
+  - Check if /msg #chan,nick
+  - Check away message + send message anyway
+  
+  - Check for correct ERR MESSAGE
   - Handle ERR_TOOMANYTARGETS (how could this happen actually ?)
 */
 void server::Privmsg_cmd(user *sender, t_IRCMessage cmd)
 {
     std::cout << "COMMANDE -> PRIVMSG" << std::endl;
 
+    if (isRestricted(sender))
+    {
+        _Output_client(sender->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
+        return ;
+    } 
     if (_parse_privmsg(sender, cmd))                                                // Parse PRIVMSG command
         return;
     std::vector<std::string> target = _target_handle(cmd);                          // Create a vector of targets
@@ -461,6 +511,11 @@ void server::Notice_cmd(user *sender, t_IRCMessage cmd)
 {
     std::cout << "COMMANDE -> NOTICE" << std::endl;
 
+    if (isRestricted(sender))
+    {
+        _Output_client(sender->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
+        return ;
+    }
     if (_parse_notice_wallops(cmd))                                                 // Parse PRIVMSG command
         return;
     std::vector<std::string> target = _target_handle(cmd);                          // Create a vector of targets
@@ -476,41 +531,34 @@ void server::Notice_cmd(user *sender, t_IRCMessage cmd)
     }
 };
 
-void server::Away_cmd(user *user, t_IRCMessage cmd)
-{
+void server::Away_cmd(user *user, t_IRCMessage cmd) {
 
+    std::cout << "AWAY" << std::endl;
     // Verifie que le user est enregistre
-    if (user->Get_username().empty())
+    if (user->Get_username().empty() || isRestricted(user))
     {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
         return;
-    }
-
+    } 
     // Verifie les arguments de AWAY
-    // Si l'utilisateur ne passe pas de parametre, le message d'absence est vide
-    if (cmd.params.empty())
-    {
-        user->Set_mode("+a");
+    // Si l'utilisateur ne passe pas de parametre, l'indicateur d'absence est supprime
+    if (cmd.params.empty()) {
+        user->Set_mode("-a");
         user->Get_mode().Set_away_reply("");
-        _Output_client(user->Get_fd_client(), "Changed away status to away with no message");
+        _Output_client(user->Get_fd_client(), RPL_UNAWAY(_name_serveur, user->Get_nickname()));
         return;
     }
 
     // Si l'utilisateur passe un parametre, le message d'absence est celui passe en parametre
-    std::string away = cmd.params[0];
-    for (size_t i = 1; i < cmd.params.size(); i++) {
-        away += " " + cmd.params[i];
-    }
-
-    if (away[0] != ':')
-    {
+    if (cmd.params[0].at(0) != ':') {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "AWAY"));
         return;
     }
-    away = away.substr(1, away.size());
+    std::string away_msg = Join(cmd.params, 0, cmd.params.size());
+    away_msg = away_msg.substr(1, away_msg.size());
     user->Set_mode("+a");
-    user->Get_mode().Set_away_reply(away);
-    _Output_client(user->Get_fd_client(), "Changed away status to away with message: " + away);
+    user->Get_mode().Set_away_reply(away_msg);
+    _Output_client(user->Get_fd_client(), RPL_NOWAWAY(_name_serveur, user->Get_nickname()));
 };
 
 void server::Users_cmd(user *user, t_IRCMessage cmd)
@@ -549,6 +597,11 @@ void server::Wallops_cmd(user *sender, t_IRCMessage cmd)
 {
     std::cout << "COMMANDE -> WALLOPS" << std::endl;
 
+    if (isRestricted(sender))
+    {
+        _Output_client(sender->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
+        return ;
+    }
     if (_parse_notice_wallops(cmd))                                                 // Parse WALLOPS command
         return;
     if (sender->Get_mode().Get_operator() == false)                                 // Check is user is an Operator
@@ -573,14 +626,111 @@ void server::Pong_cmd(user *user, t_IRCMessage cmd)
 {
     std::cout << "PONG" << std::endl;
 
-    // Verifie les arguments de PONG
     if (cmd.params.empty())
     {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PONG"));
         return;
     }
-
-    std::string pong = cmd.params[0];
-    std::cout << ":" + user->Get_nickname() + " PONG " + user->Get_nickname() + " :" + pong + "\r\n"
+    std::string pong = "PONG " + cmd.params[0];
+    std::cout << ":" + user->Get_nickname() + " :" + pong + "\r\n"
               << std::endl;
+    _Output_client(user->Get_fd_client(), pong);
+};
+
+void server::Oper_cmd(user *user, t_IRCMessage cmd) {
+    
+    // Verifie les arguments de OPER
+    if (cmd.params.size() < 2) {
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "OPER"));
+        return;
+    }
+
+    // Verifie que le nom d'utilisateur est correct
+    if (cmd.params[0] != user->Get_username().substr(0, user->Get_username().find(' ', 0)) && cmd.params[0] != user->Get_nickname()) {
+        _Output_client(user->Get_fd_client(), ERR_NOOPERHOST(_name_serveur));
+        return;
+    }
+
+    // Verifie que le mot de passe est correct
+    if (cmd.params[1] != _admin_password) {
+        _Output_client(user->Get_fd_client(), ERR_PASSWDMISMATCH(_name_serveur));
+        return;
+    }
+
+    // Si tout est correct, l'utilisateur devient operateur
+    user->Set_mode("+o");
+    _Output_client(user->Get_fd_client(), RPL_YOUREOPER(_name_serveur, user->Get_nickname()));
+};
+
+void server::Topic_cmd(user *user, t_IRCMessage cmd) {
+    (void)user;
+    (void)cmd;
+
+    // change for checkout lvl 3
+
+//     Command: TOPIC
+//    Parameters: <channel> [ <topic> ]
+
+//    The TOPIC command is used to change or view the topic of a channel.
+//    The topic for channel <channel> is returned if there is no <topic>
+//    given.  If the <topic> parameter is present, the topic for that
+//    channel will be changed, if this action is allowed for the user
+//    requesting it.  If the <topic> parameter is an empty string, the
+//    topic for that channel will be removed.
+
+        // ERR_NEEDMOREPARAMS              ERR_NOTONCHANNEL
+        // RPL_NOTOPIC                     RPL_TOPIC
+        // ERR_CHANOPRIVSNEEDED            ERR_NOCHANMODES
+
+//  Examples:
+
+//    :WiZ!jto@tolsun.oulu.fi TOPIC #test :New topic
+//      ; User Wiz setting the topic.
+
+//    TOPIC #test :another topic
+//      ; Command to set the topic on #test to "another topic".
+
+//    TOPIC #test :
+//      ; Command to clear the topic on #test.
+
+//    TOPIC #test
+//      ; Command to check the topic for #test.
+
+    // 1 seul chan a la fois
+
+    // size == 1: afficher topic du channel
+    //      peut etre utiliser sans etre dans le chan
+
+    // size == 2: changer topic du channel
+    //      doit etre chans le chan
+    //      tous les membres peuvent le changer
+
+    //params[0] == channel
+    //params [1+] == message, retirer ':'
+    if (cmd.params.empty()){
+        // ERR_NEEDMOREPARAMS 
+    }
+    if (!_Channel_already_exist(cmd.params[0]))
+    {
+        std::cout << "chan no found" << std::endl;
+        return ;
+    }
+
+    if (cmd.params.size() == 1)
+    {
+        std::cout << "TOPIC: 1 arg" << std::endl;
+        std::cout << cmd.params[0] << std::endl;
+        
+    }
+    else if (cmd.params.size() >= 2)
+    {
+
+        std::cout << "TOPIC: 2 arg" << std::endl;
+        for (size_t i = 0; i < cmd.params.size(); i++)
+        {
+            std::cout << cmd.params[i] << std::endl;
+        }
+        // std::cout << cmd.params[0] << std::endl;
+        // std::cout << cmd.params[1] << std::endl;
+    }
 };

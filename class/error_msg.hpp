@@ -16,7 +16,7 @@
 
 # define RPL_UMODEIS(serveur, mode) ":" + serveur + " 221 " + mode
 
-# define RPL_AWAY(serveur, nick, msg) ":" + serveur + " 301 " + nick + " :" + msg
+# define RPL_AWAY(serveur, nick, nick_dest, msg) ":" + serveur + " 301 " + nick + " " + nick_dest + " :" + msg
 # define RPL_UNAWAY(serveur, nick) ":" + serveur + " 305 " + nick + " :You are no longer marked as being away"
 # define RPL_NOWAWAY(serveur, nick) ":" + serveur + " 306 " + nick + " :You have been marked as being away"
 # define RPL_LIST(serveur, chan, nb_users, topic) ":" + serveur + " 322 " + chan + " " + nb_users + " :" + topic

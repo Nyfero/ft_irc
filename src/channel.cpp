@@ -1,4 +1,4 @@
-# include "../class/channel.hpp"
+# include "../class/utils.hpp"
 
 /***************************/
 /******* CONSTRUCTOR *******/
@@ -100,6 +100,10 @@ const std::string   channel::Get_channel_key() const {
     return(_key);
 };
 
+const std::string   channel::Get_channel_topic() const {
+    return(_topic);
+};
+
 std::vector<user *> channel::Get_list_channel_user() const {
     return _list_channel_user;
 };
@@ -107,7 +111,6 @@ std::vector<user *> channel::Get_list_channel_user() const {
 std::vector<user *> channel::Get_list_operator() const {
     return(_list_operator);
 };
-
 
 void    channel::print_user_channel(){
     std::cout << "   user:" << _list_channel_user.size() << std::endl;

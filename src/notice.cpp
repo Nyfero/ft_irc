@@ -1,18 +1,4 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   notice.cpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/01/14 17:54:33 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/14 20:03:26 by egiacomi         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-#include "../class/server.hpp"
 #include "../class/utils.hpp"
-#include "../class/user.hpp"
 
 bool	server::_parse_notice_wallops(t_IRCMessage cmd)
 {
@@ -59,8 +45,11 @@ bool	server::_add_channel_targetfds_notice(user *sender, std::vector<int> *targe
 			if (User_in_channel(sender, _list_channel[i]))											// Check if User is in the Channel
 			{
 				std::vector<user *> channel_users = _list_channel[i]->Get_list_channel_user();
-				for (size_t i = 0; i < channel_users.size(); i++)									// Add all channel user's fd
-					targets_fds->push_back(channel_users[i]->Get_fd_client());
+				for (size_t i = 0; i < channel_users.size(); i++)									// Add all channel_users_fd
+				{
+					if (channel_users[i]->Get_fd_client() != sender->Get_fd_client())
+						targets_fds->push_back(channel_users[i]->Get_fd_client());
+				}
 			}
 			return false;
 		}
@@ -73,7 +62,7 @@ std::vector<int> server::_targetfds_creator_notice(user *sender, std::vector<std
 	std::vector<int> targets_fds;
     for (std::vector<std::string>::iterator it = target.begin(); it != target.end(); ++it)
 	{
-        if ((*it)[0] == '#')
+        if (Check_valid_channel(*it))
 		{
 			if (_list_channel.empty())
 			{
