@@ -1,18 +1,4 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   invite.cpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/01/15 03:52:17 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/16 16:15:01 by egiacomi         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-#include "../class/server.hpp"
 #include "../class/utils.hpp"
-#include "../class/user.hpp"
 
 bool server::_parse_invite(user *sender, t_IRCMessage cmd)
 {
