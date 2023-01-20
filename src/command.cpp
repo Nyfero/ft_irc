@@ -100,33 +100,38 @@ int server::Check_command(user *user, std::string str)
 
 void server::Pass_cmd(user *user, t_IRCMessage cmd) {
 
+    // Verifie si le user est deja connecte
+    if (user->Get_login_status()) { 
+        _Output_client(user->Get_fd_client(), ERR_ALREADYREGISTRED(_name_serveur));
+        return;
+    }
+
     // Verifie les arguments de PASS
     if (cmd.params.empty()) {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PASS"));
         return;
     }
 
-    //change
-    if (user->Get_is_register()) { // Verifie si le user est deja connecte
-        _Output_client(user->Get_fd_client(), ERR_ALREADYREGISTRED(_name_serveur));
-    }
-    else if (cmd.params[0] != _password) { // Verifie le mot de passe
+    // Verifie le mot de passe
+    if (cmd.params[0] != _password) { 
         _Output_client(user->Get_fd_client(), ERR_PASSWDMISMATCH(_name_serveur));
+        return;
     }
-    else { // Connecte le user et envoie un message de bienvenue
-        std::cout << "New user connected on " << user->Get_fd_client() << std::endl;
-        _Output_client(user->Get_fd_client(), "Welcome to the IRC server");
-        //change
-        user->Set_is_register(true);
-    }
+    
+    // Connecte le user et envoie un message de bienvenue
+    std::cout << "PASS b: Get login status " << user->Get_login_status() << std::endl;
+    user->Set_login_status(1);
+    std::cout << "PASS a: Get login status " << user->Get_login_status() << std::endl;
+    std::cout << "New user connected on " << user->Get_fd_client() << std::endl;
+    _Output_client(user->Get_fd_client(), "Welcome to the IRC server");
 
 };
 
 void server::User_cmd(user *user, t_IRCMessage cmd) {
 
-    // Verifie si le user est connecte
-    //change
-    if (!user->Get_is_register() || !user->Get_username().empty()) {
+    // Verifie que le user a deja set son nickname
+    if (user->Get_login_status() != 2) {
+        std::cout << "Get login status " << user->Get_login_status() << std::endl;
         _Output_client(user->Get_fd_client(), ERR_ALREADYREGISTRED(_name_serveur));
         return;
     }
@@ -156,36 +161,43 @@ void server::User_cmd(user *user, t_IRCMessage cmd) {
     }
 
     // Verifie le realname
-    if (cmd.params[3].empty()) {
+    if (cmd.params[3].empty() || cmd.params[3].at(0) != ':') {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "USER"));
         return;
     }
-    if (cmd.params[3].at(0) != ':') {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "USER"));
-        return;
-    }
+
     std::string realname = Join(cmd.params, 3, cmd.params.end() - cmd.params.begin());
     realname = realname.substr(1, realname.size());
 
     // Enregistre le user
+    user->Set_login_status(3);
     user->Set_username(cmd.params[0]);
     user->Set_hostname(cmd.params[2]);
     user->Set_realname(realname);
-    if (!isNumber(cmd.params[1])) {
+    if (!isNumber(cmd.params[1]))
         user->Set_mode("0");
-    }
-    else {
+    else
         user->Set_mode(cmd.params[1]);
-    }
-
-    //change
 
     _Output_client(user->Get_fd_client(), RPL_WELCOME(_name_serveur, user->Get_realname(), user->Get_username(), user->Get_hostname()));
 };
 
 void server::Nick_cmd(user *user, t_IRCMessage cmd) {
 
-    //change
+    // Verifie que le user a rentrer le mot de passe
+    if (!user->Get_login_status()) {
+        std::cout << "NICK: Get login status " << user->Get_login_status() << std::endl;
+        _Output_client(user->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
+        return;
+    }
+
+    if (user->Get_login_status() != 3) {
+        std::cout << "NICK a: Get login status " << user->Get_login_status() << std::endl;
+        user->Set_login_status(2);
+        std::cout << "NICK b: Get login status " << user->Get_login_status() << std::endl;
+    }
+
+    // Verifie si le user n'est pas restreind
     if (isRestricted(user)) {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
         return ;
@@ -206,7 +218,7 @@ void server::Nick_cmd(user *user, t_IRCMessage cmd) {
 
     // Verifie si le nick contient des caracteres speciaux
     for (size_t i = 0; i < cmd.params[0].length(); i++) {
-        if (!isalnum(cmd.params[0][i]) && cmd.params[0][i] != '-' && cmd.params[0][i] != '_' || !cmd.params[1].empty()) {
+        if (!isalnum(cmd.params[0][i]) && cmd.params[0][i] != '-' && cmd.params[0][i] != '_') {
             _Output_client(user->Get_fd_client(), ERR_ERRONEUSNICKNAME(_name_serveur, user->Get_nickname()));
             _Output_client(user->Get_fd_client(), "The nickname must not contain special characters (except - and _)");
             return;
@@ -221,15 +233,14 @@ void server::Nick_cmd(user *user, t_IRCMessage cmd) {
         }
     }
 
-
-    if (!user->Get_username().empty()) { // Modifie le nickname
+    // Modifie le nickname ou le definit
+    if (!user->Get_username().empty()) {
         user->Set_nickname(cmd.params[0]);
         _Output_client(user->Get_fd_client(), "Your nickname is now " + cmd.params[0]);
     }
-    else { // Definit le nickname
+    else {
+        
         user->Set_nickname(cmd.params[0]);
-        //change
-        user->Set_gave_nick(true);
         std::cout << "Introducing new " << cmd.params[0] << " user" << std::endl;
         _Output_client(user->Get_fd_client(), "Hello " + cmd.params[0] + " !");
     }
@@ -238,8 +249,8 @@ void server::Nick_cmd(user *user, t_IRCMessage cmd) {
 void server::Mode_cmd(user *user, t_IRCMessage cmd) {
 
     // Verifie que le user est enregistre
-    if (user->Get_username().empty()) {
-        _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
+    if (user->Get_login_status() != 3) {
+        _Output_client(user->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
         return;
     }
 
@@ -248,6 +259,8 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "MODE"));
         return;
     }
+
+    // check if chan or user
 
     // Verifie que le premier parametre est le nickname ou le realname
     //change (mode channel a implementer)
@@ -282,14 +295,20 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
 };
 
 int server::Quit_cmd(user *user, t_IRCMessage cmd) {
-    //change
-    (void)cmd;
+
     (void)user;
+    (void)cmd;
     return -2;
 };
 
 void server::Join_cmd(user *user, t_IRCMessage cmd) {
-    //change
+    
+     // Verifie que le user est enregistre
+    if (user->Get_login_status() != 3) {
+        _Output_client(user->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
+        return;
+    }
+
     if (isRestricted(user))
     {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
@@ -322,7 +341,12 @@ void server::Join_cmd(user *user, t_IRCMessage cmd) {
 };
 
 void server::Part_cmd(user *user, t_IRCMessage cmd) {
-    //change
+    
+     // Verifie que le user est enregistre
+    if (user->Get_login_status() != 3) {
+        _Output_client(user->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
+        return;
+    }
 
     std::vector<std::string> v_chan;
     channel *chan;
@@ -368,7 +392,13 @@ void server::Part_cmd(user *user, t_IRCMessage cmd) {
 };
 
 void server::Names_cmd(user *user, t_IRCMessage cmd) {
-    //change
+    
+    // Verifie que le user est enregistre
+    if (user->Get_login_status() != 3) {
+        _Output_client(user->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
+        return;
+    }
+
     (void)cmd;
     (void)user;
 };
@@ -382,7 +412,13 @@ TODO :
     Check if user is away or Invite user
     Send REPLY INVITE to ender */
 void server::Invite_cmd(user *sender, t_IRCMessage cmd) {
-    //change
+    
+    // Verifie que le user est enregistre
+    if (sender->Get_login_status() != 3) {
+        _Output_client(sender->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
+        return;
+    }
+
     if (isRestricted(sender))
     {
         _Output_client(sender->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
@@ -403,7 +439,13 @@ void server::Invite_cmd(user *sender, t_IRCMessage cmd) {
 };
 
 void server::Kick_cmd(user *sender, t_IRCMessage cmd) {
-    //change
+    
+    // Verifie que le user est enregistre
+    if (sender->Get_login_status() != 3) {
+        _Output_client(sender->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
+        return;
+    }
+
     if (isRestricted(sender))
     {
         _Output_client(sender->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
@@ -422,7 +464,13 @@ void server::Kick_cmd(user *sender, t_IRCMessage cmd) {
 */
 void server::Privmsg_cmd(user *sender, t_IRCMessage cmd) {
 
-    //change
+    // Verifie que le user est enregistre
+    if (sender->Get_login_status() != 3) {
+        _Output_client(sender->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
+        return;
+    }
+
+
     if (isRestricted(sender))
     {
         _Output_client(sender->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
@@ -445,7 +493,12 @@ void server::Privmsg_cmd(user *sender, t_IRCMessage cmd) {
 
 void server::Notice_cmd(user *sender, t_IRCMessage cmd) {
 
-    //change
+    // Verifie que le user est enregistre
+    if (sender->Get_login_status() != 3) {
+        _Output_client(sender->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
+        return;
+    }
+
     if (isRestricted(sender))
     {
         _Output_client(sender->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
@@ -468,12 +521,18 @@ void server::Notice_cmd(user *sender, t_IRCMessage cmd) {
 
 void server::Away_cmd(user *user, t_IRCMessage cmd) {
 
+    // Verifie que le user est enregistre
+    if (user->Get_login_status() != 3) {
+        _Output_client(user->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
+        return;
+    }
+
     // Verifie que le user est n'est pas restreind
-    //change
     if (isRestricted(user)) {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
         return;
     } 
+
     // Verifie les arguments de AWAY
     // Si l'utilisateur ne passe pas de parametre, l'indicateur d'absence est supprime
     if (cmd.params.empty()) {
@@ -504,8 +563,13 @@ void server::Away_cmd(user *user, t_IRCMessage cmd) {
 void server::Users_cmd(user *user, t_IRCMessage cmd) {
 
     // Verifie que le user est enregistre
-    //change
-    if (user->Get_username().empty() || !user->Get_mode().Get_operator())
+    if (user->Get_login_status() != 3) {
+        _Output_client(user->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
+        return;
+    }
+
+    // Verifie que le user est enregistre
+    if (!user->Get_mode().Get_operator())
     {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
         return;

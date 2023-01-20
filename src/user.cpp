@@ -10,7 +10,7 @@ user::user(int  socket, addrinfo info)
     : _addrinfo_client(info) {
     std::cout << "/*** CONSTRUCTOR USER ***/"<< std::endl;
     (void) _addrinfo_client;
-    _is_register = false;
+    _login_status = 0;
     _fd_poll_client.fd = socket,
     _fd_poll_client.revents = 0,
     _fd_poll_client.events = POLLIN,
@@ -38,8 +38,8 @@ int user::Get_fd_client() const {
     return _fd_poll_client.fd;
 };
 
-bool user::Get_is_register() const {
-    return _is_register;
+int user::Get_login_status() const {
+    return _login_status;
 };
 
 std::string user::Get_username() const {
@@ -112,8 +112,8 @@ void    user::Remove_all_channel(){
         _channel_register.clear();
 };
 
-void user::Set_is_register(bool modif) {
-    _is_register = modif;
+void user::Set_login_status(int modif) {
+    _login_status = modif;
 };
 
 void user::Set_nickname(std::string nickname) {
