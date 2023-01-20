@@ -50,11 +50,7 @@ void    server::_Join_rpl(user *use, channel *chan){
     }
     // :onichan!alpha@localhost JOIN :#qwe
 
-    _Output_client(use->Get_fd_client(), ":" + use->Get_nickname() + " JOIN " + ":" + chan->Get_channel_name());
-    
-    //_Output_client(use->Get_fd_client(), ":" + _name_serveur + " 353 " + use->Get_nickname() + " = " + chan->Get_channel_name() + " :" + names);
-
-    _Output_client(use->Get_fd_client(), RPL_NAMREPLY(_name_serveur, use->Get_nickname(), "=", chan->Get_channel_name(), names));
+    _Output_client(use->Get_fd_client(), RPL_NAMREPLY(_name_serveur, chan->Get_channel_name(), names));
     _Output_client(use->Get_fd_client(), RPL_ENDOFNAMES(_name_serveur, use->Get_nickname(),chan->Get_channel_name()));
 }
 

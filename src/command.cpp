@@ -255,6 +255,9 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
     }
 
     // check if chan or user
+    if (cmd.params[0].at(0) == '!' || cmd.params[0].at(0) == '#' || cmd.params[0].at(0) == '&' || cmd.params[0].at(0) == '+') {
+        return;
+    }
 
     // Verifie que le premier parametre est le nickname ou le realname
     //change (mode channel a implementer)
@@ -392,8 +395,35 @@ void server::Names_cmd(user *user, t_IRCMessage cmd) {
         return;
     }
 
-    (void)cmd;
-    (void)user;
+    // Verifie si l'utilisateur est restreind
+    if (isRestricted(user)) {
+        _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
+        return;
+    }
+
+    // Verifie les arguments de NAMES
+    if (cmd.params.empty()) {
+        for (size_t i = 0; i < user->Get_channel_register().size(); i++) {
+            for (size_t j = 0; j < user->Get_channel_register().at(i)->Get_list_channel_user().size(); j++) {
+                if (user->Get_channel_register().at(i)->Get_list_channel_user().at(j)->Get_nickname() != user->Get_nickname()) {
+                    _Output_client(user->Get_fd_client(), RPL_NAMREPLY(_name_serveur, user->Get_channel_register().at(i)->Get_channel_name(), user->Get_channel_register().at(i)->Get_list_channel_user().at(j)->Get_nickname()));
+                }
+            }
+            _Output_client(user->Get_fd_client(), RPL_ENDOFNAMES(_name_serveur, user->Get_nickname(), user->Get_channel_register().at(i)->Get_channel_name()));
+        }
+    }
+    else {
+        for (size_t i = 0; i < user->Get_channel_register().size(); i++) {
+            if (cmd.params[0] == user->Get_channel_register().at(i)->Get_channel_name()) {
+                for (size_t j = 0; j < user->Get_channel_register().at(i)->Get_list_channel_user().size(); j++) {
+                    if (user->Get_channel_register().at(i)->Get_list_channel_user().at(j)->Get_nickname() != user->Get_nickname()) {
+                        _Output_client(user->Get_fd_client(), RPL_NAMREPLY(_name_serveur, user->Get_channel_register().at(i)->Get_channel_name(), user->Get_channel_register().at(i)->Get_list_channel_user().at(j)->Get_nickname()));
+                    }
+                _Output_client(user->Get_fd_client(), RPL_ENDOFNAMES(_name_serveur, user->Get_nickname(), user->Get_channel_register().at(i)->Get_channel_name()));
+                }
+            }
+        }
+    }
 };
 
 /*  
