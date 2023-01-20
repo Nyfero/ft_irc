@@ -37,18 +37,19 @@ void    server::_Join_rpl(user *use, channel *chan){
     res = chan->Get_list_channel_user();
     if (res.size())
     {
-        if (use->Is_op_channel(chan))
+        if (res[0]->Is_op_channel(chan))
             names += "@";
         names += res[0]->Get_nickname();
     }
     for (size_t i = 1; i < res.size(); i++)
     {
         names += " ";
-        if (use->Is_op_channel(chan))
+        if (res[i]->Is_op_channel(chan))
             names += "@";
         names += res[i]->Get_nickname();
     }
-    // :onichan!alpha@localhost JOIN :#qwe
+    std::string prefix = use->Get_nickname() + "!" + use->Get_username() + "@" + use->Get_hostname();
+    //_Output_client(use->Get_fd_client(), ":" + prefix + " JOIN " + ":" + chan->Get_channel_name());
 
     _Output_client(use->Get_fd_client(), RPL_NAMREPLY(_name_serveur, chan->Get_channel_name(), names));
     _Output_client(use->Get_fd_client(), RPL_ENDOFNAMES(_name_serveur, use->Get_nickname(),chan->Get_channel_name()));

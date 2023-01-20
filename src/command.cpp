@@ -2,7 +2,7 @@
 
 int server::Check_command(user *user, std::string str)
 {
-    std::cout << "Check_command: " << str << std::endl;
+    std::cout << std::endl << "Check_command: " << str << std::endl;
 
     t_IRCMessage msg = split_message(user, str);
 
@@ -12,11 +12,13 @@ int server::Check_command(user *user, std::string str)
         std::cout << "params[" << i << "]: " << msg.params[i] << std::endl;
     }
 
-    std::string list_command[17] = {"PASS", "USER", "NICK", "MODE", "QUIT", "JOIN", "PART", "NAMES", "INVITE", "KICK", "PRIVMSG", "NOTICE", "AWAY", "USERS", "WALLOPS", "PING", "OPER"};
+    std::string list_command[18] = {"PASS", "USER", "NICK", "MODE", "QUIT", "JOIN", "PART", "NAMES", "INVITE", "KICK", "PRIVMSG", "NOTICE", "AWAY", "USERS", "WALLOPS", "PING", "OPER", "TOPIC"};
 
     int i = 0;
-    while (i < 17) {
-        if (msg.command == list_command[i]) {
+    while (i < 18)
+    {
+        if (msg.command == list_command[i])
+        {
             break;
         }
         i++;
@@ -90,7 +92,9 @@ int server::Check_command(user *user, std::string str)
     case 16:
         Oper_cmd(user, msg);
         return 0;
-    
+    case 17:
+        Topic_cmd(user, msg);
+        return 0;
     default:
         std::cout << "*** server::Check_command - ***" << std::endl;
         break;
@@ -363,7 +367,9 @@ void server::Part_cmd(user *user, t_IRCMessage cmd) {
             {
                 user->Remove_Channel(chan);
                 chan->Remove_user(user);
-                _Output_client(user->Get_fd_client(), ":" + user->Get_nickname() + " PART " + chan->Get_channel_name()+ " :");
+                _Output_client(user->Get_fd_client(), user->Get_nickname() + " PART " + chan->Get_channel_name() + " :");
+
+                _Output_channel(chan,  user->Get_nickname() + " PART " + chan->Get_channel_name() + " :");
                 if (chan->Get_list_channel_user().empty()) {
                 // si chan vide degager
                     _Remove_channel(chan);
@@ -480,7 +486,7 @@ void server::Kick_cmd(user *sender, t_IRCMessage cmd) {
 
 /* TODO :
   - Check if /msg #chan,nick
-  - Check away message + send message anyway
+  - Check away message
   
   - Check for correct ERR MESSAGE
   - Handle ERR_TOOMANYTARGETS (how could this happen actually ?)
@@ -699,4 +705,77 @@ void server::Oper_cmd(user *user, t_IRCMessage cmd) {
     // Si tout est correct, l'utilisateur devient operateur
     user->Set_mode("+o");
     _Output_client(user->Get_fd_client(), RPL_YOUREOPER(_name_serveur, user->Get_nickname()));
+};
+
+void server::Topic_cmd(user *user, t_IRCMessage cmd) {
+    (void)user;
+    (void)cmd;
+
+    // change for checkout lvl 3
+
+//     Command: TOPIC
+//    Parameters: <channel> [ <topic> ]
+
+//    The TOPIC command is used to change or view the topic of a channel.
+//    The topic for channel <channel> is returned if there is no <topic>
+//    given.  If the <topic> parameter is present, the topic for that
+//    channel will be changed, if this action is allowed for the user
+//    requesting it.  If the <topic> parameter is an empty string, the
+//    topic for that channel will be removed.
+
+        // ERR_NEEDMOREPARAMS              ERR_NOTONCHANNEL
+        // RPL_NOTOPIC                     RPL_TOPIC
+        // ERR_CHANOPRIVSNEEDED            ERR_NOCHANMODES
+
+//  Examples:
+
+//    :WiZ!jto@tolsun.oulu.fi TOPIC #test :New topic
+//      ; User Wiz setting the topic.
+
+//    TOPIC #test :another topic
+//      ; Command to set the topic on #test to "another topic".
+
+//    TOPIC #test :
+//      ; Command to clear the topic on #test.
+
+//    TOPIC #test
+//      ; Command to check the topic for #test.
+
+    // 1 seul chan a la fois
+
+    // size == 1: afficher topic du channel
+    //      peut etre utiliser sans etre dans le chan
+
+    // size == 2: changer topic du channel
+    //      doit etre chans le chan
+    //      tous les membres peuvent le changer
+
+    //params[0] == channel
+    //params [1+] == message, retirer ':'
+    if (cmd.params.empty()){
+        // ERR_NEEDMOREPARAMS 
+    }
+    if (!_Channel_already_exist(cmd.params[0]))
+    {
+        std::cout << "chan no found" << std::endl;
+        return ;
+    }
+
+    if (cmd.params.size() == 1)
+    {
+        std::cout << "TOPIC: 1 arg" << std::endl;
+        std::cout << cmd.params[0] << std::endl;
+        
+    }
+    else if (cmd.params.size() >= 2)
+    {
+
+        std::cout << "TOPIC: 2 arg" << std::endl;
+        for (size_t i = 0; i < cmd.params.size(); i++)
+        {
+            std::cout << cmd.params[i] << std::endl;
+        }
+        // std::cout << cmd.params[0] << std::endl;
+        // std::cout << cmd.params[1] << std::endl;
+    }
 };
