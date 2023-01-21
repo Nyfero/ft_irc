@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:42:54 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/20 23:42:55 by egiacomi         ###   ########.fr       */
+/*   Updated: 2023/01/21 20:01:45 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,8 +105,8 @@ void    server::_Launch_server() {
 
     while (g_stop) {
 
-        _Print_user();
-        _Print_channel();
+        // _Print_user();
+        // _Print_channel();
 
 
         // poll(tab pollfd, size tab, timer)
@@ -300,6 +300,7 @@ void    server::_Remove_channel(channel *chan) {
 /**** DIVERS ****/
 /****************/
 
+
 int server::_Input_client(std::vector<pollfd>::iterator it) {
     int         fd = it->fd;
     char        inpt[SIZE_INPT];
@@ -311,6 +312,7 @@ int server::_Input_client(std::vector<pollfd>::iterator it) {
     if ((ret = recv(fd, inpt, SIZE_INPT - 1, 0)) == -1) {
         return -1;
     }
+// to-do faire un message quand user deco?
     if (!ret) { // disconnect
         _Remove_user(it);
         return -2;

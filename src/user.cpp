@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   user.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:42:58 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/20 23:42:59 by egiacomi         ###   ########.fr       */
+/*   Updated: 2023/01/21 16:03:57 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,10 +81,17 @@ std::vector<channel *>  user::Get_channel_register() const{
 bool user::Is_op_channel(channel *chan) const{
     std::vector<user *> list;
 
+    if (!chan)
+        return false;
     list = chan->Get_list_operator();
     for (size_t i = 0; i < list.size(); i++)
+    {
+        std::cout << "user= " << _nickname << " chan[x] user = " << list[i]->Get_nickname() << std::endl;
         if (_nickname == list[i]->Get_nickname())
             return true;
+
+    }
+    std::cout << "false" << std::endl;
     return false;
 }
 

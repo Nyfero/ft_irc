@@ -2,3 +2,4 @@
 ircserv
 .vscode
 .env
+*.txt

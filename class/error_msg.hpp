@@ -14,6 +14,10 @@
 /*---------------------------------------------------------------------------*/
 # define RPL_WELCOME(serveur, nick, use, host) ":" + serveur + " 001 " + nick + " :Welcome to the Internet Relay Network " + nick + "!" + use + "@" + host
 
+
+// # define RPL_WELCOME(serveur, nick, use, host) ":" + serveur + " 001 " + nick + " :Welcome to the Internet Relay Network " + nick + "!" + use + "@" + host
+
+
 # define RPL_UMODEIS(serveur, mode) ":" + serveur + " 221 " + mode
 
 # define RPL_AWAY(serveur, nick, nick_dest, msg) ":" + serveur + " 301 " + nick + " " + nick_dest + " :" + msg
@@ -23,9 +27,15 @@
 # define RPL_LISTEND(serveur) ":" + serveur + " 323 :End of LIST"
 # define RPL_CHANNELMODEIS(serveur, chan, mode) ":" + serveur + " 324 " + chan + " " + mode
 # define RPL_NOTOPIC(serveur, chan) ":" + serveur + " 331 " + chan + " :No topic is set"
+// # define RPL_TOPIC(serveur, chan, topic) ":" + serveur + " 332 " + nick + " " + chan + " :" + topic
 # define RPL_TOPIC(serveur, chan, topic) ":" + serveur + " 332 " + chan + " :" + topic
+
+
 # define RPL_INVITING(serveur, sender, chan, target) ":" + serveur + " 341 " + sender + " " + target + " " + chan
-# define RPL_NAMREPLY(serveur, chan, names) ":" + serveur + " 353 " + chan + " :" + names
+// # define RPL_NAMREPLY(serveur, chan, names) ":" + serveur + " 353 " + chan + " :" + names
+# define RPL_NAMREPLY(serveur, nick, chan, names) ":" + serveur + " 353 " + nick + " = " + chan + " :" + names
+
+
 # define RPL_ENDOFNAMES(serveur, nick, chan) ":" + serveur + " 366 " + nick + " " + chan + " :End of NAMES list"
 # define RPL_YOUREOPER(serveur, nick) ":" + serveur + " 381 " + nick + " :You are now an IRC operator"
 # define RPL_USERSSTART(serveur) ":" + serveur + " 392 :UserID Terminal Host"

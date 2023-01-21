@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:44:08 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/21 01:53:09 by egiacomi         ###   ########.fr       */
+/*   Updated: 2023/01/21 17:50:40 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,9 +93,11 @@ class server
         channel     *_Channel_already_exist(std::string str);
 
         /* COMMAND*/
+                /* Join */
         int                      _Join_treat(user *user, std::vector<std::string> chan, std::vector<std::string> key);
         int                      _Join_treat(user *user, std::vector<std::string> chan);
         void                     _Join_rpl(user *user, channel *chan);
+
         bool                     _parse_privmsg(user *sender, struct s_IRCMessage cmd);
         std::vector<std::string> _target_handle(struct s_IRCMessage cmd);
         std::vector<int>         _targetfds_creator_privmsg(user *sender, std::vector<std::string> target);
