@@ -21,6 +21,7 @@
 # define RPL_NOWAWAY(serveur, nick) ":" + serveur + " 306 " + nick + " :You have been marked as being away"
 # define RPL_LIST(serveur, chan, nb_users, topic) ":" + serveur + " 322 " + chan + " " + nb_users + " :" + topic
 # define RPL_LISTEND(serveur) ":" + serveur + " 323 :End of LIST"
+# define RPL_CHANNELMODEIS(serveur, chan, mode) ":" + serveur + " 324 " + chan + " " + mode
 # define RPL_NOTOPIC(serveur, chan) ":" + serveur + " 331 " + chan + " :No topic is set"
 # define RPL_TOPIC(serveur, chan, topic) ":" + serveur + " 332 " + chan + " :" + topic
 # define RPL_INVITING(serveur, sender, chan, target) ":" + serveur + " 341 " + sender + " " + target + " " + chan
@@ -60,6 +61,7 @@
 # define ERR_ALREADYREGISTRED(serveur) ":" + serveur + " 462 :Unauthorized command (already registered)"
 # define ERR_PASSWDMISMATCH(serveur) ":" + serveur + " 464 :Password incorrect"
 # define ERR_CHANNELISFULL(serveur, chan) ":" + serveur + " 471 " + chan + " :Cannot join channel (+l)"
+# define ERR_UNKNOWNMODE(serveur, chan) ":" + serveur + " 472 " + chan + " :is unknown mode char to me"
 # define ERR_INVITEONLYCHAN(serveur, chan) ":" + serveur + " 473 " + chan + " :Cannot join channel (+i)"
 # define ERR_BANNEDFROMCHAN(serveur, chan) ":" + serveur + " 474 " + chan + " :Cannot join channel (+b)"
 # define ERR_BADCHANNELKEY(serveur, chan) ":" + serveur + " 475 " + chan + " :Cannot join channel (+k)"

@@ -259,13 +259,87 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
     }
 
     // check if chan or user
-    // TODO : Est-ce possible d'ajouter un mode invite only a un channel ? '+i';
     if (cmd.params[0].at(0) == '!' || cmd.params[0].at(0) == '#' || cmd.params[0].at(0) == '&' || cmd.params[0].at(0) == '+') {
+        if (cmd.params.size() == 1) {
+            _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "MODE"));
+            return;
+        }
+        if (cmd.params[1].at(0) == '+') {
+            if (cmd.params[1].at(1) == 'i') {
+                if (!user->Get_mode().Get_operator()) {
+                    _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
+                    return;
+                }
+                for (size_t i = 0; i < _list_channel.size(); i++) {
+                    if (Compare_case_sensitive(_list_channel[i]->Get_channel_name(), cmd.params[0])) {
+                        _list_channel[i]->Set_invite_only(true);
+                        //TODO : Envoyer un message a tous les users du channel
+                        _Output_client(user->Get_fd_client(), RPL_CHANNELMODEIS(_name_serveur, cmd.params[0], cmd.params[0] + " is now invite only"));
+                        return;
+                    }
+                }
+            }
+            else if (cmd.params[1].at(1) == 't') {
+                if (!user->Get_mode().Get_operator()) {
+                    _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
+                    return;
+                }
+                for (size_t i = 0; i < _list_channel.size(); i++) {
+                    if (Compare_case_sensitive(_list_channel[i]->Get_channel_name(), cmd.params[0])) {
+                        _list_channel[i]->Set_topic_settable(false);
+                        //TODO : Envoyer un message a tous les users du channel
+                        _Output_client(user->Get_fd_client(), RPL_CHANNELMODEIS(_name_serveur, cmd.params[0], cmd.params[0] + " is now topic settable only by operators"));
+                        return;
+                    }
+                }
+            }
+            else {
+                _Output_client(user->Get_fd_client(), ERR_UNKNOWNMODE(_name_serveur, cmd.params[1]));
+                return;
+            }
+        }
+        else if (cmd.params[1].at(0) == '-') {
+            if (cmd.params[1].at(1) == 'i') {
+                if (!user->Get_mode().Get_operator()) {
+                    _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
+                    return;
+                }
+                for (size_t i = 0; i < _list_channel.size(); i++) {
+                    if (Compare_case_sensitive(_list_channel[i]->Get_channel_name(), cmd.params[0])) {
+                        _list_channel[i]->Set_invite_only(false);
+                        //TODO : Envoyer un message a tous les users du channel
+                        _Output_client(user->Get_fd_client(), RPL_CHANNELMODEIS(_name_serveur, cmd.params[0], cmd.params[0] + " is now not invite only"));
+                        return;
+                    }
+                }
+            }
+            else if (cmd.params[1].at(1) == 't') {
+                if (!user->Get_mode().Get_operator()) {
+                    _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
+                    return;
+                }
+                for (size_t i = 0; i < _list_channel.size(); i++) {
+                    if (Compare_case_sensitive(_list_channel[i]->Get_channel_name(), cmd.params[0])) {
+                        _list_channel[i]->Set_topic_settable(true);
+                        //TODO : Envoyer un message a tous les users du channel
+                        _Output_client(user->Get_fd_client(), RPL_CHANNELMODEIS(_name_serveur, cmd.params[0], cmd.params[0] + " is now topic settable"));
+                        return;
+                    }
+                }
+            }
+            else {
+                _Output_client(user->Get_fd_client(), ERR_UNKNOWNMODE(_name_serveur, cmd.params[1]));
+                return;
+            }
+        }
+        else {
+            _Output_client(user->Get_fd_client(), ERR_UNKNOWNMODE(_name_serveur, cmd.params[1]));
+            return;
+        }
         return;
     }
 
     // Verifie que le premier parametre est le nickname ou le realname
-    //change (mode channel a implementer)
     if (cmd.params[0] != user->Get_nickname() && cmd.params[0] != user->Get_realname().substr(0, user->Get_realname().find(' '))) {
         _Output_client(user->Get_fd_client(), ERR_USERSDONTMATCH(_name_serveur));
         return;

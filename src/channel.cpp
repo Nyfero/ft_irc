@@ -20,12 +20,19 @@ channel::channel(std::string name, user *creator)
     :_channel_name(name) {
     _list_channel_user.push_back(creator);
     _list_operator.push_back(creator);
+    _key = "";
+    _topic = "";
+    _invite_only = false;
+    _topic_settable = true;
 };
 
 channel::channel(std::string name, user *creator, std::string key)
     :_channel_name(name), _key(key) {
     _list_channel_user.push_back(creator);
     _list_operator.push_back(creator);
+    _topic = "";
+    _invite_only = false;
+    _topic_settable = true;
 };
 
 /**************************/
@@ -104,6 +111,14 @@ void channel::Mod_topic(std::string str){
     _topic = str;
 }
 
+void channel::Set_invite_only(bool b){
+    _invite_only = b;
+}
+
+void channel::Set_topic_settable(bool b){
+    _topic_settable = b;
+};
+
 /************************/
 /******* ACCESSOR *******/
 /************************/
@@ -126,6 +141,14 @@ std::vector<user *> channel::Get_list_channel_user() const {
 
 std::vector<user *> channel::Get_list_operator() const {
     return(_list_operator);
+};
+
+bool channel::Get_invite_only() const {
+    return(_invite_only);
+};
+
+bool channel::Get_topic_settable() const {
+    return(_topic_settable);
 };
 
 void    channel::print_user_channel(){
