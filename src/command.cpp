@@ -437,13 +437,13 @@ TODO :
     ( Check if privilege needed
     Do we do Flags in channel ? Invite only )
 
-    Check if channel exists, if not create and add sender to newchannel
-    Add target to channel
+    Check if I need to create window ;
+    Check if I need to join separately to create window ;
+    Check rpl invite 341
+    Check other error messages
 
-    Parse (Check enough param == 2
-    Check is a Nickname, Check Inviter is part of channel, Check dest is already in the channel
-    Check if user is away or Invite user
-    Send REPLY INVITE to sender */
+    Try to call join_cmd
+*/
 void server::Invite_cmd(user *sender, t_IRCMessage cmd) {
     
     // Verifie que le user est enregistre
@@ -456,23 +456,38 @@ void server::Invite_cmd(user *sender, t_IRCMessage cmd) {
         _Output_client(sender->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
         return ;
     } 
-    if (_parse_invite(sender, cmd))         // Parse INVITE command
+    if (_parse_invite(sender, cmd))             // Parse INVITE command
         return;
     user *target_nick = _check_nick_invite(sender, cmd); 
-    if (target_nick == NULL)                // Check that the param 1 : Nickname is correct
+    if (target_nick == NULL)                    // Check that the param 1 : Nickname is correct
         return;
     channel *target_chan = _check_chan_invite(sender, cmd);
     if (target_chan == NULL)
         return;
     if (_user_already_member(target_nick, target_chan))
     {
-		_Output_client(sender->Get_fd_client(), ERR_USERONCHANNEL(_name_serveur, target_nick->Get_nickname(), target_chan->Get_channel_name()));
+		_Output_client(sender->Get_fd_client(), ERR_USERONCHANNEL(_name_serveur, sender->Get_nickname(), target_chan->Get_channel_name(), target_nick->Get_nickname()));
         return;
     }
-    // Add target_nick to target_chan
-    _invite_success(sender, cmd);
+    target_nick->Add_channel(target_chan);       // Add channel to target_nick channel list
+    target_chan->Add_user(target_nick);          // Add target_nick to channel users list
+    _invite_success(sender, target_nick, cmd);                // Send success invite messages
 };
 
+/* 
+TODO :
+    - Parse the command :
+        errors + validity : 
+            ERR_BADCHANMASK (mauvais nom de channel) | OK
+            ERR_NEEDMOREPARAMS (pas assez de params) | OK
+            ERR_NOSUCHCHANNEL (channel n'existe pas) | OK
+            ERR_CHANOPRIVSNEEDED (pas de flag operator) | 
+            ERR_USERNOTINCHANNEL (quand target n'est pas dans channel) | OK
+            ERR_NOTONCHANNEL (sender not in channel) | OK
+    - Split the command appropriately with one user / one channel (irssi already split thr users) OK
+    - Kick user (like in Part) OK
+    - Send succesfully kicked message
+*/
 void server::Kick_cmd(user *sender, t_IRCMessage cmd) {
     
     // Verifie que le user est enregistre
@@ -480,14 +495,23 @@ void server::Kick_cmd(user *sender, t_IRCMessage cmd) {
         _Output_client(sender->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
         return;
     }
-
     if (isRestricted(sender))
     {
         _Output_client(sender->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
         return ;
-    } 
-    (void)cmd;
-    (void)sender;
+    }
+    if (_parse_kick(sender, cmd))                                                           // Parse KICK command
+        return; 
+    user *target_nick = _check_nick_kick(sender, cmd);                                      // Check that the nickname parameter is correct
+    if (target_nick == NULL)                                                                // Check that the param 1 : Nickname is correct
+        return;
+    std::vector<channel *> channels_kick = _split_channels_kick(sender, cmd);               // Split channel paramater (#chan1,#chan2,#chan3) & check if its correct
+    for (size_t i = 0; i < channels_kick.size(); i++)
+    {
+        channels_kick[i] = _user_not_in_channel(sender, target_nick, channels_kick[i]);     // Check if user target is in channel
+        if (_kick_from_channel(target_nick, channels_kick[i]))
+            _kick_success_message(target_nick, channels_kick[i], cmd);
+    }
 };
 
 /* TODO :
@@ -659,6 +683,7 @@ void server::Wallops_cmd(user *sender, t_IRCMessage cmd) {
     }
 };
 
+/* FIXME : Understand why ca marche une fois sur deux */
 void server::Pong_cmd(user *user, t_IRCMessage cmd) {
 
      // Verifie que le user est enregistre

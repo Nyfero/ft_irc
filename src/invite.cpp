@@ -1,20 +1,32 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   invite.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/01/20 23:42:29 by egiacomi          #+#    #+#             */
+/*   Updated: 2023/01/20 23:42:30 by egiacomi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../class/utils.hpp"
 
 bool server::_parse_invite(user *sender, t_IRCMessage cmd)
 {
     if (cmd.params.empty())																				// Check if command takes parameters
     {
-        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PRIVMSG"));
+		_Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "INVITE"));
         return true;
     }
 	if (cmd.params.size() < 2)																			// Check if I have minimum 2 parameters (target + channel)
     {
-        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PRIVMSG"));
+        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "INVITE"));
         return true;
     }
     if (Check_valid_channel(cmd.params[1]) == false)													// Check if 2nd parameter is a Channel
     {
-        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PRIVMSG"));
+        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "INVITE"));
         return true;
     }
 	return false;
@@ -55,8 +67,8 @@ channel *server::_check_chan_invite(user *sender, struct s_IRCMessage cmd)
 			}
 		}
 	}
-	// TODO : Create a channel; Addsender in channel;
-	channel *NewChannel = NULL;
+	channel *NewChannel = _Add_channel(cmd.params[1], sender);						// Create a New Channel with sender in it
+	sender->Add_channel(NewChannel);
 	return NewChannel;
 }
 
@@ -71,10 +83,10 @@ bool	server::_user_already_member(user *target_nick, channel *target_chan)
 	return false;
 }
 
-void	server::_invite_success(user *sender, s_IRCMessage cmd)
+void	server::_invite_success(user *sender, user *target, s_IRCMessage cmd)
 {
-	_Output_client(sender->Get_fd_client(), RPL_INVITING(_name_serveur, cmd.params[0], cmd.params[1]));
+	_Output_client(sender->Get_fd_client(), RPL_INVITING(_name_serveur, sender->Get_nickname(), cmd.params[1], cmd.params[0]));
 	std::string invited_message = cmd.prefix + " " + cmd.command + " " + cmd.params[0] + " " + cmd.params[1];	
 	std::cout << invited_message << std::endl;
-	_Output_client(sender->Get_fd_client(), invited_message);
+	_Output_client(target->Get_fd_client(), invited_message);
 }

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   server.hpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/01/20 23:44:08 by egiacomi          #+#    #+#             */
+/*   Updated: 2023/01/21 01:53:09 by egiacomi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #pragma once
 
 # include "utils.hpp"
@@ -102,8 +114,16 @@ class server
         user	                 *_check_nick_invite(user *sender, struct s_IRCMessage cmd);
         channel	                 *_check_chan_invite(user *sender, struct s_IRCMessage cmd);
         bool                     _user_already_member(user *target_nick, channel *target_chan);
-        void                     _invite_success(user *sender, s_IRCMessage cmd);
-
+        void                     _invite_success(user *sender, user *target, s_IRCMessage cmd);
+                    /* Kick */
+        bool	                 _parse_kick(user *sender, struct s_IRCMessage cmd);
+        user                     *_check_nick_kick(user *sender, struct s_IRCMessage cmd);
+        std::vector<channel *>   _split_channels_kick(user *sender, struct s_IRCMessage cmd);
+        channel                  *_chan_kick_creator(user *sender, std::string chan_to_kick);
+        channel                  *_user_not_in_channel(user *sender, user *target_nick, channel *channel_kick);
+        bool                     _kick_from_channel(user *target_nick, channel *channel_kick);
+        void                     _kick_success_message(user *target_nick, channel *channel_kick, struct s_IRCMessage cmd);
+       
     public:
 
         /*********************/

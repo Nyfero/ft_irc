@@ -23,7 +23,7 @@
 # define RPL_LISTEND(serveur) ":" + serveur + " 323 :End of LIST"
 # define RPL_NOTOPIC(serveur, chan) ":" + serveur + " 331 " + chan + " :No topic is set"
 # define RPL_TOPIC(serveur, chan, topic) ":" + serveur + " 332 " + chan + " :" + topic
-# define RPL_INVITING(serveur, nick, chan) ":" + serveur + " 341 " + nick + " " + chan
+# define RPL_INVITING(serveur, sender, chan, target) ":" + serveur + " 341 " + sender + " " + target + " " + chan
 # define RPL_NAMREPLY(serveur, chan, names) ":" + serveur + " 353 " + chan + " :" + names
 # define RPL_ENDOFNAMES(serveur, nick, chan) ":" + serveur + " 366 " + nick + " " + chan + " :End of NAMES list"
 # define RPL_YOUREOPER(serveur, nick) ":" + serveur + " 381 " + nick + " :You are now an IRC operator"
@@ -53,7 +53,7 @@
 # define ERR_UNAVAILRESOURCE(serveur, nick) ":" + serveur + " 437 " + nick + " :Nick/channel is temporarily unavailable"
 # define ERR_USERNOTINCHANNEL(serveur, nick, chan) ":" + serveur + " 441 " + nick + " " + chan + " :They aren't on that channel"
 # define ERR_NOTONCHANNEL(serveur, chan) ":" + serveur + " 442 " + chan + " :You're not on that channel"
-# define ERR_USERONCHANNEL(serveur, nick, chan) ":" + serveur + " 443 " + nick + " " + chan + " :is already on channel"
+# define ERR_USERONCHANNEL(serveur, sender, chan, target) ":" + serveur + " 443 " + sender + " " + target + " :is already on channel"
 # define ERR_NOLOGIN(serveur, usr) ":" + serveur + " 444 " + usr " :User not logged in"
 # define ERR_USERDISABLED(serveur, nick) ":" + serveur + " 446 " + nick + " :User has been disabled"
 # define ERR_NEEDMOREPARAMS(serveur, commande) ":" + serveur + " 461 " + commande + " : Not enough parameters"

@@ -45,6 +45,7 @@ FILES = main.cpp 	\
 		notice.cpp 	\
 		wallops.cpp	\
 		invite.cpp	\
+		kick.cpp	\
 		\
 
 
@@ -55,7 +56,7 @@ NAME = ircserv
 
 CXX = clang++
 
-CFLAGS = -Wall -Wextra -Werror -std=c++98
+CFLAGS = -Wall -Wextra -Werror -std=c++98 -g3
 
 RM = rm -rf
 
