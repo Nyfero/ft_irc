@@ -6,7 +6,7 @@
 /*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:42:29 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/20 23:42:30 by egiacomi         ###   ########.fr       */
+/*   Updated: 2023/01/21 03:40:35 by egiacomi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,9 +56,9 @@ channel *server::_check_chan_invite(user *sender, struct s_IRCMessage cmd)
 	for (size_t i = 0; i < _list_channel.size(); i++)
 	{
 		std::string channel_test = _list_channel[i]->Get_channel_name();
-		if (Compare_case_sensitive(channel_test, cmd.params[1]))					// Check if channel already exist
+		if (Compare_case_sensitive(channel_test, cmd.params[1]))							// Check if channel already exist
 		{
-			if (User_in_channel(sender, _list_channel[i]))							// Check if user is in the channel (HERE I CAN ADD IF PRIVILEGES)
+			if (User_in_channel(sender, _list_channel[i]))									// Check if user is in the channel (HERE I CAN ADD IF PRIVILEGES)
 				return _list_channel[i];
 			else
 			{
@@ -67,9 +67,8 @@ channel *server::_check_chan_invite(user *sender, struct s_IRCMessage cmd)
 			}
 		}
 	}
-	channel *NewChannel = _Add_channel(cmd.params[1], sender);						// Create a New Channel with sender in it
-	sender->Add_channel(NewChannel);
-	return NewChannel;
+	_Output_client(sender->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, sender->Get_nickname(), cmd.params[1]));	// Send an error if channel does not exists
+	return NULL;
 }
 
 bool	server::_user_already_member(user *target_nick, channel *target_chan)

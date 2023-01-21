@@ -259,6 +259,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
     }
 
     // check if chan or user
+    // TODO : Est-ce possible d'ajouter un mode invite only a un channel ? '+i';
     if (cmd.params[0].at(0) == '!' || cmd.params[0].at(0) == '#' || cmd.params[0].at(0) == '&' || cmd.params[0].at(0) == '+') {
         return;
     }
@@ -434,15 +435,9 @@ void server::Names_cmd(user *user, t_IRCMessage cmd) {
 
 /*  
 TODO :   
-    ( Check if privilege needed
-    Do we do Flags in channel ? Invite only )
+    - Ajouter un if sender is operator si le channel est en mode invite only
 
-    Check if I need to create window ;
-    Check if I need to join separately to create window ;
-    Check rpl invite 341
-    Check other error messages
-
-    Try to call join_cmd
+    - Check other error messages
 */
 void server::Invite_cmd(user *sender, t_IRCMessage cmd) {
     
@@ -469,24 +464,11 @@ void server::Invite_cmd(user *sender, t_IRCMessage cmd) {
 		_Output_client(sender->Get_fd_client(), ERR_USERONCHANNEL(_name_serveur, sender->Get_nickname(), target_chan->Get_channel_name(), target_nick->Get_nickname()));
         return;
     }
-    target_nick->Add_channel(target_chan);       // Add channel to target_nick channel list
-    target_chan->Add_user(target_nick);          // Add target_nick to channel users list
     _invite_success(sender, target_nick, cmd);                // Send success invite messages
 };
 
 /* 
-TODO :
-    - Parse the command :
-        errors + validity : 
-            ERR_BADCHANMASK (mauvais nom de channel) | OK
-            ERR_NEEDMOREPARAMS (pas assez de params) | OK
-            ERR_NOSUCHCHANNEL (channel n'existe pas) | OK
-            ERR_CHANOPRIVSNEEDED (pas de flag operator) | 
-            ERR_USERNOTINCHANNEL (quand target n'est pas dans channel) | OK
-            ERR_NOTONCHANNEL (sender not in channel) | OK
-    - Split the command appropriately with one user / one channel (irssi already split thr users) OK
-    - Kick user (like in Part) OK
-    - Send succesfully kicked message
+TODO : ERR_CHANOPRIVSNEEDED (pas de flag operator) | 
 */
 void server::Kick_cmd(user *sender, t_IRCMessage cmd) {
     
@@ -683,7 +665,7 @@ void server::Wallops_cmd(user *sender, t_IRCMessage cmd) {
     }
 };
 
-/* FIXME : Understand why ca marche une fois sur deux */
+/* Si ca bug c'est car le meme irssi est connecte sur plusieurs instances */
 void server::Pong_cmd(user *user, t_IRCMessage cmd) {
 
      // Verifie que le user est enregistre

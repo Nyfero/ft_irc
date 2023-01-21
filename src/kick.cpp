@@ -6,7 +6,7 @@
 /*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:42:24 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/21 02:13:45 by egiacomi         ###   ########.fr       */
+/*   Updated: 2023/01/21 04:47:41 by egiacomi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,16 @@ channel *server::_user_not_in_channel(user *sender, user *target_nick, channel *
 		for (size_t i = 0; i < target_channels_member.size(); i++)										// Add all channel_users_fd
 		{
 			if (Compare_case_sensitive(target_channels_member[i]->Get_channel_name(), channel_kick->Get_channel_name()))
-				return channel_kick;
+			{
+				// TODO : check if this line is ok ;
+				if (sender->Is_op_channel(channel_kick))					
+					return channel_kick;
+				else
+				{
+    				_Output_client(sender->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, channel_kick->Get_channel_name()));
+					return NULL;
+				}
+			}
 		}
 		_Output_client(sender->Get_fd_client(), ERR_USERNOTINCHANNEL(_name_serveur, target_nick->Get_nickname(), channel_kick->Get_channel_name()));
 	}
@@ -94,7 +103,7 @@ std::vector<channel *> server::_split_channels_kick(user *sender, t_IRCMessage c
 
 bool server::_kick_from_channel(user *target_nick, channel *channel_kick)
 {
-	if (channel_kick)
+	if (channel_kick != NULL)
 	{
 		target_nick->Remove_Channel(channel_kick);
 		channel_kick->Remove_user(target_nick);
@@ -110,9 +119,14 @@ bool server::_kick_from_channel(user *target_nick, channel *channel_kick)
 
 void server::_kick_success_message(user *target_nick, channel *channel_kick, t_IRCMessage cmd)
 {
-	std::string kicked_message_channel = cmd.prefix + " " + cmd.command + " " + channel_kick->Get_channel_name() + " " + cmd.params[1];
+	std::string kicked_message_channel = cmd.prefix + " " + cmd.command + " " + channel_kick->Get_channel_name() + cmd.params[1];
 	if (!cmd.params[2].empty())
-		kicked_message_channel.append(" " + cmd.params[2]);
+	{
+		std::string note;
+		for (size_t i = 2; i < cmd.params.size(); i++) 
+        	note += " " + cmd.params[i];
+		kicked_message_channel.append(" " + note);
+	}
 	_Output_channel(channel_kick, kicked_message_channel);
 	_Output_client(target_nick->Get_fd_client(), kicked_message_channel);
 }
