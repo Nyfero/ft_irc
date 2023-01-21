@@ -165,7 +165,7 @@ class server
         void    Part_cmd(user *user, struct s_IRCMessage cmd);
         void    Topic_cmd(user *user, struct s_IRCMessage cmd);
         int     Quit_cmd(user *user, struct s_IRCMessage cmd);
-        
+        void    List_cmd(user *user, struct s_IRCMessage cmd);
         void    Names_cmd(user *user, struct s_IRCMessage cmd);
         void    Invite_cmd(user *user, struct s_IRCMessage cmd);
         void    Kick_cmd(user *user, struct s_IRCMessage cmd);

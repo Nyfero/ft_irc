@@ -795,10 +795,12 @@ void server::Oper_cmd(user *user, t_IRCMessage cmd) {
 };
 
 void server::Topic_cmd(user *user, t_IRCMessage cmd) {
-    (void)user;
-    (void)cmd;
 
-    // change for checkout lvl 3
+    // Verifie que le user est enregistre
+    if (user->Get_login_status() != 3) {
+        _Output_client(user->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
+        return;
+    }
 
 //     Command: TOPIC
 //    Parameters: <channel> [ <topic> ]
@@ -894,4 +896,15 @@ void server::Topic_cmd(user *user, t_IRCMessage cmd) {
             _Output_channel(chan, cmd.prefix + " TOPIC " + chan->Get_channel_name() + " :" + new_topic);
         
     }
+};
+
+void server::List_cmd(user *user, t_IRCMessage cmd) {
+
+    // Verifie que le user est enregistre
+    if (user->Get_login_status() != 3) {
+        _Output_client(user->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
+        return;
+    }
+
+
 };
