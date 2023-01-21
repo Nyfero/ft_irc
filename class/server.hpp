@@ -87,6 +87,7 @@ class server
         int     _Output_channel(channel *chan, std::string msg);
         void    _Print_channel();
         void    _Print_user();
+        bool    _User_is_in_chan(user *use, channel *chan);
 
         /* GET CHANNEL */
         channel     *_Channel_already_exist(std::string str);

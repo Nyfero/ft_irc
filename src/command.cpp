@@ -783,30 +783,59 @@ void server::Topic_cmd(user *user, t_IRCMessage cmd) {
 
     //params[0] == channel
     //params [1+] == message, retirer ':'
-    if (cmd.params.empty()){
-        // ERR_NEEDMOREPARAMS 
-    }
-    if (!_Channel_already_exist(cmd.params[0]))
-    {
-        std::cout << "chan no found" << std::endl;
+    channel     *chan;
+    std::string new_topic;
+
+    if (cmd.params.empty()) { // ERR_NEEDMOREPARAMS 
+        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "TOPIC"));
         return ;
     }
+    if (!(chan = _Channel_already_exist(cmd.params[0])))
+    {
+        std::cout << "chan no found" << std::endl;
+        //#qwe: No such channel
+        return ;
+    }
+    std::cout << "topic: " << chan->Get_channel_topic() << std::endl;
 
-    if (cmd.params.size() == 1)
+    if (cmd.params.size() == 1) // print chan's topic
     {
         std::cout << "TOPIC: 1 arg" << std::endl;
         std::cout << cmd.params[0] << std::endl;
-        
+        if (chan->Get_channel_topic().empty()) { //RPL_NOTOPIC
+            _Output_client(user->Get_fd_client(), RPL_NOTOPIC(_name_serveur, chan->Get_channel_name()));
+        }
+        else { //RPL_TOPIC
+            _Output_client(user->Get_fd_client(), RPL_TOPIC(_name_serveur, chan->Get_channel_name(), chan->Get_channel_topic()));
+        }
     }
-    else if (cmd.params.size() >= 2)
+    else if (cmd.params.size() >= 2) //change chan's topic
     {
 
-        std::cout << "TOPIC: 2 arg" << std::endl;
+        std::cout << "TOPIC: 2+ arg" << std::endl;
         for (size_t i = 0; i < cmd.params.size(); i++)
         {
             std::cout << cmd.params[i] << std::endl;
         }
-        // std::cout << cmd.params[0] << std::endl;
-        // std::cout << cmd.params[1] << std::endl;
+
+        if (!_User_is_in_chan(user, chan)) { // ERR_NOTONCHANNEL
+            _Output_client(user->Get_fd_client(), ERR_NOTONCHANNEL(_name_serveur, chan->Get_channel_name()));
+            return ;
+        }
+        
+        for (size_t i = 1; i < cmd.params.size(); i++){
+            new_topic += cmd.params[i];
+            if (i + 1 < cmd.params.size())
+                new_topic += " ";
+        }
+        // :nick42!user42@localhost TOPIC #qwe :prout sdf sdf
+        new_topic.erase(new_topic.begin());
+        std::cout << new_topic << std::endl;
+        chan->Mod_topic(new_topic);
+        if (new_topic.empty())
+            _Output_channel(chan, cmd.prefix + " TOPIC " + chan->Get_channel_name() + " :");
+        else
+            _Output_channel(chan, cmd.prefix + " TOPIC " + chan->Get_channel_name() + " :" + new_topic);
+        
     }
 };

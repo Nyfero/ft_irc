@@ -100,6 +100,10 @@ void channel::Add_oper(user *use)
         _list_operator.push_back(use);
 }
 
+void channel::Mod_topic(std::string str){
+    _topic = str;
+}
+
 /************************/
 /******* ACCESSOR *******/
 /************************/
