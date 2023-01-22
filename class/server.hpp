@@ -73,6 +73,7 @@ class server
 
         /* GET USER */
         user   *_Get_user_by_fd(int fd);
+        user    *_Get_user_by_nick(std::string str);
         
         
         /* MOD CHANNEL */

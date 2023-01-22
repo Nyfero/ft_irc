@@ -393,3 +393,12 @@ bool    server::_User_is_in_chan(user *use, channel *chan){
     }
     return false;
 }
+
+user *server::_Get_user_by_nick(std::string str) {
+    for (size_t i = 0; i < _list_user.size(); i++) {
+        if (Compare_case_sensitive(_list_user.at(i)->Get_nickname(), str)) {
+            return _list_user.at(i);
+        }
+    }
+    return NULL;
+};
