@@ -190,10 +190,6 @@ void server::Nick_cmd(user *user, t_IRCMessage cmd) {
         _Output_client(user->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
         return;
     }
-    if (user->Get_login_status() != 3) {
-        user->Set_login_status(2);
-    }
-
 
     // Verifie si le user n'est pas restreind
     if (isRestricted(user)) {
@@ -223,22 +219,28 @@ void server::Nick_cmd(user *user, t_IRCMessage cmd) {
         }
     }
 
-    // Verifie si le nick est deja pris
-    for (size_t i = 0; i < _list_user.size(); i++) {
-        if (Compare_case_sensitive(_list_user[i]->Get_nickname(), cmd.params[0])) {
-            _Output_client(user->Get_fd_client(), ERR_NICKNAMEINUSE(_name_serveur, user->Get_nickname()));
-            return;
-        }
-    }
-
-// >> :nick42!~user42@62b6-e9b-bf46-d69f-76d5.210.62.ip NICK :nouveaunick42
-// 
     if (!user->Get_username().empty()) {
+        // Verifie si le nick est deja pris
+        for (size_t i = 0; i < _list_user.size(); i++) {
+            if (Compare_case_sensitive(_list_user[i]->Get_nickname(), cmd.params[0])) {
+                _Output_client(user->Get_fd_client(), ERR_NICKNAMEINUSE(_name_serveur, user->Get_nickname()));
+                return;
+            }
+        }
         _Output_client(user->Get_fd_client(), ":" + user->Get_nickname() + " NICK :" + cmd.params[0]);
         user->Set_nickname(cmd.params[0]);
     }
     else {
-        
+        // Verifie si le nick est deja pris
+        bool name_changed = false;
+        for (size_t i = 0; i < _list_user.size(); i++) {
+            if (Compare_case_sensitive(_list_user[i]->Get_nickname(), cmd.params[0])) {
+                cmd.params[0] += '_';
+                i = 0;
+                name_changed = true;
+            }
+        }
+        user->Set_login_status(2);
         user->Set_nickname(cmd.params[0]);
         std::cout << "Introducing new " << cmd.params[0] << " user" << std::endl;
         _Output_client(user->Get_fd_client(), "Hello " + cmd.params[0] + " !");
@@ -246,8 +248,6 @@ void server::Nick_cmd(user *user, t_IRCMessage cmd) {
 };
 
 void server::Mode_cmd(user *user, t_IRCMessage cmd) {
-    //to-do 
-    //  faire msg premier appel: voir discord 21/01 16:17
 
     // Verifie que le user est enregistre
     if (user->Get_login_status() != 3) {
@@ -256,8 +256,8 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
     }
 
     // Verifie les arguments de MODE
-    if (cmd.params[0].empty()) {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "MODE"));
+    if (cmd.params.size() == 1) {
+        // _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "MODE"));
         return;
     }
 
@@ -265,12 +265,19 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
     if (cmd.params[0].at(0) == '!' || cmd.params[0].at(0) == '#' || cmd.params[0].at(0) == '&' || cmd.params[0].at(0) == '+') {
 
         // Verifie si le channel existe
-        channel *chan = _Channel_already_exist(cmd.params[0]);//pour is_op_chan: get channel attention channel peut etre == NULL si nonfound
+        channel *chan = _Channel_already_exist(cmd.params[0]);
         if (!chan) {
             _Output_client(user->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, user->Get_nickname(), cmd.params[0]));
             return;
         }
 
+        // Verifie s'il y a un mode
+        if (cmd.params[1].empty()) {
+            _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "MODE"));
+            return;
+        }
+
+        // Verifie le si le mode existe
         if (cmd.params[1].at(0) == '+') {
             if (cmd.params[1].at(1) == 'i') {
                 if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan)) { // ajout chan op : && user->Is_op_channel(chan)
@@ -279,7 +286,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                 }
                 if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
                     chan->Set_invite_only(true);
-                    _Output_channel(chan, RPL_CHANNELMODEIS(_name_serveur, cmd.params[0], cmd.params[0] + " is now invite only"));
+                    _Output_channel(chan, RPL_CHANNELMODEIS(user->Get_nickname(), chan->Get_channel_name(), "+i"));
                     return;
                 }
             }
@@ -290,7 +297,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                 }
                 if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
                     chan->Set_topic_settable(false);
-                    _Output_channel(chan, RPL_CHANNELMODEIS(_name_serveur, cmd.params[0], cmd.params[0] + " is now topic settable only by operators"));
+                    _Output_channel(chan, RPL_CHANNELMODEIS(user->Get_nickname(), chan->Get_channel_name(), "+t"));
                     return;
                 }
             }
@@ -300,13 +307,18 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                     return;
                 }
                 if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
-                    
-                    _Output_channel(chan, RPL_CHANNELMODEIS(_name_serveur, cmd.params[0], cmd.params[0] + " is now topic settable only by operators"));
+                    if (cmd.params[2].empty()) {
+                        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "MODE"));
+                        return;
+                    }
+
+                    _Output_channel(chan, RPL_CHANNELMODEIS(user->Get_nickname(), chan->Get_channel_name(), "+o"));
                     return;
                 }
             }
             else {
-                _Output_client(user->Get_fd_client(), ERR_UNKNOWNMODE(_name_serveur, cmd.params[1]));
+                // _Output_client(user->Get_fd_client(), ERR_UNKNOWNMODE(_name_serveur, cmd.params[1]));
+                _Output_client(user->Get_fd_client(), cmd.prefix + " PRIVMSG " + chan->Get_channel_name() + " : Unknown MODE flag" ); 
                 return;
             }
         }
@@ -316,12 +328,10 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                     _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
                     return;
                 }
-                for (size_t i = 0; i < _list_channel.size(); i++) {
-                    if (Compare_case_sensitive(_list_channel[i]->Get_channel_name(), cmd.params[0])) {
-                        _list_channel[i]->Set_invite_only(false);
-                        _Output_channel(chan, RPL_CHANNELMODEIS(_name_serveur, cmd.params[0], cmd.params[0] + " is now not invite only"));
-                        return;
-                    }
+                if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
+                    chan->Set_invite_only(false);
+                    _Output_channel(chan, RPL_CHANNELMODEIS(user->Get_nickname(), chan->Get_channel_name(), "-i"));
+                    return;
                 }
             }
             else if (cmd.params[1].at(1) == 't') {
@@ -329,12 +339,10 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                     _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
                     return;
                 }
-                for (size_t i = 0; i < _list_channel.size(); i++) {
-                    if (Compare_case_sensitive(_list_channel[i]->Get_channel_name(), cmd.params[0])) {
-                        _list_channel[i]->Set_topic_settable(true);
-                        _Output_channel(chan, RPL_CHANNELMODEIS(_name_serveur, cmd.params[0], cmd.params[0] + " is now topic settable"));
-                        return;
-                    }
+                if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
+                    chan->Set_topic_settable(true);
+                    _Output_channel(chan, RPL_CHANNELMODEIS(user->Get_nickname(), chan->Get_channel_name(), "-t"));
+                    return;
                 }
             }
             else {

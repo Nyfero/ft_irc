@@ -195,3 +195,28 @@ bool    isRestricted(user *sender)
         return true;
     return false;
 }
+
+
+
+// Check_command: 
+// MODE #yolo +i
+// A
+// B
+// C
+// D
+// E
+// 4 >> :localhost 324 #yolo #yolo is now invite only
+
+
+// Check_command: 
+// WHO #yolo
+// *** server::Check_command - ***
+
+// Check_command: 
+// MODE #yolo +i
+// A
+// B
+// C
+// D
+// E
+// 4 >> :localhost 324 #yolo #yolo is now invite only
