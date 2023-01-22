@@ -14,7 +14,7 @@
 /*---------------------------------------------------------------------------*/
 # define RPL_WELCOME(serveur, nick, use, host) ":" + serveur + " 001 " + nick + " :Welcome to the Internet Relay Network " + nick + "!" + use + "@" + host
 
-# define RPL_UMODEIS(serveur, mode) ":" + serveur + " 221 " + mode
+# define RPL_UMODEIS(nick, target, mode) ":" + nick + " MODE " + target + " :" + mode
 
 # define RPL_AWAY(serveur, nick, nick_dest, msg) ":" + serveur + " 301 " + nick + " " + nick_dest + " :" + msg
 # define RPL_UNAWAY(serveur, nick) ":" + serveur + " 305 " + nick + " :You are no longer marked as being away"
@@ -68,12 +68,12 @@
 # define ERR_UNKNOWNMODE(serveur, chan) ":" + serveur + " 472 " + chan + " :is unknown mode char to me"
 # define ERR_INVITEONLYCHAN(serveur, chan) ":" + serveur + " 473 " + chan + " :Cannot join channel (+i)"
 # define ERR_BANNEDFROMCHAN(serveur, chan) ":" + serveur + " 474 " + chan + " :Cannot join channel (+b)"
-# define ERR_BADCHANNELKEY(serveur, chan) ":" + serveur + " 475 " + chan + " :Cannot join channel (+k)"
+# define ERR_BADCHANNELKEY(serveur, nick, chan) ":" + serveur + " 475 " + nick + " " + chan + " :Cannot join channel (+k)"
 # define ERR_BADCHANMASK(serveur, chan) ":" + serveur + " 476 " + chan + " :Bad Channel Mask"
 # define ERR_NOCHANMODES(serveur, chan) ":" + serveur + " 477 " + chan + " :Channel doesn't support modes"
 # define ERR_CHANOPRIVSNEEDED(serveur, chan) ":" + serveur + " 482 " + chan + " :You're not channel operator"
 # define ERR_RESTRICTED(serveur, nick) ":" + serveur + " 484 " + nick + " :Your connection is restricted!"
 # define ERR_NOOPERHOST(serveur) ":" + serveur + " 491 :No O-lines for your host"
 
-# define ERR_UMODEUNKNOWNFLAG(serveur) ":" + serveur + " 501 :Unknown MODE flag"
+# define ERR_UMODEUNKNOWNFLAG(pre, chan) pre + " PRIVMSG " + chan + " : Unknown MODE flag"
 # define ERR_USERSDONTMATCH(serveur) ":" + serveur + " 502 :Cannot change mode for other users"

@@ -140,27 +140,30 @@ void    Mode::Set_away_reply(std::string away_reply) {
 /*********************/
 
 std::string Mode::Print_mode() const {
-    std::string mode = "Mode :";
+    std::string mode = "+";
     if (_away == true) {
-        mode.append("\n- Away");
+        mode.append("a");
     }
     if (_invisible == true) {
-        mode.append("\n- Invisible");
+        mode.append("i");
     }
     if (_wallops == true) {
-        mode.append("\n- Wallops");
+        mode.append("w");
     }
     if (_restricted == true) {
-        mode.append("\n- Restricted");
+        mode.append("r");
     }
     if (_operator == true) {
-        mode.append("\n- Operator");
+        mode.append("O");
     }
     if (_local_operator == true) {
-        mode.append("\n- Local Operator");
+        mode.append("o");
     }
     if (_server_notice == true) {
-        mode.append("\n- Server Notice");
+        mode.append("s");
+    }
+    if (mode == "+") {
+        return "";
     }
     return mode;
 };
