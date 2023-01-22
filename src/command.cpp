@@ -282,7 +282,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                 }
                 if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
                     chan->Set_invite_only(true);
-                    _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "+i", user->Get_nickname()));
+                    _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "+i"));
                     return;
                 }
             }
@@ -293,7 +293,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                 }
                 if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
                     chan->Set_topic_settable(false);
-                    _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "+t", user->Get_nickname()));
+                    _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "+t"));
                     return;
                 }
             }
@@ -310,10 +310,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                     for (size_t i = 0; i < chan->Get_list_channel_user().size(); i++) {
                         if (Compare_case_sensitive(chan->Get_list_channel_user().at(i)->Get_nickname(), cmd.params[2])) {
                             chan->Add_oper(chan->Get_list_channel_user().at(i));
-                            _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), chan->Get_list_channel_user().at(i)->Get_nickname() + "+o", chan->Get_list_channel_user().at(i)->Get_nickname()));
-                            std::string names = Create_names_rpl(chan);
-                            _Output_channel(chan, RPL_NAMREPLY(_name_serveur, user->Get_nickname(), chan->Get_channel_name(), names));
-                            _Output_channel(chan, RPL_ENDOFNAMES(_name_serveur, user->Get_nickname(), chan->Get_channel_name()));
+                            _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), chan->Get_list_channel_user().at(i)->Get_nickname() + "+o"));
                             return;
                         }
                     }
@@ -330,13 +327,13 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                     return;
                 }
                 if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
-                    if (cmd.params[2].empty()) {
+                    if (cmd.params.size() < 3) {
                         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "MODE"));
                         return;
                     }
                     chan->Set_channel_key(cmd.params[2]);
                     chan->Set_channel_private(true);
-                    _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "+k ", chan->Get_channel_key()));
+                    _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "+k " + chan->Get_channel_key()));
                 }
             }
             else {
@@ -352,7 +349,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                 }
                 if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
                     chan->Set_invite_only(false);
-                    _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "-i", " " + user->Get_nickname()));
+                    _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "-i"));
                     return;
                 }
             }
@@ -363,7 +360,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                 }
                 if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
                     chan->Set_topic_settable(true);
-                    _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "-t", " " + user->Get_nickname()));
+                    _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "-t"));
                     return;
                 }
             }
@@ -384,7 +381,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                         }
                         chan->Set_channel_key("");
                         chan->Set_channel_private(false);
-                        _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "-k", " " + user->Get_nickname()));
+                        _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "-k"));
                     }
                 }
             }

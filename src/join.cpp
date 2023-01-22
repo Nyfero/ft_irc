@@ -119,7 +119,7 @@ int server::_Join_treat(user *user, std::vector<std::string> chan, std::vector<s
                 std::cout << "Already exist channel" << std::endl;
                 // check key + invit
                 if (!res->Get_channel_key().empty() && key[0] != res->Get_channel_key()) // check if key needed and good key
-                    _Output_client(user->Get_fd_client(), (ERR_BADCHANNELKEY(_name_serveur, user->Get_nickname(), chan[0])));
+                    _Output_client(user->Get_fd_client(), ERR_BADCHANNELKEY(_name_serveur, user->Get_nickname(), chan[0]));
                 else if (!user->Is_user_channel(res)) // check user not in chan && invited
                 {
                     user->Add_channel(res); // ajouter channel dans user

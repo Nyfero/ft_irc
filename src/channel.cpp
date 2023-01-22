@@ -6,7 +6,7 @@
 /*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:43:08 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/22 22:23:13 by egiacomi         ###   ########.fr       */
+/*   Updated: 2023/01/20 23:43:09 by egiacomi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,13 @@
 /***************************/
 
 channel::channel(std::string name, user *creator)
-    :_channel_name(n manger avec nous true;
+    :_channel_name(name) {
+    _list_channel_user.push_back(creator);
+    _list_operator.push_back(creator);
+    _key = "";
+    _topic = "";
+    _invite_only = false;
+    _topic_settable = true;
 };
 
 channel::channel(std::string name, user *creator, std::string key)
@@ -46,7 +52,7 @@ int channel::Add_user(user *use){
     std::vector<user *>::iterator   it = _list_channel_user.begin();
     unsigned    i = 0;
     for (; it != _list_channel_user.end(); it++) // Check user not already in channel
-    { manger avec nous
+    {
         if (_list_channel_user[i]->Get_fd_client() == use->Get_fd_client())
         {
             return -1;
