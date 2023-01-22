@@ -6,7 +6,7 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:42:58 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/22 16:19:24 by jgourlin         ###   ########.fr       */
+/*   Updated: 2023/01/22 19:38:40 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,6 @@ bool user::Is_user_channel(channel *chan) const{
             return true;
 
     }
-    std::cout << "false" << std::endl;
     return false;
 }
 
