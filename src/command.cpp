@@ -261,14 +261,15 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
         return;
     }
 
-    // check if chan or user
+    // check if chan
     if (cmd.params[0].at(0) == '!' || cmd.params[0].at(0) == '#' || cmd.params[0].at(0) == '&' || cmd.params[0].at(0) == '+') {
-        if (cmd.params.size() == 1) {
-            _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "MODE"));
+
+        // Verifie si le channel existe
+        channel *chan = _Channel_already_exist(cmd.params[0]);//pour is_op_chan: get channel attention channel peut etre == NULL si nonfound
+        if (!chan) {
+            _Output_client(user->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, user->Get_nickname(), cmd.params[0]));
             return;
         }
-
-        channel *chan = _Channel_already_exist(cmd.params[0]);//pour is_op_chan: get channel attention channel peut etre == NULL si nonfound
 
         if (cmd.params[1].at(0) == '+') {
             if (cmd.params[1].at(1) == 'i') {
@@ -276,27 +277,32 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                     _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
                     return;
                 }
-                for (size_t i = 0; i < _list_channel.size(); i++) {
-                    if (Compare_case_sensitive(_list_channel[i]->Get_channel_name(), cmd.params[0])) {
-                        _list_channel[i]->Set_invite_only(true);
-                        //TODO : Envoyer un message a tous les users du channel
-                        _Output_client(user->Get_fd_client(), RPL_CHANNELMODEIS(_name_serveur, cmd.params[0], cmd.params[0] + " is now invite only"));
-                        return;
-                    }
+                if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
+                    chan->Set_invite_only(true);
+                    _Output_channel(chan, RPL_CHANNELMODEIS(_name_serveur, cmd.params[0], cmd.params[0] + " is now invite only"));
+                    return;
                 }
             }
             else if (cmd.params[1].at(1) == 't') {
-                if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan)) { // idem qu'en haut
+                if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan)) {
                     _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
                     return;
                 }
-                for (size_t i = 0; i < _list_channel.size(); i++) {
-                    if (Compare_case_sensitive(_list_channel[i]->Get_channel_name(), cmd.params[0])) {
-                        _list_channel[i]->Set_topic_settable(false);
-                        //TODO : Envoyer un message a tous les users du channel
-                        _Output_client(user->Get_fd_client(), RPL_CHANNELMODEIS(_name_serveur, cmd.params[0], cmd.params[0] + " is now topic settable only by operators"));
-                        return;
-                    }
+                if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
+                    chan->Set_topic_settable(false);
+                    _Output_channel(chan, RPL_CHANNELMODEIS(_name_serveur, cmd.params[0], cmd.params[0] + " is now topic settable only by operators"));
+                    return;
+                }
+            }
+            else if (cmd.params[1].at(1) == 'o') {
+                if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan)) {
+                    _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
+                    return;
+                }
+                if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
+                    
+                    _Output_channel(chan, RPL_CHANNELMODEIS(_name_serveur, cmd.params[0], cmd.params[0] + " is now topic settable only by operators"));
+                    return;
                 }
             }
             else {
@@ -306,29 +312,27 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
         }
         else if (cmd.params[1].at(0) == '-') {
             if (cmd.params[1].at(1) == 'i') {
-                if (!user->Get_mode().Get_operator()) {
+                if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan)) {
                     _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
                     return;
                 }
                 for (size_t i = 0; i < _list_channel.size(); i++) {
                     if (Compare_case_sensitive(_list_channel[i]->Get_channel_name(), cmd.params[0])) {
                         _list_channel[i]->Set_invite_only(false);
-                        //TODO : Envoyer un message a tous les users du channel
-                        _Output_client(user->Get_fd_client(), RPL_CHANNELMODEIS(_name_serveur, cmd.params[0], cmd.params[0] + " is now not invite only"));
+                        _Output_channel(chan, RPL_CHANNELMODEIS(_name_serveur, cmd.params[0], cmd.params[0] + " is now not invite only"));
                         return;
                     }
                 }
             }
             else if (cmd.params[1].at(1) == 't') {
-                if (!user->Get_mode().Get_operator()) {
+                if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan)) {
                     _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
                     return;
                 }
                 for (size_t i = 0; i < _list_channel.size(); i++) {
                     if (Compare_case_sensitive(_list_channel[i]->Get_channel_name(), cmd.params[0])) {
                         _list_channel[i]->Set_topic_settable(true);
-                        //TODO : Envoyer un message a tous les users du channel
-                        _Output_client(user->Get_fd_client(), RPL_CHANNELMODEIS(_name_serveur, cmd.params[0], cmd.params[0] + " is now topic settable"));
+                        _Output_channel(chan, RPL_CHANNELMODEIS(_name_serveur, cmd.params[0], cmd.params[0] + " is now topic settable"));
                         return;
                     }
                 }
