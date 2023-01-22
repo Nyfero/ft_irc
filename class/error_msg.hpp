@@ -23,7 +23,7 @@
 # define RPL_LISTEND(serveur) ":" + serveur + " 323 :End of LIST"
 # define RPL_CHANNELMODEIS(nick, chan, mode) ":" + nick + " MODE " + chan + " " + mode
 # define RPL_NOTOPIC(serveur, chan) ":" + serveur + " 331 " + chan + " :No topic is set"
-# define RPL_TOPIC(serveur, chan, topic) ":" + serveur + " 332 " + chan + " :" + topic
+# define RPL_TOPIC(serveur, nick, chan, topic) ":" + serveur + " 332 " + nick + " " + chan + " :" + topic
 
 
 # define RPL_INVITING(serveur, sender, chan, target) ":" + serveur + " 341 " + sender + " " + target + " " + chan

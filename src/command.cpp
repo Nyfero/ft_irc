@@ -391,8 +391,16 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
 int server::Quit_cmd(user *user, t_IRCMessage cmd) {
     // to-do
     //  definir message a envoyer
-    (void)user;
-    (void)cmd;
+
+    std::string msg;
+    for (size_t i = 0; i < cmd.params.size(); i++)
+    {
+        msg += cmd.params[i];
+        if (i + 1 < cmd.params.size())
+            msg += " ";
+    }
+    msg.insert(0, " ");
+    _Output_all_user_channel(user, msg);
     return -2;
 };
 
@@ -421,9 +429,11 @@ void server::Join_cmd(user *user, t_IRCMessage cmd) {
         std::vector<channel*>    l_chan = user->Get_channel_register();
         while (!l_chan.empty())
         {
-            // mettre msg
+            _Output_channel(l_chan[0],  ":" + cmd.prefix + " PART " + l_chan[0]->Get_channel_name());
             user->Remove_Channel(l_chan[0]);
             l_chan[0]->Remove_user(user);
+            if (l_chan[0]->Get_list_channel_user().empty()) // si chan vide le retirer
+                _Remove_channel(l_chan[0]);
             l_chan = user->Get_channel_register();
         }
     }
@@ -471,12 +481,9 @@ void server::Part_cmd(user *user, t_IRCMessage cmd) {
                 _Output_channel(chan,  ":" + prefix + " PART " + chan->Get_channel_name());
                 user->Remove_Channel(chan);
                 chan->Remove_user(user);
-                // _Output_client(user->Get_fd_client(), user->Get_nickname() + " PART " + chan->Get_channel_name() + " :");
 
-                // _Output_channel(chan,  user->Get_nickname() + " PART " + chan->Get_channel_name() + " :");
                 if (chan->Get_list_channel_user().empty())// chan vide donc le delete
                     _Remove_channel(chan); 
-                //:jgourlin!jgourlin@localhost PART #qw :
             }
             else
             {
@@ -891,7 +898,7 @@ void server::Topic_cmd(user *user, t_IRCMessage cmd) {
             _Output_client(user->Get_fd_client(), RPL_NOTOPIC(_name_serveur, chan->Get_channel_name())); // check si correct
         }
         else { //RPL_TOPIC
-            _Output_client(user->Get_fd_client(), RPL_TOPIC(_name_serveur, chan->Get_channel_name(), chan->Get_channel_topic()));
+            _Output_client(user->Get_fd_client(), RPL_TOPIC(_name_serveur, user->Get_nickname(), chan->Get_channel_name(), chan->Get_channel_topic()));
         }
     }
     else if (cmd.params.size() >= 2) //change chan's topic
