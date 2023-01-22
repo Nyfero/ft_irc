@@ -6,7 +6,7 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:42:36 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/22 16:28:42 by jgourlin         ###   ########.fr       */
+/*   Updated: 2023/01/22 18:00:33 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,26 +91,15 @@ void    server::_Join_rpl(user *use, channel *chan){
 
     if (chan->Get_list_channel_user().size() > 1) {// deja existant
         if (!chan->Get_channel_topic().empty())// 332
-            _Output_client(use->Get_fd_client(), RPL_TOPIC(_name_serveur, chan->Get_channel_name(), chan->Get_channel_topic()));
-        // 333
+            _Output_client(use->Get_fd_client(), RPL_TOPIC(_name_serveur, use->Get_nickname(), chan->Get_channel_name(), chan->Get_channel_topic()));
     }
-
     // new channel
     _Output_client(use->Get_fd_client(), RPL_NAMREPLY(_name_serveur, use->Get_nickname(), chan->Get_channel_name(), names));// 353
     _Output_client(use->Get_fd_client(), RPL_ENDOFNAMES(_name_serveur, use->Get_nickname(),chan->Get_channel_name()));// 366
-
-    // _Output_client(use->Get_fd_client(), RPL_NAMREPLY(_name_serveur, use->Get_nickname(), chan->Get_channel_name(), names));
-    
-    // _Output_client(use->Get_fd_client(),);
-    // _Output_client(use->Get_fd_client(),);
-    // _Output_client(use->Get_fd_client(), RPL_NAMREPLY(_name_serveur, chan->Get_channel_name(), names));
-    // _Output_client(use->Get_fd_client(), RPL_ENDOFNAMES(_name_serveur, use->Get_nickname(),chan->Get_channel_name()));
 }
 
 //to-do
 //  chan n'est pas invit only ->ERR_INVITEONLYCHAN
-//  join 0
-//  RPL
 
 int server::_Join_treat(user *user, std::vector<std::string> chan, std::vector<std::string> key)
 {

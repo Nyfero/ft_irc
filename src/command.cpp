@@ -175,10 +175,7 @@ void server::User_cmd(user *user, t_IRCMessage cmd) {
     user->Set_username(cmd.params[0]);
     user->Set_hostname(cmd.params[2]);
     user->Set_realname(realname);
-    if (!isNumber(cmd.params[1]))
-        user->Set_mode("0");
-    else
-        user->Set_mode(cmd.params[1]);
+    user->Set_mode("+i");
 
     _Output_client(user->Get_fd_client(), RPL_WELCOME(_name_serveur, user->Get_nickname(), user->Get_username(), user->Get_hostname()));
 };
@@ -320,6 +317,25 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                     _Output_client(user->Get_fd_client(), ERR_USERNOTINCHANNEL(_name_serveur, cmd.params[2], cmd.params[0]));
                 }
             }
+            else if (cmd.params[1].at(1) == 'k') {
+                if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan)) {
+                    _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
+                    return;
+                }
+                if (chan->Get_channel_private()) {
+                    _Output_client(user->Get_fd_client(), ERR_KEYSET(_name_serveur, chan->Get_channel_name()));
+                    return;
+                }
+                if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
+                    if (cmd.params[2].empty()) {
+                        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "MODE"));
+                        return;
+                    }
+                    chan->Set_channel_key(cmd.params[2]);
+                    chan->Set_channel_private(true);
+                    _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "+k " + chan->Get_channel_key()));
+                }
+            }
             else {
                 _Output_client(user->Get_fd_client(), ERR_UNKNOWNMODE(cmd.prefix, cmd.params[1]));
                 return;
@@ -348,6 +364,27 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                     return;
                 }
             }
+            else if (cmd.params[1].at(1) == 'k') {
+                if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan)) {
+                    _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
+                    return;
+                }
+                if (chan->Get_channel_private()) {
+                    if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
+                        if (cmd.params[2].empty()) {
+                            _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "MODE"));
+                            return;
+                        }
+                        if (cmd.params[2] != chan->Get_channel_key()) {
+                            _Output_client(user->Get_fd_client(), ERR_PASSWDMISMATCH(_name_serveur));
+                            return;
+                        }
+                        chan->Set_channel_key("");
+                        chan->Set_channel_private(false);
+                        _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "-k"));
+                    }
+                }
+            }
             else {
                 _Output_client(user->Get_fd_client(), ERR_UNKNOWNMODE(cmd.prefix, cmd.params[1]));
                 return;
@@ -362,33 +399,37 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
 
     // Verifie que le premier parametre est le nickname ou le realname
     if (cmd.params[0] != user->Get_nickname() && cmd.params[0] != user->Get_realname().substr(0, user->Get_realname().find(' '))) {
-        _Output_client(user->Get_fd_client(), ERR_USERSDONTMATCH(_name_serveur));
-        return;
+        if (!user->Get_mode().Get_operator()) {
+            _Output_client(user->Get_fd_client(), ERR_USERSDONTMATCH(_name_serveur));
+            return;
+        }
+        else if (!_Get_user_by_nick(cmd.params[0])) {
+            _Output_client(user->Get_fd_client(), ERR_USERSDONTMATCH(_name_serveur));
+            return;
+        }
     }
 
     if (cmd.params.size() == 1) {
         _Output_client(user->Get_fd_client(), RPL_UMODEIS(user->Get_nickname(), cmd.params[0], _Get_user_by_nick(cmd.params[0])->Get_mode().Print_mode()));
     }
     else {
-        if (cmd.params[0] == user->Get_nickname() || cmd.params[0] != user->Get_realname().substr(0, user->Get_realname().find(' '))) {
-            if (cmd.params[1].at(0) == '+') {
-                for (size_t i = 1; i < cmd.params[1].size(); i++) {
-                    if (user->Get_mode().Add_mode(cmd.params[1].at(i))) {
-                        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0]));
-                        return;
-                    }
+        if (cmd.params[1].at(0) == '+') {
+            for (size_t i = 1; i < cmd.params[1].size(); i++) {
+                if (_Get_user_by_nick(cmd.params[0])->Get_mode().Add_mode(cmd.params[1].at(i))) {
+                    _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0]));
+                    return;
                 }
-                _Output_client(user->Get_fd_client(), RPL_UMODEIS(user->Get_nickname(), cmd.params[0], cmd.params[1]));
             }
-            else {
-                for (size_t i = 1; i < cmd.params[1].size(); i++) {
-                    if (user->Get_mode().Remove_mode(cmd.params[1].at(i))) {
-                        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0]));
-                        return;
-                    }
+            _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), RPL_UMODEIS(_Get_user_by_nick(cmd.params[0])->Get_nickname(), cmd.params[0], cmd.params[1]));
+        }
+        else {
+            for (size_t i = 1; i < cmd.params[1].size(); i++) {
+                if (_Get_user_by_nick(cmd.params[0])->Get_mode().Remove_mode(cmd.params[1].at(i))) {
+                    _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0]));
+                    return;
                 }
-                _Output_client(user->Get_fd_client(), RPL_UMODEIS(user->Get_nickname(), cmd.params[0], cmd.params[1]));
             }
+            _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), RPL_UMODEIS(_Get_user_by_nick(cmd.params[0])->Get_nickname(), cmd.params[0], cmd.params[1]));
         }
     }
 };
@@ -396,8 +437,16 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
 int server::Quit_cmd(user *user, t_IRCMessage cmd) {
     // to-do
     //  definir message a envoyer
-    (void)user;
-    (void)cmd;
+
+    std::string msg;
+    for (size_t i = 0; i < cmd.params.size(); i++)
+    {
+        msg += cmd.params[i];
+        if (i + 1 < cmd.params.size())
+            msg += " ";
+    }
+    msg.insert(0, " ");
+    _Output_all_user_channel(user, msg);
     return -2;
 };
 
@@ -468,12 +517,9 @@ void server::Part_cmd(user *user, t_IRCMessage cmd) {
                 _Output_channel(chan,  ":" + prefix + " PART " + chan->Get_channel_name());
                 user->Remove_Channel(chan);
                 chan->Remove_user(user);
-                // _Output_client(user->Get_fd_client(), user->Get_nickname() + " PART " + chan->Get_channel_name() + " :");
 
-                // _Output_channel(chan,  user->Get_nickname() + " PART " + chan->Get_channel_name() + " :");
                 if (chan->Get_list_channel_user().empty())// chan vide donc le delete
                     _Remove_channel(chan); 
-                //:jgourlin!jgourlin@localhost PART #qw :
             }
             else
             {
@@ -888,7 +934,7 @@ void server::Topic_cmd(user *user, t_IRCMessage cmd) {
             _Output_client(user->Get_fd_client(), RPL_NOTOPIC(_name_serveur, chan->Get_channel_name())); // check si correct
         }
         else { //RPL_TOPIC
-            _Output_client(user->Get_fd_client(), RPL_TOPIC(_name_serveur, chan->Get_channel_name(), chan->Get_channel_topic()));
+            _Output_client(user->Get_fd_client(), RPL_TOPIC(_name_serveur, user->Get_nickname(), chan->Get_channel_name(), chan->Get_channel_topic()));
         }
     }
     else if (cmd.params.size() >= 2) //change chan's topic

@@ -27,6 +27,7 @@ class channel
         // Channel's mode
         bool    _invite_only;
         bool    _topic_settable;
+        bool    _channel_private;
 
     public:
 
@@ -51,8 +52,10 @@ class channel
         void    Add_oper(user *use);
 
         void    Mod_topic(std::string str);
+        void    Set_channel_key(std::string key);
         void    Set_invite_only(bool b);
         void    Set_topic_settable(bool b);
+        void    Set_channel_private(bool b);
 
         /************************/
         /******* ACCESSOR *******/
@@ -65,6 +68,7 @@ class channel
         std::vector<user *>     Get_list_operator() const;
         bool                    Get_invite_only() const;
         bool                    Get_topic_settable() const;
+        bool                    Get_channel_private() const;
 
         void    print_user_channel();
         void    print_oper_channel();

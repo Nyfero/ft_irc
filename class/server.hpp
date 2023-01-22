@@ -6,7 +6,7 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:44:08 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/21 17:50:40 by jgourlin         ###   ########.fr       */
+/*   Updated: 2023/01/22 17:16:56 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,7 @@ class server
         int     _Input_client(std::vector<pollfd>::iterator it);
         int     _Output_client(int fd, std::string msg);
         int     _Output_channel(channel *chan, std::string msg);
+        int     _Output_all_user_channel(user *user, std::string msg);
         void    _Print_channel();
         void    _Print_user();
         bool    _User_is_in_chan(user *use, channel *chan);

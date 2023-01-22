@@ -111,12 +111,20 @@ void channel::Mod_topic(std::string str){
     _topic = str;
 }
 
-void channel::Set_invite_only(bool b){
-    _invite_only = b;
-}
+void channel::Set_channel_key(std::string key) {
+    _key = key;
+};
 
-void channel::Set_topic_settable(bool b){
+void channel::Set_invite_only(bool b) {
+    _invite_only = b;
+};
+
+void channel::Set_topic_settable(bool b) {
     _topic_settable = b;
+};
+
+void channel::Set_channel_private(bool b) {
+    _channel_private = b;
 };
 
 /************************/
@@ -150,6 +158,10 @@ bool channel::Get_invite_only() const {
 bool channel::Get_topic_settable() const {
     return(_topic_settable);
 };
+
+bool channel::Get_channel_private() const {
+    return _channel_private;
+}
 
 void    channel::print_user_channel(){
     std::cout << "   user:" << _list_channel_user.size() << std::endl;

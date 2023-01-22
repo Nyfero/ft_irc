@@ -23,7 +23,7 @@
 # define RPL_LISTEND(serveur) ":" + serveur + " 323 :End of LIST"
 # define RPL_CHANNELMODEIS(nick, chan, mode) ":" + nick + " MODE " + chan + " " + mode
 # define RPL_NOTOPIC(serveur, chan) ":" + serveur + " 331 " + chan + " :No topic is set"
-# define RPL_TOPIC(serveur, chan, topic) ":" + serveur + " 332 " + chan + " :" + topic
+# define RPL_TOPIC(serveur, nick, chan, topic) ":" + serveur + " 332 " + nick + " " + chan + " :" + topic
 
 
 # define RPL_INVITING(serveur, sender, chan, target) ":" + serveur + " 341 " + sender + " " + target + " " + chan
@@ -64,6 +64,7 @@
 # define ERR_NEEDMOREPARAMS(serveur, commande) ":" + serveur + " 461 " + commande + " : Not enough parameters"
 # define ERR_ALREADYREGISTRED(serveur) ":" + serveur + " 462 :Unauthorized command (already registered)"
 # define ERR_PASSWDMISMATCH(serveur) ":" + serveur + " 464 :Password incorrect"
+# define ERR_KEYSET(serveur, chan) ":" + serveur + " 467 " + chan + " :Channel key already set" 
 # define ERR_CHANNELISFULL(serveur, chan) ":" + serveur + " 471 " + chan + " :Cannot join channel (+l)"
 # define ERR_UNKNOWNMODE(serveur, chan) ":" + serveur + " 472 " + chan + " :is unknown mode char to me"
 # define ERR_INVITEONLYCHAN(serveur, chan) ":" + serveur + " 473 " + chan + " :Cannot join channel (+i)"

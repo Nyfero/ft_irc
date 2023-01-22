@@ -6,7 +6,7 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:42:54 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/22 16:33:22 by jgourlin         ###   ########.fr       */
+/*   Updated: 2023/01/22 18:47:55 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,6 +115,8 @@ void    server::_Launch_server() {
         // check tous les fds
         while (it != _list_poll_fd.end()) {
             if (it->revents & POLLHUP) { // deconnexion
+                // send PART msg to all user's channel to-do
+                std::cout << "debut revetnts pollhup" << std::endl;
                 _Remove_user(it);
                 break;
             }
@@ -222,24 +224,34 @@ void    server::_Remove_user(std::vector<pollfd>::iterator pos) {
         }
         it++;
     }
-    user *tmp = _list_user.at(std::distance(_list_user.begin(), it));
+    user *use = _list_user.at(std::distance(_list_user.begin(), it));
 
+    // send PART msg to all channel who user is
     // leave all channel
-    while (!tmp->Get_channel_register().empty())
+    std::vector<channel *> l_chan = use->Get_channel_register();
+
+    std::cout << "fd = " << use->Get_fd_client() << std::endl;
+    std::cout << "liste chan vide : " << l_chan.empty() << std::endl;
+    while (!use->Get_channel_register().empty())
     {
-        channel *chan = tmp->Get_channel_register().front();
-        chan->Remove_user(tmp);
-        tmp->Remove_Channel(chan);   
+        std::cout << "debug il y a des chan" << std::endl;
+        channel *chan = use->Get_channel_register().front();
+        use->Remove_Channel(chan);   
+        chan->Remove_user(use);
         if (chan->Get_list_channel_user().empty())
             _Remove_channel(chan);
         else if (chan->Get_list_operator().empty())
             chan->Add_oper(chan->Get_list_operator().front());
     }
-    _Output_client(tmp->Get_fd_client(), "You have been disconnected");
-    close (tmp->Get_fd_client());
+    std::cout << "debug omega" << std::endl;
+    // _Output_client(user->Get_fd_client(), "You have been disconnected");
+    std::cout << "debug alpha" << std::endl;
+    close (use->Get_fd_client());
+    std::cout << "debug bravo" << std::endl;
     _list_user.erase(it);
+    std::cout << "debug charl" << std::endl;
     _list_poll_fd.erase(pos);
-    delete tmp;
+    delete use;
 };
 
 /******************/
@@ -307,29 +319,32 @@ int server::_Input_client(std::vector<pollfd>::iterator it) {
     ssize_t     ret = -1;
     std::string res;
     size_t      found;
-    user    *test = _Get_user_by_fd(fd);
+    user    *sender = _Get_user_by_fd(fd);
 
     if ((ret = recv(fd, inpt, SIZE_INPT - 1, 0)) == -1) {
         return -1;
     }
 // to-do faire un message quand user deco?
     if (!ret) { // disconnect
+        // send PART msg to all user's channel to-do
+        _Output_all_user_channel(sender, "");
         _Remove_user(it);
         return -2;
     }
     inpt[ret] = 0;
     // append inpt dans str de user
-    test->str.append(inpt);
-    while ((found = test->str.find("\n", 0)) != std::string::npos) { // ligne complete -> traite -> delete
+    sender->str.append(inpt);
+    while ((found = sender->str.find("\n", 0)) != std::string::npos) { // ligne complete -> traite -> delete
         
         
-        res = test->str.substr(0, found); // get first line in res
-        test->str.erase(0, found + 1); // get after first line in str
+        res = sender->str.substr(0, found); // get first line in res
+        sender->str.erase(0, found + 1); // get after first line in str
         
         if ((found = res.find("\r", 0)) != std::string::npos)
             res.erase(found);
-        if (Check_command(test, res) == -2) // check si cmd valide
+        if (Check_command(sender, res) == -2) // check si cmd valide
         {
+            // if command is QUIT
             _Remove_user(it);
             return -2;
         }
@@ -357,6 +372,23 @@ int server::_Output_channel(channel *chan, std::string msg) {
     }
     return 0;
 };
+
+int     server::_Output_all_user_channel(user *user, std::string msg) {
+    std::vector<channel *> chan = user->Get_channel_register();
+    std::string str;
+    std::string prefix = ":" + user->Get_nickname() + "!" + user->Get_username() + "@" + user->Get_hostname();
+    
+    for (size_t i = 0; i < chan.size(); i++)
+    {
+        str = prefix + " PART " + chan[i]->Get_channel_name();
+        (void)msg;
+        if (!msg.empty())
+            str += msg;
+        user->Remove_Channel(chan[i]);
+        _Output_channel(chan[i], str);
+    }
+    return 0;
+}
 
 void    server::_Print_channel()
 {
