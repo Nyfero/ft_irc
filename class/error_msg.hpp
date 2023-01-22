@@ -21,7 +21,7 @@
 # define RPL_NOWAWAY(serveur, nick) ":" + serveur + " 306 " + nick + " :You have been marked as being away"
 # define RPL_LIST(serveur, chan, nb_users, topic) ":" + serveur + " 322 " + chan + " " + nb_users + " :" + topic
 # define RPL_LISTEND(serveur) ":" + serveur + " 323 :End of LIST"
-# define RPL_CHANNELMODEIS(nick, chan, mode) ":" + nick + " MODE " + chan + " " + mode
+# define RPL_CHANNELMODEIS(pre, chan, mode, nick) ":" + pre + " MODE " + chan + " " + mode + " " + nick
 # define RPL_NOTOPIC(serveur, chan) ":" + serveur + " 331 " + chan + " :No topic is set"
 # define RPL_TOPIC(serveur, nick, chan, topic) ":" + serveur + " 332 " + nick + " " + chan + " :" + topic
 
@@ -69,7 +69,7 @@
 # define ERR_UNKNOWNMODE(serveur, chan) ":" + serveur + " 472 " + chan + " :is unknown mode char to me"
 # define ERR_INVITEONLYCHAN(serveur, chan) ":" + serveur + " 473 " + chan + " :Cannot join channel (+i)"
 # define ERR_BANNEDFROMCHAN(serveur, chan) ":" + serveur + " 474 " + chan + " :Cannot join channel (+b)"
-# define ERR_BADCHANNELKEY(serveur, nick, chan) ":" + serveur + " 475 " + nick + " " + chan + " :Cannot join channel (+k)"
+# define ERR_BADCHANNELKEY(serveur, chan) ":" + serveur + " 475 " + chan + " :Cannot join channel (+k)"
 # define ERR_BADCHANMASK(serveur, chan) ":" + serveur + " 476 " + chan + " :Bad Channel Mask"
 # define ERR_NOCHANMODES(serveur, chan) ":" + serveur + " 477 " + chan + " :Channel doesn't support modes"
 # define ERR_CHANOPRIVSNEEDED(serveur, chan) ":" + serveur + " 482 " + chan + " :You're not channel operator"

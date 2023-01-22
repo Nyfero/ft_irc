@@ -69,20 +69,7 @@
 // :<nick> PART <chan>
 
 void    server::_Join_rpl(user *use, channel *chan){
-    std::string names;
-    std::vector<user *> res;
-    std::vector<user *> ope;
-
-    ope = chan->Get_list_operator();
-    res = chan->Get_list_channel_user();
-    for (size_t i = 0; i < res.size(); i++)
-    {
-        if (res[i]->Is_op_channel(chan))
-            names += "@";
-        names += res[i]->Get_nickname();
-        //if (i + 1 < res.size())
-        names += " ";
-    }
+    std::string names = Create_names_rpl(chan);
 
     std::string prefix = use->Get_nickname() + "!" + use->Get_username() + "@" + use->Get_hostname();
 

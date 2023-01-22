@@ -196,27 +196,17 @@ bool    isRestricted(user *sender)
     return false;
 }
 
+std::string Create_names_rpl(channel *chan) {
+    std::string names;
+    std::vector<user *> v_user;
 
-
-// Check_command: 
-// MODE #yolo +i
-// A
-// B
-// C
-// D
-// E
-// 4 >> :localhost 324 #yolo #yolo is now invite only
-
-
-// Check_command: 
-// WHO #yolo
-// *** server::Check_command - ***
-
-// Check_command: 
-// MODE #yolo +i
-// A
-// B
-// C
-// D
-// E
-// 4 >> :localhost 324 #yolo #yolo is now invite only
+    v_user = chan->Get_list_channel_user();
+    for (size_t i = 0; i < v_user.size(); i++) {
+        if (v_user[i]->Is_op_channel(chan)) {
+            names += "@";
+        }
+        names += v_user[i]->Get_nickname();
+        names += " ";
+    }
+    return names;
+};
