@@ -6,7 +6,7 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:42:54 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/21 20:01:45 by jgourlin         ###   ########.fr       */
+/*   Updated: 2023/01/22 16:33:22 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,8 +105,8 @@ void    server::_Launch_server() {
 
     while (g_stop) {
 
-        // _Print_user();
-        // _Print_channel();
+        _Print_user();
+        _Print_channel();
 
 
         // poll(tab pollfd, size tab, timer)
@@ -320,7 +320,7 @@ int server::_Input_client(std::vector<pollfd>::iterator it) {
     inpt[ret] = 0;
     // append inpt dans str de user
     test->str.append(inpt);
-    while ((found = test->str.find("\r\n", 0)) != std::string::npos) { // ligne complete -> traite -> delete
+    while ((found = test->str.find("\n", 0)) != std::string::npos) { // ligne complete -> traite -> delete
         
         
         res = test->str.substr(0, found); // get first line in res

@@ -418,6 +418,14 @@ void server::Join_cmd(user *user, t_IRCMessage cmd) {
     }
     else if (cmd.params.size() == 1 && cmd.params[0] == "0") {
         // join 0
+        std::vector<channel*>    l_chan = user->Get_channel_register();
+        while (!l_chan.empty())
+        {
+            // mettre msg
+            user->Remove_Channel(l_chan[0]);
+            l_chan[0]->Remove_user(user);
+            l_chan = user->Get_channel_register();
+        }
     }
     else if (cmd.params.size() == 1) {
         // join channel

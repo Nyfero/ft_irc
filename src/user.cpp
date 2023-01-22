@@ -6,7 +6,7 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:42:58 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/21 16:03:57 by jgourlin         ###   ########.fr       */
+/*   Updated: 2023/01/22 16:19:24 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,22 @@ std::string user::Get_realname() const {
 std::vector<channel *>  user::Get_channel_register() const{
     return _channel_register;
 };
+
+bool user::Is_user_channel(channel *chan) const{
+    std::vector<user *> list;
+
+    if (!chan)
+        return false;
+    list = chan->Get_list_channel_user();
+    for (size_t i = 0; i < list.size(); i++)
+    {
+        if (_nickname == list[i]->Get_nickname())
+            return true;
+
+    }
+    std::cout << "false" << std::endl;
+    return false;
+}
 
 bool user::Is_op_channel(channel *chan) const{
     std::vector<user *> list;

@@ -6,7 +6,7 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:42:36 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/21 19:48:07 by jgourlin         ###   ########.fr       */
+/*   Updated: 2023/01/22 16:28:42 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,16 +141,15 @@ int server::_Join_treat(user *user, std::vector<std::string> chan, std::vector<s
             {
                 std::cout << "Create new channel" << std::endl;
                 std::cout << "Already exist channel" << std::endl;
-                // check key
-                if (key[0] == res->Get_channel_key() || res->Get_channel_key().empty())
+                // check key + invit
+                if (!res->Get_channel_key().empty() && key[0] != res->Get_channel_key()) // check if key needed and good key
+                    _Output_client(user->Get_fd_client(), (ERR_BADCHANNELKEY(_name_serveur, chan[0])));
+                if (user->Is_user_channel(res)) // check user not in chan && invited
                 {
                     user->Add_channel(res); // ajouter channel dans user
                     res->Add_user(user); // ajouter user dans channel
                     _Join_rpl(user, res);
                 }
-                else
-                    _Output_client(user->Get_fd_client(), (ERR_BADCHANNELKEY(_name_serveur, chan[0])));
-
             }
         }
         else
@@ -190,13 +189,13 @@ int server::_Join_treat(user *user, std::vector<std::string> chan)
             else // channel existe
             {
                 std::cout << "Already exist channel" << std::endl;
-                if (res->Get_channel_key().empty()){
+                if (!res->Get_channel_key().empty()) // check si need key
+                    _Output_client(user->Get_fd_client(), (ERR_BADCHANNELKEY(_name_serveur, chan[i])));
+                else if (!user->Is_user_channel(res)) { // check invite + user n'est pas dedans
                     user->Add_channel(res); // ajouter channel dans user
                     res->Add_user(user); // ajouter user dans channel
                     _Join_rpl(user, res);
                 }
-                else
-                    _Output_client(user->Get_fd_client(), (ERR_BADCHANNELKEY(_name_serveur, chan[i])));
             }
         }
         else
