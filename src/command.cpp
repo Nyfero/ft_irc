@@ -446,7 +446,9 @@ int server::Quit_cmd(user *user, t_IRCMessage cmd) {
             msg += " ";
     }
     msg.insert(0, " ");
-    _Output_all_user_channel(user, msg);
+    // std::cout << "quit_cmd: user list chan size :" << user->Get_channel_register().size() << std::endl;
+    //std::cout << "quit_cmd: size first chan :" << user->Get_channel_register()[0]->Get_channel_name() << std::endl;
+   _Output_all_user_channel(user, msg);
     return -2;
 };
 
@@ -472,6 +474,16 @@ void server::Join_cmd(user *user, t_IRCMessage cmd) {
     }
     else if (cmd.params.size() == 1 && cmd.params[0] == "0") {
         // join 0
+        std::vector<channel*>    l_chan = user->Get_channel_register();
+        while (!l_chan.empty())
+        {
+            _Output_channel(l_chan[0],  ":" + cmd.prefix + " PART " + l_chan[0]->Get_channel_name());
+            user->Remove_Channel(l_chan[0]);
+            l_chan[0]->Remove_user(user);
+            if (l_chan[0]->Get_list_channel_user().empty()) // si chan vide le retirer
+                _Remove_channel(l_chan[0]);
+            l_chan = user->Get_channel_register();
+        }
     }
     else if (cmd.params.size() == 1) {
         // join channel
@@ -497,13 +509,23 @@ void server::Part_cmd(user *user, t_IRCMessage cmd) {
     }
 
     std::vector<std::string> v_chan;
-    channel *chan;
+    channel     *chan;
+    std::string prefix = ":" + user->Get_nickname() + "!" + user->Get_username() + "@" + user->Get_hostname() + " PART ";
+    std::string msg;
 
-    if (cmd.params.empty()){
+// >> :nick42__!~user42@6cd7-bcd-b63-9ddf-8c58.210.62.ip PART |#qwe :aurvoir
+// >> :nick42__!~user42@6cd7-bcd-b63-9ddf-8c58.210.62.ip PART |#asd :aurvoir
+// >> :nick42__!~user42@6cd7-bcd-b63-9ddf-8c58.210.62.ip PART |#zxc :aurvoir
+
+
+    if (cmd.params.empty()){ // need more param
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, user->Get_nickname()));
     }
-    else if (cmd.params.size() == 1) // NO MSG
+    else // 1 ou + param
     {
+        if (cmd.params.size() > 1) // >= 2 param -> message
+            for (size_t i = 1; i < cmd.params.size(); i++)
+                msg += " " + cmd.params[i];
         v_chan = Split(cmd.params[0], ',');
         while (!v_chan.empty())
         {
@@ -513,8 +535,7 @@ void server::Part_cmd(user *user, t_IRCMessage cmd) {
             }
             else if (User_in_channel(user, chan))
             {
-                std::string prefix = user->Get_nickname() + "!" + user->Get_username() + "@" + user->Get_hostname();
-                _Output_channel(chan,  ":" + prefix + " PART " + chan->Get_channel_name());
+                _Output_channel(chan, prefix + chan->Get_channel_name() + msg);
                 user->Remove_Channel(chan);
                 chan->Remove_user(user);
 
@@ -527,10 +548,6 @@ void server::Part_cmd(user *user, t_IRCMessage cmd) {
             }
             v_chan.erase(v_chan.begin());
         }
-    }
-    else if (cmd.params.size() >= 2) // MSG
-    {
-        // check no channel list
     }
 
     // Servers MUST be able to parse arguments in the form of a list of
@@ -812,7 +829,10 @@ void server::Wallops_cmd(user *sender, t_IRCMessage cmd) {
 /* Si ca bug c'est car le meme irssi est connecte sur plusieurs instances */
 void server::Pong_cmd(user *user, t_IRCMessage cmd) {
 
-     // Verifie que le user est enregistre
+    // exemple pong
+    // :bifrost.ca.us.dal.net PONG bifrost.ca.us.dal.net :nick42
+
+    // Verifie que le user est enregistre
     if (user->Get_login_status() != 3) {
         _Output_client(user->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
         return;
@@ -822,9 +842,7 @@ void server::Pong_cmd(user *user, t_IRCMessage cmd) {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "PONG"));
         return;
     }
-    std::string pong = "PONG " + cmd.params[0];
-    std::cout << ":" + user->Get_nickname() + " :" + pong + "\r\n" << std::endl;
-    _Output_client(user->Get_fd_client(), pong);
+    _Output_client(user->Get_fd_client(), ":" + _name_serveur + " PONG " + _name_serveur + " :" + user->Get_nickname());
 };
 
 void server::Oper_cmd(user *user, t_IRCMessage cmd) {
