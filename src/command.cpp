@@ -424,7 +424,11 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
         }
     }
 
+    for (size_t i = 0; i < cmd.params.size(); i++) {
+        std::cout << "Parametre " << i << " : " << cmd.params[i] << std::endl;
+    }
     if (cmd.params.size() == 1) {
+        std::cout << "Mode de " << cmd.params[0] << " : " << _Get_user_by_nick(cmd.params[0])->Get_mode()->Print_mode() << std::endl;
         _Output_client(user->Get_fd_client(), RPL_UMODEIS(user->Get_nickname(), cmd.params[0], _Get_user_by_nick(cmd.params[0])->Get_mode()->Print_mode()));
     }
     else {
@@ -444,7 +448,9 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                         return;
                     }
                 }
-                _Output_client(user->Get_fd_client(), RPL_UMODEIS(_Get_user_by_nick(cmd.params[0])->Get_nickname(), cmd.params[0], cmd.params[1]));
+                if (user->Get_nickname() != cmd.params[0]) {
+                    _Output_client(user->Get_fd_client(), RPL_UMODEIS(_Get_user_by_nick(cmd.params[0])->Get_nickname(), cmd.params[0], cmd.params[1]));
+                }
             }
             _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), RPL_UMODEIS(_Get_user_by_nick(cmd.params[0])->Get_nickname(), cmd.params[0], cmd.params[1]));
         }
@@ -464,7 +470,9 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                         return;
                     }
                 }
-                _Output_client(user->Get_fd_client(), RPL_UMODEIS(_Get_user_by_nick(cmd.params[0])->Get_nickname(), cmd.params[0], cmd.params[1]));
+                if (user->Get_nickname() != cmd.params[0]) {
+                    _Output_client(user->Get_fd_client(), RPL_UMODEIS(_Get_user_by_nick(cmd.params[0])->Get_nickname(), cmd.params[0], cmd.params[1]));
+                }
             }
             _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), RPL_UMODEIS(_Get_user_by_nick(cmd.params[0])->Get_nickname(), cmd.params[0], cmd.params[1]));
         }
@@ -675,7 +683,7 @@ void server::Privmsg_cmd(user *sender, t_IRCMessage cmd) {
 
     if (isRestricted(sender)) {
         _Output_client(sender->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
-        return ;
+        return;
     } 
     if (_parse_privmsg(sender, cmd))                                                // Parse PRIVMSG command
         return;

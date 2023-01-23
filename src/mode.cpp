@@ -158,24 +158,24 @@ void    Mode::Set_away_reply(std::string away_reply) {
 /*********************/
 
 std::string Mode::Print_mode() const {
-    std::string mode = "+";
+    std::string str = "+";
     if (_away == true) {
-        mode.append("a");
+        str.append("a");
     }
     if (_invisible == true) {
-        mode.append("i");
+        str.append("i");
     }
     if (_wallops == true) {
-        mode.append("w");
+        str.append("w");
     }
     if (_restricted == true) {
-        mode.append("r");
+        str.append("r");
     }
     if (_operator == true) {
-        mode.append("o");
+        str.append("o");
     }
-    if (mode == "+") {
+    if (str == "+") {
         return "";
     }
-    return mode;
+    return str;
 };
