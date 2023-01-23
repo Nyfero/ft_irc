@@ -12,6 +12,7 @@ channel::channel(std::string name, user *creator)
     _topic = "";
     _invite_only = false;
     _topic_settable = true;
+    _channel_private = false;
 };
 
 channel::channel(std::string name, user *creator, std::string key)
@@ -21,6 +22,7 @@ channel::channel(std::string name, user *creator, std::string key)
     _topic = "";
     _invite_only = false;
     _topic_settable = true;
+    _channel_private = false;
 };
 
 /**************************/
