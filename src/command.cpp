@@ -1,5 +1,17 @@
 #include "../class/utils.hpp"
 
+/* 
+    TODO : 
+    - Check AWAY MESSAGE
+    - Bot Jarod a modifier
+
+    - Mode RESTRICTED ne marche pas (a fix)
+
+    - Tester list
+    - Tester Kick/Invite
+
+    - Test Mode ( et les fonctions des autres)
+*/
 int server::Check_command(user *user, std::string str)
 {
     std::cout << std::endl << "Check_command: " << str << std::endl;
@@ -280,7 +292,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
         // Verifie le si le mode existe
         if (cmd.params[1].at(0) == '+') {
             if (cmd.params[1].at(1) == 'i') {
-                if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan)) {
+                if (!user->Get_mode()->Get_operator() && !user->Is_op_channel(chan)) {
                     _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, user->Get_nickname(), cmd.params[0]));
                     return;
                 }
@@ -291,7 +303,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                 }
             }
             else if (cmd.params[1].at(1) == 't') {
-                if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan)) {
+                if (!user->Get_mode()->Get_operator() && !user->Is_op_channel(chan)) {
                     _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, user->Get_nickname(), cmd.params[0]));
                     return;
                 }
@@ -302,7 +314,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                 }
             }
             else if (cmd.params[1].at(1) == 'o') {
-                if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan)) {
+                if (!user->Get_mode()->Get_operator() && !user->Is_op_channel(chan)) {
                     _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, user->Get_nickname(), cmd.params[0]));
                     return;
                 }
@@ -321,7 +333,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                 }
             }
             else if (cmd.params[1].at(1) == 'k') {
-                if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan)) {
+                if (!user->Get_mode()->Get_operator() && !user->Is_op_channel(chan)) {
                     _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, user->Get_nickname(), cmd.params[0]));
                     return;
                 }
@@ -346,7 +358,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
         }
         else if (cmd.params[1].at(0) == '-') {
             if (cmd.params[1].at(1) == 'i') {
-                if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan)) {
+                if (!user->Get_mode()->Get_operator() && !user->Is_op_channel(chan)) {
                     _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, user->Get_nickname(), cmd.params[0]));
                     return;
                 }
@@ -357,7 +369,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                 }
             }
             else if (cmd.params[1].at(1) == 't') {
-                if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan)) {
+                if (!user->Get_mode()->Get_operator() && !user->Is_op_channel(chan)) {
                     _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, user->Get_nickname(), cmd.params[0]));
                     return;
                 }
@@ -368,7 +380,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                 }
             }
             else if (cmd.params[1].at(1) == 'k') {
-                if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan)) {
+                if (!user->Get_mode()->Get_operator() && !user->Is_op_channel(chan)) {
                     _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, user->Get_nickname(), cmd.params[0]));
                     return;
                 }
@@ -402,7 +414,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
 
     // Verifie que le premier parametre est le nickname ou le realname
     if (cmd.params[0] != user->Get_nickname() && cmd.params[0] != user->Get_realname().substr(0, user->Get_realname().find(' '))) {
-        if (!user->Get_mode().Get_operator()) {
+        if (!user->Get_mode()->Get_operator()) {
             _Output_client(user->Get_fd_client(), ERR_USERSDONTMATCH(_name_serveur));
             return;
         }
@@ -413,13 +425,13 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
     }
 
     if (cmd.params.size() == 1) {
-        _Output_client(user->Get_fd_client(), RPL_UMODEIS(user->Get_nickname(), cmd.params[0], _Get_user_by_nick(cmd.params[0])->Get_mode().Print_mode()));
+        _Output_client(user->Get_fd_client(), RPL_UMODEIS(user->Get_nickname(), cmd.params[0], _Get_user_by_nick(cmd.params[0])->Get_mode()->Print_mode()));
     }
     else {
         if (cmd.params[1].at(0) == '+') {
-            if (!user->Get_mode().Get_operator()) {
+            if (!user->Get_mode()->Get_operator()) {
                 for (size_t i = 1; i < cmd.params[1].size(); i++) {
-                    if (user->Get_mode().Add_mode(cmd.params[1].at(i))) {
+                    if (user->Get_mode()->Add_mode(cmd.params[1].at(i))) {
                         _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0]));
                         return;
                     }
@@ -427,7 +439,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
             }
             else {
                 for (size_t i = 1; i < cmd.params[1].size(); i++) {
-                    if (_Get_user_by_nick(cmd.params[0])->Get_mode().Oper_add_mode(cmd.params[1].at(i))) {
+                    if (_Get_user_by_nick(cmd.params[0])->Get_mode()->Oper_add_mode(cmd.params[1].at(i))) {
                         _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0]));
                         return;
                     }
@@ -437,9 +449,9 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
             _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), RPL_UMODEIS(_Get_user_by_nick(cmd.params[0])->Get_nickname(), cmd.params[0], cmd.params[1]));
         }
         else {
-            if (!user->Get_mode().Get_operator()) {
+            if (!user->Get_mode()->Get_operator()) {
                 for (size_t i = 1; i < cmd.params[1].size(); i++) {
-                    if (user->Get_mode().Remove_mode(cmd.params[1].at(i))) {
+                    if (user->Get_mode()->Remove_mode(cmd.params[1].at(i))) {
                         _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0]));
                         return;
                     }
@@ -447,7 +459,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
             }
             else {
                 for (size_t i = 1; i < cmd.params[1].size(); i++) {
-                    if (_Get_user_by_nick(cmd.params[0])->Get_mode().Oper_remove_mode(cmd.params[1].at(i))) {
+                    if (_Get_user_by_nick(cmd.params[0])->Get_mode()->Oper_remove_mode(cmd.params[1].at(i))) {
                         _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0]));
                         return;
                     }
@@ -595,10 +607,6 @@ void server::Names_cmd(user *user, t_IRCMessage cmd) {
     }
 };
 
-/*  
-TODO :   
-    - Check other error messages
-*/
 void server::Invite_cmd(user *sender, t_IRCMessage cmd) {
     
     // Verifie que le user est enregistre
@@ -627,9 +635,6 @@ void server::Invite_cmd(user *sender, t_IRCMessage cmd) {
     _invite_success(sender, target_nick, target_chan, cmd);                // Send success invite messages
 };
 
-/* 
-TODO : ERR_CHANOPRIVSNEEDED (pas de flag operator) | 
-*/
 void server::Kick_cmd(user *sender, t_IRCMessage cmd) {
     
     // Verifie que le user est enregistre
@@ -659,9 +664,6 @@ void server::Kick_cmd(user *sender, t_IRCMessage cmd) {
 /* TODO :
   - Check if /msg #chan,nick
   - Check away message
-  
-  - Check for correct ERR MESSAGE
-  - Handle ERR_TOOMANYTARGETS (how could this happen actually ?)
 */
 void server::Privmsg_cmd(user *sender, t_IRCMessage cmd) {
 
@@ -718,11 +720,11 @@ void server::Notice_cmd(user *sender, t_IRCMessage cmd) {
     }
 };
 
-void server::Away_cmd(user *user, t_IRCMessage cmd) {
+void server::Away_cmd(user *sender, t_IRCMessage cmd) {
 
     // Verifie que le user est enregistre
-    if (user->Get_login_status() != 3) {
-        _Output_client(user->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
+    if (sender->Get_login_status() != 3) {
+        _Output_client(sender->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
         return;
     }
 
@@ -731,28 +733,28 @@ void server::Away_cmd(user *user, t_IRCMessage cmd) {
     // - L'utilisateur est deja AWAY -> il ne l'est plus
     // - L'utilisateur n'est pas AWAY -> il devient AWAY avec aucun message
     if (cmd.params.empty()) {
-        user->Get_mode().Set_away_reply("");
-        if (user->Get_mode().Get_away()) {
-            user->Set_mode("-a");
-            _Output_client(user->Get_fd_client(), RPL_UNAWAY(_name_serveur, user->Get_nickname()));
+        sender->Get_mode()->Set_away_reply("");
+        if (sender->Get_mode()->Get_away()) {
+            sender->Set_mode("-a");
+            _Output_client(sender->Get_fd_client(), RPL_UNAWAY(_name_serveur, sender->Get_nickname()));
         }
         else {
-            user->Set_mode("+a");
-            _Output_client(user->Get_fd_client(), RPL_NOWAWAY(_name_serveur, user->Get_nickname()));
+            sender->Set_mode("+a");
+            _Output_client(sender->Get_fd_client(), RPL_NOWAWAY(_name_serveur, sender->Get_nickname()));
         }
         return;
     }
 
     // Si l'utilisateur passe un parametre, le message d'absence est celui passe en parametre
     if (cmd.params[0].at(0) != ':') {
-        _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "AWAY"));
+        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "AWAY"));
         return;
     }
     std::string away_msg = Join(cmd.params, 0, cmd.params.size());
     away_msg = away_msg.substr(1, away_msg.size());
-    user->Set_mode("+a");
-    user->Get_mode().Set_away_reply(away_msg);
-    _Output_client(user->Get_fd_client(), RPL_NOWAWAY(_name_serveur, user->Get_nickname()));
+    sender->Set_mode("+a");
+    sender->Get_mode()->Set_away_reply(away_msg);
+    _Output_client(sender->Get_fd_client(), RPL_NOWAWAY(_name_serveur, sender->Get_nickname()));
 };
 
 void server::Users_cmd(user *user, t_IRCMessage cmd) {
@@ -764,7 +766,7 @@ void server::Users_cmd(user *user, t_IRCMessage cmd) {
     }
 
     // Verifie que le user est operateur
-    if (!user->Get_mode().Get_operator())
+    if (!user->Get_mode()->Get_operator())
     {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
         return;
@@ -788,7 +790,7 @@ void server::Users_cmd(user *user, t_IRCMessage cmd) {
     _Output_client(user->Get_fd_client(), "Connected on " + _name_serveur + ":");
     for (size_t i = 0; i < _list_user.size(); i++)
     {
-        _Output_client(user->Get_fd_client(), "\n***\n-" + _list_user[i]->Get_username() + "\n-" + _list_user[i]->Get_hostname() + "\n-" + _list_user[i]->Get_realname() + "\n-" + _list_user[i]->Get_mode().Print_mode() + "\n***");
+        _Output_client(user->Get_fd_client(), "\n***\n-" + _list_user[i]->Get_username() + "\n-" + _list_user[i]->Get_hostname() + "\n-" + _list_user[i]->Get_realname() + "\n-" + _list_user[i]->Get_mode()->Print_mode() + "\n***");
     }
 };
 
@@ -807,7 +809,7 @@ void server::Wallops_cmd(user *sender, t_IRCMessage cmd) {
     }
     if (_parse_notice_wallops(cmd))                                                 // Parse WALLOPS command
         return;
-    if (sender->Get_mode().Get_operator() == false)                                 // Check is user is an Operator
+    if (sender->Get_mode()->Get_operator() == false)                                 // Check is user is an Operator
     {
         _Output_client(sender->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur,sender->Get_nickname(), cmd.params[0]));
         return;
@@ -917,7 +919,7 @@ void server::Topic_cmd(user *user, t_IRCMessage cmd) {
             _Output_client(user->Get_fd_client(), ERR_NOTONCHANNEL(_name_serveur, chan->Get_channel_name()));
             return ;
         }
-        if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan) && chan->Get_topic_settable() == false) { // ERR_NOCHANMODES : Need rights and user doesn't have
+        if (!user->Get_mode()->Get_operator() && !user->Is_op_channel(chan) && chan->Get_topic_settable() == false) { // ERR_NOCHANMODES : Need rights and user doesn't have
             _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, user->Get_nickname(), cmd.params[0]));
             return ;
         }

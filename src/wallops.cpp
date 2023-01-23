@@ -6,7 +6,7 @@
 /*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:43:03 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/20 23:43:05 by egiacomi         ###   ########.fr       */
+/*   Updated: 2023/01/23 19:07:57 by egiacomi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ bool	server::_add_channel_targetfds_wallops(user *sender, std::vector<int> *targ
 			{
 				std::vector<user *> channel_users = _list_channel[i]->Get_list_channel_user();
 				for (size_t i = 0; i < channel_users.size(); i++) {									// Add all channel user's fd if they have the WallOps Mode
-                    if (channel_users[i]->Get_mode().Get_wallops() && channel_users[i]->Get_fd_client() != sender->Get_fd_client()) {
+                    if (channel_users[i]->Get_mode()->Get_wallops() && channel_users[i]->Get_fd_client() != sender->Get_fd_client()) {
 						targets_fds->push_back(channel_users[i]->Get_fd_client());
 					}
 				}

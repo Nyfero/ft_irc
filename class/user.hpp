@@ -19,7 +19,7 @@ class user
         std::string         _hostname;
 
         // Mode du client
-        Mode            _mode;
+        Mode                *_mode;
 
         // Channels du client
         std::vector<channel *> _channel_register;
@@ -65,7 +65,7 @@ class user
         std::string Get_username() const;
         std::string Get_nickname() const;
         std::string Get_hostname() const;
-        Mode    Get_mode() const;
+        Mode        *Get_mode() const;
         std::string Get_realname() const;
         std::vector<channel *>  Get_channel_register() const;
         bool Is_op_channel(channel *chan) const;
