@@ -6,7 +6,7 @@
 /*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/14 17:54:33 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/20 17:16:55 by egiacomi         ###   ########.fr       */
+/*   Updated: 2023/01/23 00:44:02 by egiacomi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ bool	server::_add_user_targetfds_privmsg(user *sender, std::vector<int> *targets
 			return false;
 		}
 	}
-	_Output_client(sender->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur, target));
+	_Output_client(sender->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur, sender->Get_nickname(), target));
 	return true;
 }
 

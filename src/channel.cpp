@@ -1,14 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   channel.cpp                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/01/20 23:43:08 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/23 00:55:08 by jgourlin         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
 # include "../class/utils.hpp"
 
@@ -141,6 +130,12 @@ void channel::Set_channel_private(bool b) {
     _channel_private = b;
 };
 
+void    channel::Add_invited_user(user *use)
+{
+    _list_invited_user.push_back(use);
+};
+
+
 /************************/
 /******* ACCESSOR *******/
 /************************/
@@ -175,6 +170,10 @@ bool channel::Get_topic_settable() const {
 
 bool channel::Get_channel_private() const {
     return _channel_private;
+};
+
+std::vector<user *> channel::Get_invited_user() const {
+    return _list_invited_user;
 }
 
 void    channel::print_user_channel(){
