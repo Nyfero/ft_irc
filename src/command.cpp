@@ -18,6 +18,8 @@ int server::Check_command(user *user, std::string str)
         i++;
     }
 
+    _Bot_main(user, msg);
+
     switch (i) {
 
     case 0:
@@ -310,8 +312,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                     }
                     for (size_t i = 0; i < chan->Get_list_channel_user().size(); i++) {
                         if (Compare_case_sensitive(chan->Get_list_channel_user().at(i)->Get_nickname(), cmd.params[2])) {
-                            chan->Add_oper(chan->Get_list_channel_user().at(i));
-                            _Output_channel(chan, RPL_CHANNELNEWOP(cmd.prefix, chan->Get_channel_name(), "+o", chan->Get_list_channel_user().at(i)->Get_nickname()));
+                            chan->Add_oper(user ,chan->Get_list_channel_user().at(i));
                             return;
                         }
                     }

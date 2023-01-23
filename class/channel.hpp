@@ -51,7 +51,7 @@ class channel
         int     Add_user(user *use);
         int     Remove_user(user *use);
 
-        void    Add_oper(user *use);
+        void    Add_oper(user *sender, user *use);
         void    Add_invited_user(user *use);
         
         void    Mod_topic(std::string str);

@@ -85,14 +85,28 @@ int channel::Remove_user(user *use){
     }
     // ajouter oper si vide
     if (_list_operator.empty() && !_list_channel_user.empty())
-        Add_oper(_list_channel_user.front());
+        Add_oper(use, _list_channel_user.front());
     return 0;
 };
 
-void channel::Add_oper(user *use)
+void channel::Add_oper(user *sender, user *use)
 {
+    std::vector<user *> list = Get_list_channel_user();
+    std::vector<user *>::iterator it;
+
     if (User_in_channel(use, this) && !User_in_channel_is_op(use, this))
+    {
         _list_operator.push_back(use);
+
+        std::string msg;
+
+        for (it = list.begin(); it < list.end(); it++) { // previent mode +o le nouvel oper channel pour les membres
+            msg = RPL_CHANNELNEWOP(sender->Get_nickname() + "!" + sender->Get_username() + "@" + sender->Get_hostname(), Get_channel_name(), "+o ",  use->Get_nickname());
+            msg.append("\r\n");
+            std::cout << (*it)->Get_fd_client() << " oper >> " << msg << std::endl;
+            send((*it)->Get_fd_client(), msg.c_str(), msg.size(), 0);
+        }
+    }
 }
 
 void channel::Mod_topic(std::string str){
