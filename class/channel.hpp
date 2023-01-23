@@ -52,7 +52,9 @@ class channel
         int     Remove_user(user *use);
 
         void    Add_oper(user *sender, user *use);
+
         void    Add_invited_user(user *use);
+        void    Remove_invited_user(user *use);
         
         void    Mod_topic(std::string str);
         void    Set_channel_key(std::string key);
@@ -73,6 +75,8 @@ class channel
         bool                    Get_topic_settable() const;
         bool                    Get_channel_private() const;
         std::vector<user *>     Get_invited_user() const;
+        
+        bool                    _Is_invit(user *use) const;
 
         void    print_user_channel();
         void    print_oper_channel();

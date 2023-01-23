@@ -39,12 +39,9 @@ int channel::Add_user(user *use){
     // use pas deja present
     std::vector<user *>::iterator   it = _list_channel_user.begin();
     unsigned    i = 0;
-    for (; it != _list_channel_user.end(); it++) // Check user not already in channel
-    {
+    for (; it != _list_channel_user.end(); it++) { // Check user not already in channel
         if (_list_channel_user[i]->Get_fd_client() == use->Get_fd_client())
-        {
             return -1;
-        }
         i++;
     }
     _list_channel_user.push_back(use);
@@ -53,34 +50,25 @@ int channel::Add_user(user *use){
 
 int channel::Remove_user(user *use){
     std::vector<user *>::iterator it;
-    // if ((it = User_in_channel(use, this)) != _list_channel_user.end())
-    //     _list_channel_user.erase(it);
-    
-    // if ((it = User_in_channel_is_op(use, this)) != _list_operator.end())
-    //     _list_operator.erase(it);
-
 
     it = _list_channel_user.begin();
     size_t  i = 0;
-    while (i < _list_channel_user.size()){
-        if (_list_channel_user[i]->Get_fd_client() == use->Get_fd_client())
-        {
+    for (size_t i = 0; i < _list_channel_user.size(); i++) {
+        if (_list_channel_user[i]->Get_fd_client() == use->Get_fd_client()) {
             _list_channel_user.erase(it);
             break;
         }
-        i++;
         it++;
     }
 
     it = _list_operator.begin();
     i = 0;
-    while (i < _list_operator.size()){
-        if (_list_operator[i]->Get_fd_client() == use->Get_fd_client())
-        {
+    // while (i < _list_operator.size())
+    for (i = 0; i < _list_operator.size(); i++) {
+        if (_list_operator[i]->Get_fd_client() == use->Get_fd_client()) {
             _list_operator.erase(it);
             break;
         }
-        i++;
         it++;
     }
     // ajouter oper si vide
@@ -93,13 +81,11 @@ void channel::Add_oper(user *sender, user *use)
 {
     std::vector<user *> list = Get_list_channel_user();
     std::vector<user *>::iterator it;
+    std::string msg;
 
     if (User_in_channel(use, this) && !User_in_channel_is_op(use, this))
     {
         _list_operator.push_back(use);
-
-        std::string msg;
-
         for (it = list.begin(); it < list.end(); it++) { // previent mode +o le nouvel oper channel pour les membres
             msg = RPL_CHANNELNEWOP(sender->Get_nickname() + "!" + sender->Get_username() + "@" + sender->Get_hostname(), Get_channel_name(), "+o ",  use->Get_nickname());
             msg.append("\r\n");
@@ -133,6 +119,17 @@ void    channel::Add_invited_user(user *use)
 {
     _list_invited_user.push_back(use);
 };
+
+void    channel::Remove_invited_user(user *use) {
+    std::vector<user *>::iterator   it = _list_invited_user.begin();
+
+    for (; it < _list_invited_user.end(); it++) {
+        if ((*it)->Get_nickname() == use->Get_nickname()) {
+            _list_invited_user.erase(it);
+            return ;
+        }
+    }
+}
 
 
 /************************/
@@ -174,6 +171,13 @@ bool channel::Get_channel_private() const {
 std::vector<user *> channel::Get_invited_user() const {
     return _list_invited_user;
 }
+
+bool    channel::_Is_invit(user *use) const {
+    for (size_t i = 0; i < _list_invited_user.size(); i++)
+        if (_list_invited_user[i]->Get_nickname() == use->Get_nickname())
+            return true;
+    return false;
+};
 
 void    channel::print_user_channel(){
     std::cout << "   user:" << _list_channel_user.size() << std::endl;
