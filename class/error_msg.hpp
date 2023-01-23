@@ -19,9 +19,10 @@
 # define RPL_AWAY(serveur, nick, nick_dest, msg) ":" + serveur + " 301 " + nick + " " + nick_dest + " :" + msg
 # define RPL_UNAWAY(serveur, nick) ":" + serveur + " 305 " + nick + " :You are no longer marked as being away"
 # define RPL_NOWAWAY(serveur, nick) ":" + serveur + " 306 " + nick + " :You have been marked as being away"
-# define RPL_LIST(serveur, chan, nb_users, topic) ":" + serveur + " 322 " + chan + " " + nb_users + " :" + topic
-# define RPL_LISTEND(serveur) ":" + serveur + " 323 :End of LIST"
-# define RPL_CHANNELMODEIS(pre, chan, mode) pre + " MODE " + chan + " " + mode
+# define RPL_LIST(serveur, nick, chan, nb_users, topic) ":" + serveur + " 322 " + nick + " " + chan + " " + nb_users + " :" + topic
+# define RPL_LISTEND(serveur, nick) ":" + serveur + " 323 " + nick + " :End of LIST"
+# define RPL_CHANNELNEWOP(pre, chan, mode, nick) ":" + pre + " MODE " + chan + " " + mode + " " + nick
+# define RPL_CHANNELMODEIS(pre, chan, mode) ":" + pre + " MODE " + chan + " " + mode
 # define RPL_NOTOPIC(serveur, chan) ":" + serveur + " 331 " + chan + " :No topic is set"
 # define RPL_TOPIC(serveur, nick, chan, topic) ":" + serveur + " 332 " + nick + " " + chan + " :" + topic
 

@@ -33,6 +33,7 @@ int     parsing(int argc, char **argv);
 bool    isNumber(const std::string& s);
 bool    Compare_case_sensitive(std::string str1, std::string str2);
 int     Stoi(std::string str);
+std::string Itos(int nb);
 
 // Fonctions pour les channels
 int     Check_valid_channel(std::string str);

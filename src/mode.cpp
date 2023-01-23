@@ -22,8 +22,6 @@ Mode::Mode() {
     _wallops = false;
     _restricted = false;
     _operator = false;
-    _local_operator = false;
-    _server_notice = false;
 };
 
 
@@ -59,14 +57,6 @@ bool    Mode::Get_operator() const {
     return _operator;
 };
 
-bool    Mode::Get_local_operator() const {
-    return _local_operator;
-};
-
-bool    Mode::Get_server_notice() const {
-    return _server_notice;
-};
-
 std::string Mode::Get_away_reply() const {
     return _away_reply;
 };
@@ -76,29 +66,65 @@ std::string Mode::Get_away_reply() const {
 /********************/
 
 int     Mode::Add_mode(char m) {
-    switch (m) {
-        case 'i':
-            _invisible = true;
-            break;
-        case 'w':
-            _wallops = true;
-            break;
-        default:
-            return 1;
+    if (m == 'i') {
+        Set_invisible(true);
+    }
+    else if (m == 'w') {
+        Set_wallops(true);
+    }
+    else {
+        return 1;
+    }
+    return 0;
+};
+
+int     Mode::Oper_add_mode(char m) {
+    if (m == 'a') {
+        Set_away(true);
+    }
+    else if (m == 'i') {
+        Set_invisible(true);
+    }
+    else if (m == 'w') {
+        Set_wallops(true);
+    }
+    else if (m == 'r') {
+        Set_restricted(true);
+    }
+    else {
+        return 1;
     }
     return 0;
 };
 
 int     Mode::Remove_mode(char m) {
-    switch (m) {
-        case 'i':
-            _invisible = false;
-            break;
-        case 'w':
-            _wallops = false;
-            break;
-        default:
-            return 1;
+    if (m == 'i') {
+        Set_invisible(false);
+    }
+    else if (m == 'w') {
+        Set_wallops(false);
+    }
+    else {
+        return 1;
+    }
+    return 0;
+};
+
+int     Mode::Oper_remove_mode(char m) {
+    if (m == 'a') {
+        Set_away(false);
+    }
+    else if (m == 'i') {
+        Set_invisible(false);
+    }
+    else if (m == 'w') {
+        Set_wallops(false);
+    }
+    else if (m == 'r') {
+        Set_restricted(false);
+    }
+    else {
+        return 1;
     }
     return 0;
 };
@@ -121,14 +147,6 @@ void    Mode::Set_restricted(bool restricted) {
 
 void    Mode::Set_operator(bool op) {
     _operator = op;
-};
-
-void    Mode::Set_local_operator(bool local_op) {
-    _local_operator = local_op;
-};
-
-void    Mode::Set_server_notice(bool server_notice) {
-    _server_notice = server_notice;
 };
 
 void    Mode::Set_away_reply(std::string away_reply) {
@@ -154,13 +172,7 @@ std::string Mode::Print_mode() const {
         mode.append("r");
     }
     if (_operator == true) {
-        mode.append("O");
-    }
-    if (_local_operator == true) {
         mode.append("o");
-    }
-    if (_server_notice == true) {
-        mode.append("s");
     }
     if (mode == "+") {
         return "";

@@ -12,10 +12,10 @@ int server::Check_command(user *user, std::string str)
     //     std::cout << "params[" << i << "]: " << msg.params[i] << std::endl;
     // }
 
-    std::string list_command[18] = {"PASS", "USER", "NICK", "MODE", "QUIT", "JOIN", "PART", "NAMES", "INVITE", "KICK", "PRIVMSG", "NOTICE", "AWAY", "USERS", "WALLOPS", "PING", "OPER", "TOPIC"};
+    std::string list_command[19] = {"PASS", "USER", "NICK", "MODE", "QUIT", "JOIN", "PART", "NAMES", "INVITE", "KICK", "PRIVMSG", "NOTICE", "AWAY", "USERS", "WALLOPS", "PING", "OPER", "TOPIC", "LIST"};
 
     int i = 0;
-    while (i < 18)
+    while (i < 19)
     {
         if (msg.command == list_command[i])
         {
@@ -92,9 +92,15 @@ int server::Check_command(user *user, std::string str)
     case 16:
         Oper_cmd(user, msg);
         return 0;
+
     case 17:
         Topic_cmd(user, msg);
         return 0;
+
+    case 18:
+        List_cmd(user, msg);
+        return 0;
+
     default:
         std::cout << "*** server::Check_command - ***" << std::endl;
         break;
@@ -189,6 +195,7 @@ void server::Nick_cmd(user *user, t_IRCMessage cmd) {
     }
 
     // Verifie si le user n'est pas restreind
+    std::cout << "isRestricted ==> " << isRestricted(user) << std::endl;
     if (isRestricted(user)) {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
         return ;
@@ -310,7 +317,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                     for (size_t i = 0; i < chan->Get_list_channel_user().size(); i++) {
                         if (Compare_case_sensitive(chan->Get_list_channel_user().at(i)->Get_nickname(), cmd.params[2])) {
                             chan->Add_oper(chan->Get_list_channel_user().at(i));
-                            _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), chan->Get_list_channel_user().at(i)->Get_nickname() + "+o"));
+                            _Output_channel(chan, RPL_CHANNELNEWOP(cmd.prefix, chan->Get_channel_name(), "+o", chan->Get_list_channel_user().at(i)->Get_nickname()));
                             return;
                         }
                     }
@@ -414,20 +421,42 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
     }
     else {
         if (cmd.params[1].at(0) == '+') {
-            for (size_t i = 1; i < cmd.params[1].size(); i++) {
-                if (_Get_user_by_nick(cmd.params[0])->Get_mode().Add_mode(cmd.params[1].at(i))) {
-                    _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0]));
-                    return;
+            if (!user->Get_mode().Get_operator()) {
+                for (size_t i = 1; i < cmd.params[1].size(); i++) {
+                    if (user->Get_mode().Add_mode(cmd.params[1].at(i))) {
+                        _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0]));
+                        return;
+                    }
                 }
+            }
+            else {
+                for (size_t i = 1; i < cmd.params[1].size(); i++) {
+                    if (_Get_user_by_nick(cmd.params[0])->Get_mode().Oper_add_mode(cmd.params[1].at(i))) {
+                        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0]));
+                        return;
+                    }
+                }
+                _Output_client(user->Get_fd_client(), RPL_UMODEIS(_Get_user_by_nick(cmd.params[0])->Get_nickname(), cmd.params[0], cmd.params[1]));
             }
             _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), RPL_UMODEIS(_Get_user_by_nick(cmd.params[0])->Get_nickname(), cmd.params[0], cmd.params[1]));
         }
         else {
-            for (size_t i = 1; i < cmd.params[1].size(); i++) {
-                if (_Get_user_by_nick(cmd.params[0])->Get_mode().Remove_mode(cmd.params[1].at(i))) {
-                    _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0]));
-                    return;
+            if (!user->Get_mode().Get_operator()) {
+                for (size_t i = 1; i < cmd.params[1].size(); i++) {
+                    if (user->Get_mode().Remove_mode(cmd.params[1].at(i))) {
+                        _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0]));
+                        return;
+                    }
                 }
+            }
+            else {
+                for (size_t i = 1; i < cmd.params[1].size(); i++) {
+                    if (_Get_user_by_nick(cmd.params[0])->Get_mode().Oper_remove_mode(cmd.params[1].at(i))) {
+                        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0]));
+                        return;
+                    }
+                }
+                _Output_client(user->Get_fd_client(), RPL_UMODEIS(_Get_user_by_nick(cmd.params[0])->Get_nickname(), cmd.params[0], cmd.params[1]));
             }
             _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), RPL_UMODEIS(_Get_user_by_nick(cmd.params[0])->Get_nickname(), cmd.params[0], cmd.params[1]));
         }
@@ -435,9 +464,6 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
 };
 
 int server::Quit_cmd(user *user, t_IRCMessage cmd) {
-    // to-do
-    //  definir message a envoyer
-
     std::string msg;
     for (size_t i = 0; i < cmd.params.size(); i++)
     {
@@ -446,8 +472,6 @@ int server::Quit_cmd(user *user, t_IRCMessage cmd) {
             msg += " ";
     }
     msg.insert(0, " ");
-    // std::cout << "quit_cmd: user list chan size :" << user->Get_channel_register().size() << std::endl;
-    //std::cout << "quit_cmd: size first chan :" << user->Get_channel_register()[0]->Get_channel_name() << std::endl;
    _Output_all_user_channel(user, msg);
     return -2;
 };
@@ -512,11 +536,6 @@ void server::Part_cmd(user *user, t_IRCMessage cmd) {
     channel     *chan;
     std::string prefix = ":" + user->Get_nickname() + "!" + user->Get_username() + "@" + user->Get_hostname() + " PART ";
     std::string msg;
-
-// >> :nick42__!~user42@6cd7-bcd-b63-9ddf-8c58.210.62.ip PART |#qwe :aurvoir
-// >> :nick42__!~user42@6cd7-bcd-b63-9ddf-8c58.210.62.ip PART |#asd :aurvoir
-// >> :nick42__!~user42@6cd7-bcd-b63-9ddf-8c58.210.62.ip PART |#zxc :aurvoir
-
 
     if (cmd.params.empty()){ // need more param
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, user->Get_nickname()));
@@ -810,7 +829,7 @@ void server::Wallops_cmd(user *sender, t_IRCMessage cmd) {
         return;
     if (sender->Get_mode().Get_operator() == false)                                 // Check is user is an Operator
     {
-        std::cout << "ERROR : User is not OPERATOR" << std::endl;
+        _Output_client(sender->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
         return;
     }
     std::vector<std::string> target = _target_handle(cmd);                           // Create a vector of targets
@@ -890,64 +909,21 @@ void server::Topic_cmd(user *user, t_IRCMessage cmd) {
         return;
     }
 
-//     Command: TOPIC
-//    Parameters: <channel> [ <topic> ]
-
-//    The TOPIC command is used to change or view the topic of a channel.
-//    The topic for channel <channel> is returned if there is no <topic>
-//    given.  If the <topic> parameter is present, the topic for that
-//    channel will be changed, if this action is allowed for the user
-//    requesting it.  If the <topic> parameter is an empty string, the
-//    topic for that channel will be removed.
-
-        // ERR_NEEDMOREPARAMS              ERR_NOTONCHANNEL
-        // RPL_NOTOPIC                     RPL_TOPIC
-        // ERR_CHANOPRIVSNEEDED            ERR_NOCHANMODES
-
-//  Examples:
-
-//    :WiZ!jto@tolsun.oulu.fi TOPIC #test :New topic
-//      ; User Wiz setting the topic.
-
-//    TOPIC #test :another topic
-//      ; Command to set the topic on #test to "another topic".
-
-//    TOPIC #test :
-//      ; Command to clear the topic on #test.
-
-//    TOPIC #test
-//      ; Command to check the topic for #test.
-
-    // 1 seul chan a la fois
-
-    // size == 1: afficher topic du channel
-    //      peut etre utiliser sans etre dans le chan
-
-    // size == 2: changer topic du channel
-    //      doit etre chans le chan
-    //      tous les membres peuvent le changer
-
-    //params[0] == channel
-    //params [1+] == message, retirer ':'
     channel     *chan;
     std::string new_topic;
 
-    if (cmd.params.empty()) { // ERR_NEEDMOREPARAMS 
+    if (cmd.params.empty()) {
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "TOPIC"));
         return ;
     }
     if (!(chan = _Channel_already_exist(cmd.params[0])))
     {
-        std::cout << "chan no found" << std::endl;// print del
-        //#qwe: No such channel
+        _Output_client(user->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, user->Get_nickname(), chan->Get_channel_name()));
         return ;
     }
-    std::cout << "topic: " << chan->Get_channel_topic() << std::endl;// print del
 
     if (cmd.params.size() == 1) // print chan's topic
     {
-        std::cout << "TOPIC: 1 arg" << std::endl;// print del
-        std::cout << cmd.params[0] << std::endl;// print del
         if (chan->Get_channel_topic().empty()) { //RPL_NOTOPIC
             _Output_client(user->Get_fd_client(), RPL_NOTOPIC(_name_serveur, chan->Get_channel_name())); // check si correct
         }
@@ -957,18 +933,12 @@ void server::Topic_cmd(user *user, t_IRCMessage cmd) {
     }
     else if (cmd.params.size() >= 2) //change chan's topic
     {
-
-        std::cout << "TOPIC: 2+ arg" << std::endl; // print del
-        for (size_t i = 0; i < cmd.params.size(); i++){// print del
-            std::cout << cmd.params[i] << std::endl;// print del
-        }// print del
-
         if (!_User_is_in_chan(user, chan)) { // ERR_NOTONCHANNEL : User not in channel
             _Output_client(user->Get_fd_client(), ERR_NOTONCHANNEL(_name_serveur, chan->Get_channel_name()));
             return ;
         }
-        if (!user->Get_mode().Get_operator() && chan->Get_topic_settable() == false && !user->Is_op_channel(chan)) { // ERR_NOCHANMODES : Need rights and user doesn't have
-            _Output_client(user->Get_fd_client(),ERR_NOCHANMODES(_name_serveur, chan->Get_channel_name()));
+        if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan) && chan->Get_topic_settable() == false) { // ERR_NOCHANMODES : Need rights and user doesn't have
+            _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
             return ;
         }
         for (size_t i = 1; i < cmd.params.size(); i++) { // create new_topic
@@ -977,7 +947,6 @@ void server::Topic_cmd(user *user, t_IRCMessage cmd) {
                 new_topic += " ";
         }
         new_topic.erase(new_topic.begin()); // delete ':' 
-        std::cout << new_topic << std::endl; // print del
         chan->Mod_topic(new_topic);
         if (new_topic.empty())
             _Output_channel(chan, cmd.prefix + " TOPIC " + chan->Get_channel_name() + " :");
@@ -987,12 +956,19 @@ void server::Topic_cmd(user *user, t_IRCMessage cmd) {
 };
 
 void server::List_cmd(user *user, t_IRCMessage cmd) {
-    (void) cmd;
+
     // Verifie que le user est enregistre
     if (user->Get_login_status() != 3) {
         _Output_client(user->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
         return;
     }
 
+    if (cmd.params.empty()) { // affiche tout du serveur
+        for (size_t i = 0; i < _list_channel.size(); i++) { 
+            _Output_client(user->Get_fd_client(), RPL_LIST(_name_serveur,user->Get_nickname(), _list_channel[i]->Get_channel_name(), Itos(_list_channel[i]->Get_list_channel_user().size()), _list_channel[i]->Get_channel_topic()));
+        }
+        _Output_client(user->Get_fd_client(), RPL_LISTEND(_name_serveur, user->Get_nickname()));
+    }
+    return;
 
 };

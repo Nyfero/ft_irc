@@ -181,12 +181,6 @@ void user::Set_mode(std::string mode) {
         else if (mode[1] == 'o') {
             _mode.Set_operator(true);
         }
-        else if (mode[1] == 'O') {
-            _mode.Set_local_operator(true);
-        }
-        else if (mode[1] == 's') {
-            _mode.Set_server_notice(true);
-        }
     }
     else if (mode[0] == '-') {
         if (mode[1] == 'a') {
@@ -203,12 +197,6 @@ void user::Set_mode(std::string mode) {
         }
         else if (mode[1] == 'o') {
             _mode.Set_operator(false);
-        }
-        else if (mode[1] == 'O') {
-            _mode.Set_local_operator(false);
-        }
-        else if (mode[1] == 's') {
-            _mode.Set_server_notice(false);
         }
     }
 };

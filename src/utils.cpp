@@ -79,6 +79,23 @@ int Stoi(std::string str) {
     return res;
 };
 
+std::string Itos(int nb) {
+    std::string rev;
+
+    while ((nb / 10) > 0) {
+        rev += (nb % 10) + '0';
+        nb = nb / 10;
+    }
+    rev += (nb % 10) + '0';
+
+    std::string res;
+    for (int i = rev.size(); i >= 0; i--) {
+        res += rev[i];
+    }
+
+    return res;
+}
+
 
 
 /**********************/
