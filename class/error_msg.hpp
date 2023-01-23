@@ -25,7 +25,6 @@
 # define RPL_NOTOPIC(serveur, chan) ":" + serveur + " 331 " + chan + " :No topic is set"
 # define RPL_TOPIC(serveur, nick, chan, topic) ":" + serveur + " 332 " + nick + " " + chan + " :" + topic
 
-
 # define RPL_INVITING(serveur, sender, chan, target) ":" + serveur + " 341 " + sender + " " + target + " " + chan
 # define RPL_NAMREPLY(serveur, nick, chan, names) ":" + serveur + " 353 " + nick + " = " + chan + " :" + names
 

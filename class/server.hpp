@@ -6,7 +6,7 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:44:08 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/22 17:16:56 by jgourlin         ###   ########.fr       */
+/*   Updated: 2023/01/23 01:38:32 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,6 +128,9 @@ class server
         channel                  *_user_not_in_channel(user *sender, user *target_nick, channel *channel_kick);
         bool                     _kick_from_channel(user *target_nick, channel *channel_kick);
         void                     _kick_success_message(user *target_nick, channel *channel_kick, struct s_IRCMessage cmd);
+        
+        /* BOT */
+        void                     _Bot_main(user *sender, struct s_IRCMessage cmd);
        
     public:
 

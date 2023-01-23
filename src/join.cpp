@@ -6,7 +6,7 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:42:36 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/22 20:20:31 by jgourlin         ###   ########.fr       */
+/*   Updated: 2023/01/23 01:49:41 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,6 +122,7 @@ int server::_Join_treat(user *user, std::vector<std::string> chan, std::vector<s
                     _Output_client(user->Get_fd_client(), ERR_BADCHANNELKEY(_name_serveur, user->Get_nickname(), chan[0]));
                 else if (!user->Is_user_channel(res)) // check user not in chan && invited
                 {
+                    // remove user list invit
                     user->Add_channel(res); // ajouter channel dans user
                     res->Add_user(user); // ajouter user dans channel
                     _Join_rpl(user, res);
@@ -168,6 +169,7 @@ int server::_Join_treat(user *user, std::vector<std::string> chan)
                 if (!res->Get_channel_key().empty()) // check si need key
                     _Output_client(user->Get_fd_client(), (ERR_BADCHANNELKEY(_name_serveur, user->Get_nickname(), chan[i])));
                 else if (!user->Is_user_channel(res)) { // check invite + user n'est pas dedans
+                    // remove user list invit
                     user->Add_channel(res); // ajouter channel dans user
                     res->Add_user(user); // ajouter user dans channel
                     _Join_rpl(user, res);

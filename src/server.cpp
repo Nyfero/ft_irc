@@ -6,7 +6,7 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:42:54 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/22 22:01:14 by jgourlin         ###   ########.fr       */
+/*   Updated: 2023/01/23 02:40:27 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -207,7 +207,7 @@ void    server::_Remove_user(std::vector<user*>::iterator pos) {
         if (chan->Get_list_channel_user().empty()) // si channeldevient vide,le  delete
             _Remove_channel(chan);
         else if (chan->Get_list_operator().empty()) // sinon si l'user etait le dernier op on le remplace
-            chan->Add_oper(chan->Get_list_operator().front());
+            chan->Add_oper(tmp, chan->Get_list_operator().front());
     }
 
     close (tmp->Get_fd_client());
@@ -243,7 +243,7 @@ void    server::_Remove_user(std::vector<pollfd>::iterator pos) {
         if (l_chan[i]->Get_list_channel_user().empty())
             _Remove_channel(l_chan[i]);
         else if (l_chan[i]->Get_list_operator().empty())
-            l_chan[i]->Add_oper(l_chan[i]->Get_list_channel_user().front());
+            l_chan[i]->Add_oper(use, l_chan[i]->Get_list_channel_user().front());
     }
 
     close (use->Get_fd_client());
@@ -383,7 +383,14 @@ int     server::_Output_all_user_channel(user *user, std::string msg) {
             str += msg;
         user->Remove_Channel(chan[i]);
         chan[i]->Remove_user(user);
+        
         _Output_channel(chan[i], str);
+        if (chan[i]->Get_list_channel_user().empty())
+            _Remove_channel(chan[i]);
+        else if (chan[i]->Get_list_operator().empty())
+            chan[i]->Add_oper(user, chan[i]->Get_list_channel_user().front());
+        else
+            _Output_channel(chan[i], str);
     }
     return 0;
 }
