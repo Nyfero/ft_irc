@@ -6,7 +6,7 @@
 /*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:42:54 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/23 03:52:30 by jgourlin         ###   ########.fr       */
+/*   Updated: 2023/01/23 05:13:40 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,8 +119,13 @@ void    server::_Launch_server() {
                     break;
                 }
                 else { // From client
-                    if (_Input_client(it) == -2) {
-                        break;
+                    try{
+                        if (_Input_client(it) == -2)
+                            break;
+                    }
+                    catch(const std::exception& e)
+                    {
+                        std::cerr << e.what() << '\n';
                     }
                 }
             }
