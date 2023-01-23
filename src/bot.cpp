@@ -11,15 +11,13 @@
 # define DEFAU "\033[0m"
 
 
-void    server::_Bot_main(user *sender, struct s_IRCMessage cmd) {
-    // heure
-    (void)cmd;
-    (void)sender;
+void    server::_Bot_main(user *sender, t_IRCMessage cmd) 
+{
+    std::cout << "Speaking with Bot" << std::endl;
 
-    std::cout << "bot" << std::endl;
-
-    cmd.params[1].erase(0);
-    if (cmd.params[0] == "@heure")
+    cmd.params[1].erase(0, 1);
+    std::cout << "it is : " << cmd.params[1] << std::endl;
+    if (Compare_case_sensitive(cmd.params[1], "heure"))
     {
         time_t rawtime;
         struct tm * timeinfo;
@@ -30,7 +28,7 @@ void    server::_Bot_main(user *sender, struct s_IRCMessage cmd) {
         _Output_client(sender->Get_fd_client() ,":" + _name_serveur + " 391 " + sender->Get_nickname() + " :\033[36m" + asctime(timeinfo) + "\033[0m");
         std::cout << "Current local time and date: " << asctime(timeinfo) << std::endl;
     }
-    else if (cmd.params[0] == "@liste")
+    else if (Compare_case_sensitive(cmd.params[1], "liste"))
     {
         std::string str;
         std::vector<channel*>::iterator it;
@@ -41,6 +39,13 @@ void    server::_Bot_main(user *sender, struct s_IRCMessage cmd) {
             str = "\033[33mNo Channel in server\033[0m";
         _Output_client(sender->Get_fd_client(), str);
     }
+    else if (Compare_case_sensitive(cmd.params[1], "help"))
+        _Output_client(sender->Get_fd_client(), BOT_HELP_TEXT(sender->Get_nickname()));
+    else if (Compare_case_sensitive(cmd.params[1], "bonjour") || Compare_case_sensitive(cmd.params[1], "hello"))
+    {
+        srand(time(0));
+        _Output_client(sender->Get_fd_client(), BOT_GREETING_TEXT);
+    }   
     else
-        _Output_client(sender->Get_fd_client(), "\033[35mSend message to @heure or @liste\033[0m");
+        _Output_client(sender->Get_fd_client(), BOT_NO_PARAMS);
 };

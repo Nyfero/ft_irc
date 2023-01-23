@@ -124,7 +124,7 @@ class server
         void                     _list_display(user *sender, std::vector<channel *> channel_targeted);
 
         
-        /* BOT */
+                    /* BOT */
         void                     _Bot_main(user *sender, struct s_IRCMessage cmd);
        
     public:

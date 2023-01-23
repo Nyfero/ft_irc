@@ -2,10 +2,7 @@
 
 /* 
     TODO : 
-    - Check AWAY MESSAGE
     - Bot Jarod a modifier
-
-    - Mode RESTRICTED ne marche pas (a fix)
 
     - Tester list
     - Tester Kick/Invite
@@ -29,9 +26,6 @@ int server::Check_command(user *user, std::string str)
         }
         i++;
     }
-
-    if (i == 10)
-        _Bot_main(user, msg);
 
     switch (i) {
 
@@ -680,6 +674,11 @@ void server::Privmsg_cmd(user *sender, t_IRCMessage cmd) {
     if (_parse_privmsg(sender, cmd))                                                // Parse PRIVMSG command
         return;
     std::vector<std::string> target = _target_handle(cmd);                          // Create a vector of targets
+    if (target.size() == 1 && Compare_case_sensitive(target.at(0), "@"))
+    {
+        _Bot_main(sender, cmd);
+        return;
+    }
     std::vector<int> targets_fds = _targetfds_creator_privmsg(sender, target);      // Check targets and put all target fds in a vector
     std::string message = _create_msg(cmd);                                         // Merge all parameters in one Message String
 
