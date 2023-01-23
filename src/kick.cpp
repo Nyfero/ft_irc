@@ -6,7 +6,7 @@
 /*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:42:24 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/21 04:47:41 by egiacomi         ###   ########.fr       */
+/*   Updated: 2023/01/23 02:10:36 by egiacomi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ user *server::_check_nick_kick(user *sender, t_IRCMessage cmd)
 		if (Compare_case_sensitive(_list_user[i]->Get_nickname(), cmd.params[1]))	// Check if nickname exists
 			return _list_user[i];													// return user
 	}
-	_Output_client(sender->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur, cmd.params[0]));
+	_Output_client(sender->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur, sender->Get_nickname(), cmd.params[0]));
 	return NULL;																	// if no user to add return NULL;
 };
 
@@ -49,16 +49,23 @@ channel *server::_chan_kick_creator(user *sender, std::string chan_to_kick)
 	{
 		if (Compare_case_sensitive(_list_channel[i]->Get_channel_name(), chan_to_kick))
 		{
-			if (User_in_channel(sender, _list_channel[i]))							// Check if user is in the channel (HERE I CAN ADD IF PRIVILEGES)
+			if (User_in_channel(sender, _list_channel[i]))							// Check if user is in the channel
+			{
+				if (sender->Is_op_channel(_list_channel[i]) == false)				// Check if the server is not Operator
+				{
+					_Output_client(sender->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, sender->Get_nickname(), _list_channel[i]->Get_channel_name())); // If not Channel operator, send error message
+					return NULL;
+				}
 				return _list_channel[i];
+			}
 			else
 			{
-				_Output_client(sender->Get_fd_client(), ERR_NOTONCHANNEL(_name_serveur, chan_to_kick));
+				_Output_client(sender->Get_fd_client(), ERR_NOTONCHANNEL(_name_serveur, chan_to_kick));	// If user is not member of the channel
 				return NULL;
 			}
 		}
 	}
-    _Output_client(sender->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, sender->Get_nickname(), chan_to_kick));
+    _Output_client(sender->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, sender->Get_nickname(), chan_to_kick)); // If channel does not exists
 	return NULL;
 }
 
@@ -70,18 +77,9 @@ channel *server::_user_not_in_channel(user *sender, user *target_nick, channel *
 		for (size_t i = 0; i < target_channels_member.size(); i++)										// Add all channel_users_fd
 		{
 			if (Compare_case_sensitive(target_channels_member[i]->Get_channel_name(), channel_kick->Get_channel_name()))
-			{
-				// TODO : check if this line is ok ;
-				if (sender->Is_op_channel(channel_kick))					
-					return channel_kick;
-				else
-				{
-    				_Output_client(sender->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, channel_kick->Get_channel_name()));
-					return NULL;
-				}
-			}
+				return channel_kick;
 		}
-		_Output_client(sender->Get_fd_client(), ERR_USERNOTINCHANNEL(_name_serveur, target_nick->Get_nickname(), channel_kick->Get_channel_name()));
+		_Output_client(sender->Get_fd_client(), ERR_USERNOTINCHANNEL(_name_serveur, sender->Get_nickname(), target_nick->Get_nickname(), channel_kick->Get_channel_name()));
 	}
 	return NULL;
 }
@@ -119,11 +117,13 @@ bool server::_kick_from_channel(user *target_nick, channel *channel_kick)
 
 void server::_kick_success_message(user *target_nick, channel *channel_kick, t_IRCMessage cmd)
 {
-	std::string kicked_message_channel = cmd.prefix + " " + cmd.command + " " + channel_kick->Get_channel_name() + cmd.params[1];
-	if (!cmd.params[2].empty())
+	std::string kicked_message_channel = cmd.prefix + " " + cmd.command + " " + channel_kick->Get_channel_name() + " " + cmd.params[1];
+	if (cmd.params[2].empty())
+		kicked_message_channel.append(":" + cmd.prefix);
+	else
 	{
-		std::string note;
-		for (size_t i = 2; i < cmd.params.size(); i++) 
+		std::string note = cmd.params[2];
+		for (size_t i = 3; i < cmd.params.size(); i++) 
         	note += " " + cmd.params[i];
 		kicked_message_channel.append(" " + note);
 	}

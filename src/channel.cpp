@@ -6,7 +6,7 @@
 /*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:43:08 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/22 22:23:13 by egiacomi         ###   ########.fr       */
+/*   Updated: 2023/01/23 01:30:59 by egiacomi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,13 @@
 /***************************/
 
 channel::channel(std::string name, user *creator)
-    :_channel_name(n manger avec nous true;
+    :_channel_name(name) {
+    _list_channel_user.push_back(creator);
+    _list_operator.push_back(creator);
+    _key = "";
+    _topic = "";
+    _invite_only = false;
+    _topic_settable = true;
 };
 
 channel::channel(std::string name, user *creator, std::string key)
@@ -46,7 +52,7 @@ int channel::Add_user(user *use){
     std::vector<user *>::iterator   it = _list_channel_user.begin();
     unsigned    i = 0;
     for (; it != _list_channel_user.end(); it++) // Check user not already in channel
-    { manger avec nous
+    {
         if (_list_channel_user[i]->Get_fd_client() == use->Get_fd_client())
         {
             return -1;
@@ -121,6 +127,12 @@ void channel::Set_channel_private(bool b) {
     _channel_private = b;
 };
 
+void    channel::Add_invited_user(user *use)
+{
+    _list_invited_user.push_back(use);
+};
+
+
 /************************/
 /******* ACCESSOR *******/
 /************************/
@@ -155,6 +167,10 @@ bool channel::Get_topic_settable() const {
 
 bool channel::Get_channel_private() const {
     return _channel_private;
+};
+
+std::vector<user *> channel::Get_invited_user() const {
+    return _list_invited_user;
 }
 
 void    channel::print_user_channel(){

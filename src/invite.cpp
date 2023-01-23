@@ -6,7 +6,7 @@
 /*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:42:29 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/21 03:40:35 by egiacomi         ###   ########.fr       */
+/*   Updated: 2023/01/23 02:28:18 by egiacomi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ user *server::_check_nick_invite(user *sender, t_IRCMessage cmd)
 				return _list_user[i];												// return user if he's not away
 		}
 	}
-	_Output_client(sender->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur, cmd.params[0]));
+	_Output_client(sender->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur, sender->Get_nickname(), cmd.params[0]));
 	return NULL;																	// if no user to add return NULL;
 };
 
@@ -58,11 +58,21 @@ channel *server::_check_chan_invite(user *sender, struct s_IRCMessage cmd)
 		std::string channel_test = _list_channel[i]->Get_channel_name();
 		if (Compare_case_sensitive(channel_test, cmd.params[1]))							// Check if channel already exist
 		{
-			if (User_in_channel(sender, _list_channel[i]))									// Check if user is in the channel (HERE I CAN ADD IF PRIVILEGES)
-				return _list_channel[i];
+			if (User_in_channel(sender, _list_channel[i]))									// Check if user is in the channel
+			{
+				if (_list_channel[i]->Get_invite_only())									// Check if the server is Invite-Only Mode
+				{
+					if (sender->Is_op_channel(_list_channel[i]) == false)					// Check if the server is not Operator
+					{
+						_Output_client(sender->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, sender->Get_nickname(), channel_test)); // If not Channel operator, send error message
+						return NULL;
+					}
+				}
+				return _list_channel[i];													// Return the correct channel target
+			}
 			else
 			{
-				_Output_client(sender->Get_fd_client(), ERR_NOTONCHANNEL(_name_serveur, channel_test));
+				_Output_client(sender->Get_fd_client(), ERR_NOTONCHANNEL(_name_serveur, channel_test));	// Channel exists but user is not member
 				return NULL;
 			}
 		}
@@ -82,10 +92,11 @@ bool	server::_user_already_member(user *target_nick, channel *target_chan)
 	return false;
 }
 
-void	server::_invite_success(user *sender, user *target, s_IRCMessage cmd)
+void	server::_invite_success(user *sender, user *target_nick, channel *target_chan, s_IRCMessage cmd)
 {
-	_Output_client(sender->Get_fd_client(), RPL_INVITING(_name_serveur, sender->Get_nickname(), cmd.params[1], cmd.params[0]));
-	std::string invited_message = cmd.prefix + " " + cmd.command + " " + cmd.params[0] + " " + cmd.params[1];	
+	target_chan->Add_invited_user(target_nick);	
+	_Output_client(sender->Get_fd_client(), RPL_INVITING(_name_serveur, sender->Get_nickname(), target_nick->Get_nickname(), target_chan->Get_channel_name()));
+	std::string invited_message = cmd.prefix + " " + cmd.command + " " + target_nick->Get_nickname() + " :" + target_chan->Get_channel_name();	
 	std::cout << invited_message << std::endl;
-	_Output_client(target->Get_fd_client(), invited_message);
+	_Output_client(target_nick->Get_fd_client(), invited_message);
 }
