@@ -69,7 +69,7 @@
 # define ERR_KEYSET(serveur, chan) ":" + serveur + " 467 " + chan + " :Channel key already set" 
 # define ERR_CHANNELISFULL(serveur, chan) ":" + serveur + " 471 " + chan + " :Cannot join channel (+l)"
 # define ERR_UNKNOWNMODE(serveur, chan) ":" + serveur + " 472 " + chan + " :is unknown mode char to me"
-# define ERR_INVITEONLYCHAN(serveur, chan) ":" + serveur + " 473 " + chan + " :Cannot join channel (+i)"
+# define ERR_INVITEONLYCHAN(serveur, nick, chan) ":" + serveur + " 473 " + nick + " " + chan + " :Cannot join channel (+i)"
 # define ERR_BANNEDFROMCHAN(serveur, chan) ":" + serveur + " 474 " + chan + " :Cannot join channel (+b)"
 # define ERR_BADCHANNELKEY(serveur, nick, chan) ":" + serveur + " 475 " + nick + " " + chan + " :Cannot join channel (+k)"
 # define ERR_BADCHANMASK(serveur, nick, chan) ":" + serveur + " 476 " + chan + " :Bad Channel Mask"

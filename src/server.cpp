@@ -6,7 +6,7 @@
 /*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:42:54 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/23 04:20:25 by egiacomi         ###   ########.fr       */
+/*   Updated: 2023/01/23 05:41:24 by egiacomi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,18 +96,12 @@ int    server::_Init_server() {
 
 void    server::_Launch_server() {
     std::vector<pollfd>::iterator it;
-    // Gerer l'ajout d'USER
-    // Gerer les commandes des USERS
     
     fcntl(_socket_serv, F_SETFL, O_NONBLOCK); // pour qu'accept ne soit pas bloquant
-
     _list_poll_fd.push_back(_serv_poll_fd);
-
     while (g_stop) {
-
         _Print_user();
         _Print_channel();
-
 
         // poll(tab pollfd, size tab, timer)
         poll(_list_poll_fd.data(), _list_poll_fd.size(), -1);
@@ -115,19 +109,23 @@ void    server::_Launch_server() {
         // check tous les fds
         while (it != _list_poll_fd.end()) {
             if (it->revents & POLLHUP) { // deconnexion
-                // send PART msg to all user's channel to-do
                 _Output_all_user_channel(_Get_user_by_fd(it->fd), "");
                 _Remove_user(it);
                 break;
             }
             if (it->revents & POLLIN) { // données en attente de lecture...
-                if (it->fd == _socket_serv) { // sur la socket server
+                if (it->fd == _socket_serv) { // From server's socket
                     _Add_user();
                     break;
                 }
-                else { // depuis un client
-                    if (_Input_client(it) == -2) {
-                        break;
+                else { // From client
+                    try{
+                        if (_Input_client(it) == -2)
+                            break;
+                    }
+                    catch(const std::exception& e)
+                    {
+                        std::cerr << e.what() << '\n';
                     }
                 }
             }
@@ -195,12 +193,8 @@ void    server::_Remove_user(std::vector<user*>::iterator pos) {
             break;
         }
     }
-
-
-    // supprimer l'use de tous les channe la auxquel i lappartient
-
-    while (!tmp->Get_channel_register().empty())
-    {
+    // supprimer l'use de tous les channe la auxquel il appartient
+    while (!tmp->Get_channel_register().empty()) {
         channel *chan = tmp->Get_channel_register().front();
         chan->Remove_user(tmp); // retirer l'user du hannel 
         tmp->Remove_Channel(chan); // retirer channel du user 
@@ -209,35 +203,26 @@ void    server::_Remove_user(std::vector<user*>::iterator pos) {
         else if (chan->Get_list_operator().empty()) // sinon si l'user etait le dernier op on le remplace
             chan->Add_oper(tmp, chan->Get_list_operator().front());
     }
-
-    close (tmp->Get_fd_client());
-    _list_user.erase(pos);
-    _list_poll_fd.erase(it);
-    delete tmp;
+    close (tmp->Get_fd_client());   // close socket
+    _list_user.erase(pos);          // remove user from list_user
+    _list_poll_fd.erase(it);        // remove user from poll_fd
+    delete tmp;                     // del user
 };
 
 void    server::_Remove_user(std::vector<pollfd>::iterator pos) {
     std::vector<user *>::iterator it = _list_user.begin();
 
     for (unsigned int i = 0; i < _list_user.size(); i++) {
-        if (_list_user[i]->Get_fd_client() == pos->fd) {
+        if (_list_user[i]->Get_fd_client() == pos->fd)
             break;
-        }
         it++;
     }
-    //user *use = _list_user.at(std::distance(_list_user.begin(), it));
 
     user *use = _Get_user_by_fd(pos->fd);
 
-
-
-    // send PART msg to all channel who user is
     // leave all channel
-
     std::vector<channel *> l_chan = use->Get_channel_register();
-
-    for (size_t i = 0; i < l_chan.size(); i++)
-    {
+    for (size_t i = 0; i < l_chan.size(); i++) {
         l_chan[i]->Remove_user(use);
         use->Remove_Channel(l_chan[i]);
         if (l_chan[i]->Get_list_channel_user().empty())
@@ -246,10 +231,10 @@ void    server::_Remove_user(std::vector<pollfd>::iterator pos) {
             l_chan[i]->Add_oper(use, l_chan[i]->Get_list_channel_user().front());
     }
 
-    close (use->Get_fd_client());
-    _list_user.erase(it);
-    _list_poll_fd.erase(pos);
-    delete use;
+    close (use->Get_fd_client());   // close socket
+    _list_user.erase(it);           // remove user from list_user
+    _list_poll_fd.erase(pos);       // remove user from poll_fd
+    delete use;                     // del user
 };
 
 /******************/
@@ -293,10 +278,8 @@ void    server::_Remove_channel(channel *chan) {
         chan->Get_list_channel_user()[i]->Remove_Channel(chan);
 
     std::vector<channel *>::iterator    it = _list_channel.begin();
-    for (size_t i = 0; it < _list_channel.end(); it++)
-    {
-        if (_list_channel[i]->Get_channel_name() == chan->Get_channel_name())
-        {
+    for (size_t i = 0; it < _list_channel.end(); it++) {
+        if (_list_channel[i]->Get_channel_name() == chan->Get_channel_name()) {
             _list_channel.erase(it);
             break;
         }
@@ -316,32 +299,24 @@ int server::_Input_client(std::vector<pollfd>::iterator it) {
     ssize_t     ret = -1;
     std::string res;
     size_t      found;
-    user    *sender = _Get_user_by_fd(fd);
+    user        *sender = _Get_user_by_fd(fd);
 
-    if ((ret = recv(fd, inpt, SIZE_INPT - 1, 0)) == -1) {
+    if ((ret = recv(fd, inpt, SIZE_INPT - 1, 0)) == -1)
         return -1;
-    }
-// to-do faire un message quand user deco?
     if (!ret) { // disconnect
-        // send PART msg to all user's channel to-do
-        std::cout << "alpha" << std::endl;
         _Output_all_user_channel(sender, "");
         _Remove_user(it);
         return -2;
     }
     inpt[ret] = 0;
-    // append inpt dans str de user
+    // append inpt in user's str
     sender->str.append(inpt);
     while ((found = sender->str.find("\n", 0)) != std::string::npos) { // ligne complete -> traite -> delete
-        
-        
         res = sender->str.substr(0, found); // get first line in res
-        sender->str.erase(0, found + 1); // get after first line in str
-        
-        if ((found = res.find("\r", 0)) != std::string::npos)
+        sender->str.erase(0, found + 1);    // get after first line in str
+        if ((found = res.find("\r", 0)) != std::string::npos) // delete \r cause we doesn't like it
             res.erase(found);
-        if (Check_command(sender, res) == -2) // check si cmd valide
-        {
+        if (Check_command(sender, res) == -2) {// check si cmd valide and ret -2 for quit
             // if command is QUIT
             _Remove_user(it);
             return -2;
@@ -354,10 +329,8 @@ int server::_Output_client(int fd, std::string msg) {
     ssize_t ret;
 
     msg.append("\r\n");
-
-    std::cout << fd << " >> " << msg << std::endl;
+    std::cout << fd << " >> " << msg << std::endl;  // print send message
     ret = send(fd, msg.c_str(), msg.size(), 0);
-
     return 0;
 };
 
@@ -365,9 +338,8 @@ int server::_Output_channel(channel *chan, std::string msg) {
     std::vector<user *> list = chan->Get_list_channel_user();
     std::vector<user *>::iterator it;
 
-    for (it = list.begin(); it < list.end(); it++) {
+    for (it = list.begin(); it < list.end(); it++)
         _Output_client((*it)->Get_fd_client(), msg);
-    }
     return 0;
 };
 
@@ -376,8 +348,7 @@ int     server::_Output_all_user_channel(user *user, std::string msg) {
     std::string str;
     std::string prefix = ":" + user->Get_nickname() + "!" + user->Get_username() + "@" + user->Get_hostname();
     
-    for (size_t i = 0; i < chan.size(); i++)
-    {
+    for (size_t i = 0; i < chan.size(); i++) {
         str = prefix + " PART " + chan[i]->Get_channel_name();
         if (!msg.empty())
             str += msg;
