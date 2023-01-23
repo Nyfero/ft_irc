@@ -24,7 +24,8 @@ int server::Check_command(user *user, std::string str)
         i++;
     }
 
-    _Bot_main(user, msg);
+    if (i == 10)
+        _Bot_main(user, msg);
 
     switch (i) {
 
@@ -437,19 +438,14 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
 };
 
 int server::Quit_cmd(user *user, t_IRCMessage cmd) {
-    // to-do
-    //  definir message a envoyer
 
     std::string msg;
-    for (size_t i = 0; i < cmd.params.size(); i++)
-    {
+    for (size_t i = 0; i < cmd.params.size(); i++){
         msg += cmd.params[i];
         if (i + 1 < cmd.params.size())
             msg += " ";
     }
     msg.insert(0, " ");
-    // std::cout << "quit_cmd: user list chan size :" << user->Get_channel_register().size() << std::endl;
-    //std::cout << "quit_cmd: size first chan :" << user->Get_channel_register()[0]->Get_channel_name() << std::endl;
    _Output_all_user_channel(user, msg);
     return -2;
 };
@@ -509,52 +505,34 @@ void server::Part_cmd(user *user, t_IRCMessage cmd) {
         _Output_client(user->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
         return;
     }
-
     std::vector<std::string> v_chan;
     channel     *chan;
     std::string prefix = ":" + user->Get_nickname() + "!" + user->Get_username() + "@" + user->Get_hostname() + " PART ";
     std::string msg;
 
-// >> :nick42__!~user42@6cd7-bcd-b63-9ddf-8c58.210.62.ip PART |#qwe :aurvoir
-// >> :nick42__!~user42@6cd7-bcd-b63-9ddf-8c58.210.62.ip PART |#asd :aurvoir
-// >> :nick42__!~user42@6cd7-bcd-b63-9ddf-8c58.210.62.ip PART |#zxc :aurvoir
-
-
     if (cmd.params.empty()){ // need more param
         _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, user->Get_nickname()));
     }
-    else // 1 ou + param
-    {
+    else { // 1 ou + param
         if (cmd.params.size() > 1) // >= 2 param -> message
             for (size_t i = 1; i < cmd.params.size(); i++)
                 msg += " " + cmd.params[i];
         v_chan = Split(cmd.params[0], ',');
-        while (!v_chan.empty())
-        {
+        while (!v_chan.empty()) {
             if ((chan = _Channel_already_exist(v_chan[0])) == NULL)
-            {
                 _Output_client(user->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, user->Get_nickname(), v_chan[0]));
-            }
-            else if (User_in_channel(user, chan))
-            {
+            else if (User_in_channel(user, chan)) {
                 _Output_channel(chan, prefix + chan->Get_channel_name() + msg);
                 user->Remove_Channel(chan);
                 chan->Remove_user(user);
-
                 if (chan->Get_list_channel_user().empty())// chan vide donc le delete
                     _Remove_channel(chan); 
             }
             else
-            {
                  _Output_client(user->Get_fd_client(), ERR_NOTONCHANNEL(_name_serveur, v_chan[0]));
-            }
             v_chan.erase(v_chan.begin());
         }
     }
-
-    // Servers MUST be able to parse arguments in the form of a list of
-    // target, but SHOULD NOT use lists when sending PART messages to
-    // clients.
 };
 
 void server::Names_cmd(user *user, t_IRCMessage cmd) {
