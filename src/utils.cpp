@@ -6,7 +6,7 @@
 /*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:43:01 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/20 23:43:02 by egiacomi         ###   ########.fr       */
+/*   Updated: 2023/01/23 19:07:57 by egiacomi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -208,7 +208,7 @@ std::string Join(std::vector<std::string> vec, size_t start, size_t end) {
 
 bool    isRestricted(user *sender)
 {
-    if(sender->Get_mode().Get_restricted())
+    if(sender->Get_mode()->Get_restricted())
         return true;
     return false;
 }

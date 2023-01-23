@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   user.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:42:58 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/22 19:38:40 by jgourlin         ###   ########.fr       */
+/*   Updated: 2023/01/23 19:16:00 by egiacomi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ user::user(int  socket, addrinfo info)
     : _addrinfo_client(info) {
     std::cout << "/*** CONSTRUCTOR USER ***/"<< std::endl;
     (void) _addrinfo_client;
+    _mode = new Mode;
     _login_status = 0;
     _fd_poll_client.fd = socket,
     _fd_poll_client.revents = 0,
@@ -66,7 +67,7 @@ std::string user::Get_hostname() const {
     return _hostname;
 };
 
-Mode    user::Get_mode() const {
+Mode        *user::Get_mode() const {
     return _mode;
 };
 
@@ -167,36 +168,36 @@ void user::Set_mode(std::string mode) {
     }
     else if (mode[0] == '+') {
         if (mode[1] == 'a') {
-            _mode.Set_away(true);
+            _mode->Set_away(true);
         }
         else if (mode[1] == 'i') {
-            _mode.Set_invisible(true);
+            _mode->Set_invisible(true);
         }
         else if (mode[1] == 'w') {
-            _mode.Set_wallops(true);
+            _mode->Set_wallops(true);
         }
         else if (mode[1] == 'r') {
-            _mode.Set_restricted(true);
+            _mode->Set_restricted(true);
         }
         else if (mode[1] == 'o') {
-            _mode.Set_operator(true);
+            _mode->Set_operator(true);
         }
     }
     else if (mode[0] == '-') {
         if (mode[1] == 'a') {
-            _mode.Set_away(false);
+            _mode->Set_away(false);
         }
         else if (mode[1] == 'i') {
-            _mode.Set_invisible(false);
+            _mode->Set_invisible(false);
         }
         else if (mode[1] == 'w') {
-            _mode.Set_wallops(false);
+            _mode->Set_wallops(false);
         }
         else if (mode[1] == 'r') {
-            _mode.Set_restricted(false);
+            _mode->Set_restricted(false);
         }
         else if (mode[1] == 'o') {
-            _mode.Set_operator(false);
+            _mode->Set_operator(false);
         }
     }
 };
