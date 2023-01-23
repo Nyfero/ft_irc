@@ -955,14 +955,14 @@ void server::List_cmd(user *user, t_IRCMessage cmd) {
         _Output_client(user->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
         return;
     }
-
-    if (cmd.params.empty()) { // affiche tout du serveur
-        _Output_client(user->Get_fd_client(), RPL_LISTSTART(_name_serveur, user->Get_nickname()));
-        for (size_t i = 0; i < _list_channel.size(); i++) { 
-            _Output_client(user->Get_fd_client(), RPL_LIST(_name_serveur, user->Get_nickname(), _list_channel[i]->Get_channel_name(), Itos(_list_channel[i]->Get_list_channel_user().size()), _list_channel[i]->Get_channel_topic()));
+    std::vector<channel *> channel_targeted;
+    if (cmd.params.empty() == false) {             // Split targeted channel and put in vector channel target
+        std::vector<std::string> target_splited = _split_channel_list(cmd.params[0]);
+        for (size_t i = 0; i < target_splited.size(); i++) {
+            channel_targeted.push_back(_filter_channel_list(target_splited[i]));
         }
-        _Output_client(user->Get_fd_client(), RPL_LISTEND(_name_serveur, user->Get_nickname()));
+        std::cout << channel_targeted.size() << channel_targeted.at(0) << std::endl;
     }
+    _list_display(user, channel_targeted);
     return;
-
 };

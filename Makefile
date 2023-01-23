@@ -46,6 +46,7 @@ FILES = main.cpp 	\
 		wallops.cpp	\
 		invite.cpp	\
 		kick.cpp	\
+		list.cpp	\
 		bot.cpp		\
 		\
 

@@ -117,6 +117,12 @@ class server
         channel                  *_user_not_in_channel(user *sender, user *target_nick, channel *channel_kick);
         bool                     _kick_from_channel(user *target_nick, channel *channel_kick);
         void                     _kick_success_message(user *target_nick, channel *channel_kick, struct s_IRCMessage cmd);
+
+                    /* List */
+        std::vector<std::string> _split_channel_list(std::string target);
+        channel *                _filter_channel_list(std::string target_splited);
+        void                     _list_display(user *sender, std::vector<channel *> channel_targeted);
+
         
         /* BOT */
         void                     _Bot_main(user *sender, struct s_IRCMessage cmd);
