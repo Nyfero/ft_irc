@@ -956,8 +956,9 @@ void server::List_cmd(user *user, t_IRCMessage cmd) {
     }
 
     if (cmd.params.empty()) { // affiche tout du serveur
+        _Output_client(user->Get_fd_client(), RPL_LISTSTART(_name_serveur, user->Get_nickname()));
         for (size_t i = 0; i < _list_channel.size(); i++) { 
-            _Output_client(user->Get_fd_client(), RPL_LIST(_name_serveur,user->Get_nickname(), _list_channel[i]->Get_channel_name(), Itos(_list_channel[i]->Get_list_channel_user().size()), _list_channel[i]->Get_channel_topic()));
+            _Output_client(user->Get_fd_client(), RPL_LIST(_name_serveur, user->Get_nickname(), _list_channel[i]->Get_channel_name(), Itos(_list_channel[i]->Get_list_channel_user().size()), _list_channel[i]->Get_channel_topic()));
         }
         _Output_client(user->Get_fd_client(), RPL_LISTEND(_name_serveur, user->Get_nickname()));
     }
