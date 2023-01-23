@@ -6,12 +6,6 @@ int server::Check_command(user *user, std::string str)
 
     t_IRCMessage msg = split_message(user, str);
 
-    // std::cout << "command: " << msg.command << std::endl;
-    // std::cout << "prefix: " << msg.prefix << std::endl;
-    // for (size_t i = 0; i < msg.params.size(); i++) {
-    //     std::cout << "params[" << i << "]: " << msg.params[i] << std::endl;
-    // }
-
     std::string list_command[19] = {"PASS", "USER", "NICK", "MODE", "QUIT", "JOIN", "PART", "NAMES", "INVITE", "KICK", "PRIVMSG", "NOTICE", "AWAY", "USERS", "WALLOPS", "PING", "OPER", "TOPIC", "LIST"};
 
     int i = 0;
@@ -284,7 +278,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
         if (cmd.params[1].at(0) == '+') {
             if (cmd.params[1].at(1) == 'i') {
                 if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan)) {
-                    _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
+                    _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, user->Get_nickname(), cmd.params[0]));
                     return;
                 }
                 if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
@@ -295,7 +289,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
             }
             else if (cmd.params[1].at(1) == 't') {
                 if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan)) {
-                    _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
+                    _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, user->Get_nickname(), cmd.params[0]));
                     return;
                 }
                 if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
@@ -306,7 +300,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
             }
             else if (cmd.params[1].at(1) == 'o') {
                 if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan)) {
-                    _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
+                    _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, user->Get_nickname(), cmd.params[0]));
                     return;
                 }
                 if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
@@ -321,12 +315,12 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                             return;
                         }
                     }
-                    _Output_client(user->Get_fd_client(), ERR_USERNOTINCHANNEL(_name_serveur, cmd.params[2], cmd.params[0]));
+                    _Output_client(user->Get_fd_client(), ERR_USERNOTINCHANNEL(_name_serveur, user->Get_nickname() ,cmd.params[2], cmd.params[0]));
                 }
             }
             else if (cmd.params[1].at(1) == 'k') {
                 if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan)) {
-                    _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
+                    _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, user->Get_nickname(), cmd.params[0]));
                     return;
                 }
                 if (chan->Get_channel_private()) {
@@ -351,7 +345,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
         else if (cmd.params[1].at(0) == '-') {
             if (cmd.params[1].at(1) == 'i') {
                 if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan)) {
-                    _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
+                    _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, user->Get_nickname(), cmd.params[0]));
                     return;
                 }
                 if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
@@ -362,7 +356,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
             }
             else if (cmd.params[1].at(1) == 't') {
                 if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan)) {
-                    _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
+                    _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, user->Get_nickname(), cmd.params[0]));
                     return;
                 }
                 if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
@@ -373,7 +367,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
             }
             else if (cmd.params[1].at(1) == 'k') {
                 if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan)) {
-                    _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
+                    _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, user->Get_nickname(), cmd.params[0]));
                     return;
                 }
                 if (chan->Get_channel_private()) {
@@ -615,8 +609,6 @@ void server::Names_cmd(user *user, t_IRCMessage cmd) {
 
 /*  
 TODO :   
-    - Ajouter un if sender is operator si le channel est en mode invite only
-
     - Check other error messages
 */
 void server::Invite_cmd(user *sender, t_IRCMessage cmd) {
@@ -631,20 +623,20 @@ void server::Invite_cmd(user *sender, t_IRCMessage cmd) {
         _Output_client(sender->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
         return ;
     } 
-    if (_parse_invite(sender, cmd))             // Parse INVITE command
+    if (_parse_invite(sender, cmd))                             // Parse INVITE command
         return;
     user *target_nick = _check_nick_invite(sender, cmd); 
-    if (target_nick == NULL)                    // Check that the param 1 : Nickname is correct
+    if (target_nick == NULL)                                    // Check that the param 1 : Nickname is correct
         return;
-    channel *target_chan = _check_chan_invite(sender, cmd);
+    channel *target_chan = _check_chan_invite(sender, cmd);     // CHeck param 2 : Channel and check for invite only
     if (target_chan == NULL)
         return;
-    if (_user_already_member(target_nick, target_chan))
+    if (_user_already_member(target_nick, target_chan))         // Check if target user is already in target channel
     {
 		_Output_client(sender->Get_fd_client(), ERR_USERONCHANNEL(_name_serveur, sender->Get_nickname(), target_chan->Get_channel_name(), target_nick->Get_nickname()));
         return;
     }
-    _invite_success(sender, target_nick, cmd);                // Send success invite messages
+    _invite_success(sender, target_nick, target_chan, cmd);                // Send success invite messages
 };
 
 /* 
@@ -829,7 +821,7 @@ void server::Wallops_cmd(user *sender, t_IRCMessage cmd) {
         return;
     if (sender->Get_mode().Get_operator() == false)                                 // Check is user is an Operator
     {
-        _Output_client(sender->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
+        _Output_client(sender->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur,sender->Get_nickname(), cmd.params[0]));
         return;
     }
     std::vector<std::string> target = _target_handle(cmd);                           // Create a vector of targets
@@ -938,7 +930,7 @@ void server::Topic_cmd(user *user, t_IRCMessage cmd) {
             return ;
         }
         if (!user->Get_mode().Get_operator() && !user->Is_op_channel(chan) && chan->Get_topic_settable() == false) { // ERR_NOCHANMODES : Need rights and user doesn't have
-            _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, cmd.params[0]));
+            _Output_client(user->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur, user->Get_nickname(), cmd.params[0]));
             return ;
         }
         for (size_t i = 1; i < cmd.params.size(); i++) { // create new_topic

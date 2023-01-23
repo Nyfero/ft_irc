@@ -16,6 +16,8 @@ class channel
         const std::string   _channel_name;
         // Liste des utilisateurs du channel
         std::vector<user *> _list_channel_user;
+        // Liste des utilisateurs invited
+        std::vector<user *> _list_invited_user;
         // Liste des operateurs du channel
         std::vector<user *> _list_operator;
         // Key channel
@@ -50,7 +52,8 @@ class channel
         int     Remove_user(user *use);
 
         void    Add_oper(user *use);
-
+        void    Add_invited_user(user *use);
+        
         void    Mod_topic(std::string str);
         void    Set_channel_key(std::string key);
         void    Set_invite_only(bool b);
@@ -69,6 +72,7 @@ class channel
         bool                    Get_invite_only() const;
         bool                    Get_topic_settable() const;
         bool                    Get_channel_private() const;
+        std::vector<user *>     Get_invited_user() const;
 
         void    print_user_channel();
         void    print_oper_channel();

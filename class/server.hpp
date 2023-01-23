@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:44:08 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/22 17:16:56 by jgourlin         ###   ########.fr       */
+/*   Updated: 2023/01/23 01:25:02 by egiacomi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,7 +119,7 @@ class server
         user	                 *_check_nick_invite(user *sender, struct s_IRCMessage cmd);
         channel	                 *_check_chan_invite(user *sender, struct s_IRCMessage cmd);
         bool                     _user_already_member(user *target_nick, channel *target_chan);
-        void                     _invite_success(user *sender, user *target, s_IRCMessage cmd);
+        void                     _invite_success(user *sender, user *target_nick, channel *target_chan, s_IRCMessage cmd);
                     /* Kick */
         bool	                 _parse_kick(user *sender, struct s_IRCMessage cmd);
         user                     *_check_nick_kick(user *sender, struct s_IRCMessage cmd);
