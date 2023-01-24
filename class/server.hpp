@@ -3,7 +3,7 @@
 
 # include "utils.hpp"
 
-# define MAX_LISTEN 2
+# define MAX_LISTEN 42
 # define SIZE_INPT 50
 
 class user;
@@ -143,14 +143,6 @@ class server
 
         ~server();
 
-
-        /***********************/
-        /*****   COMMAND   *****/
-        /***********************/
-
-        // void    Enter(user* user, std::string str);
-        // int    pass(user *user, std::string pass);
-        // void    nick(user *user, std::string nick);
  
         /***********************/
         /*****   COMMAND   *****/

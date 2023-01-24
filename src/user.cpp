@@ -8,14 +8,13 @@ user::user(){}
 
 user::user(int  socket, addrinfo info)
     : _addrinfo_client(info) {
-    std::cout << "/*** CONSTRUCTOR USER ***/"<< std::endl;
     (void) _addrinfo_client;
     _mode = new Mode;
     _login_status = 0;
     _fd_poll_client.fd = socket,
     _fd_poll_client.revents = 0,
     _fd_poll_client.events = POLLIN,
-    std::cout << "User create: " << _fd_poll_client.fd << std::endl;
+    std::cout << "*** User create: " << _fd_poll_client.fd << " ***" << std::endl;
 };
 
 /********************/
@@ -23,7 +22,7 @@ user::user(int  socket, addrinfo info)
 /********************/
 
 user::~user() {
-    std::cout << "User destroy: " << _fd_poll_client.fd << std::endl;
+    std::cout << "*** User destroy: " << _fd_poll_client.fd << " ***" << std::endl;
     delete _mode;
     close(_fd_poll_client.fd);
 };
@@ -105,32 +104,31 @@ bool user::Is_op_channel(channel *chan) const{
 /**************/
 
 int user::Add_channel(channel *chan) {
-    std::cout << "/*** USER::ADD_CHANNEL ***/"<< std::endl; 
+    std::cout << "*** USER::ADD_CHANNEL ***"<< std::endl; 
     _channel_register.push_back(chan);
     return 0;
 };
 
 int user::Remove_Channel(channel *chan) {
-    std::cout << "/*** USER::REMOVE_CHANNEL ***/"<< std::endl;
     std::vector<channel *>::iterator it, ite = _channel_register.end();
     unsigned int    i = 0;
 
     for (it = _channel_register.begin(); it != ite; it++) {
         if (_channel_register[i]->Get_channel_name() == chan->Get_channel_name()) {
-            std::cout << "channel found" << std::endl;
+            std::cout << "*** USER::REMOVE_CHANNEL ***"<< std::endl;
             _channel_register.erase(it);
             break;
         }
         i++;
     }
     if (it == ite) {
-        std::cout << "channel not found" << std::endl;
+        std::cerr << "*** channel not found ***" << std::endl;
     }
     return 0;
 };
 
 void    user::Remove_all_channel(){
-    std::cout << "/*** USER::REMOVE_ALL_CHANNEL ***/"<< std::endl;
+    std::cout << "*** USER::REMOVE_ALL_CHANNEL ***"<< std::endl;
     if (!_channel_register.empty())
         _channel_register.clear();
 };

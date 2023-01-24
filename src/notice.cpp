@@ -3,19 +3,19 @@
 bool	server::_parse_notice(t_IRCMessage cmd)
 {
     if (cmd.params.empty()) {					// Check if command takes parameters
-        std::cout << "ERROR : No parameter from NOTICE" << std::endl;	
+        std::cerr << "ERROR : No parameter from NOTICE" << std::endl;	
         return true;
 	}
 	if (cmd.params.size() == 1)	{				// Check if I have minimum 2 parameters (target + message)
-        std::cout << "ERROR : Not enough from NOTICE" << std::endl;	
+        std::cerr << "ERROR : Not enough from NOTICE" << std::endl;	
         return true;
 	}
     if (cmd.params[0][0] == ':') {				// Check if any target is specified
-        std::cout << "ERROR : No targets from NOTICE" << std::endl;	
+        std::cerr << "ERROR : No targets from NOTICE" << std::endl;	
         return true;
 	}
     if (cmd.params[1][0] != ':') {				// Check message start with a ":"
-        std::cout << "ERROR : No message starting with ':' from NOTICE" << std::endl;	
+        std::cerr << "ERROR : No message starting with ':' from NOTICE" << std::endl;	
         return true;
 	}
 	return false;
@@ -65,7 +65,7 @@ std::vector<int> server::_targetfds_creator_notice(user *sender, std::vector<std
 		{
 			if (_list_channel.empty())
 			{
-                std::cout << "ERROR : There are no channels" << std::endl;
+                std::cerr << "ERROR : There are no channels" << std::endl;
                 continue;
 			}
 			else

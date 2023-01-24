@@ -2,21 +2,9 @@
 
 # include "utils.hpp"
 
-// PREFIX Error
-# define ERR_PARSINGPREFIX          "Parsing prefix error"
-# define ERR_NOSUCHUSER             "No such user"
-# define ERR_NOSUCHHOSTNAME         "No such hostname"
-
-# define ERR_USEAWAY "Use AWAY command"
-
-
-
-/*---------------------------------------------------------------------------*/
 # define RPL_WELCOME(serveur, nick, use, host) ":" + serveur + " 001 " + nick + " :Welcome to the Internet Relay Network " + nick + "!" + use + "@" + host
-
 # define RPL_UMODEIS(nick, target, mode) ":" + nick + " MODE " + target + " :" + mode
 # define RPL_MYMODE(serveur, nick, mode) ":" + serveur + " 221 " + nick + " " + mode
-
 # define RPL_AWAY(serveur, nick, nick_dest, msg) ":" + serveur + " 301 " + nick + " " + nick_dest + " :" + msg
 # define RPL_UNAWAY(serveur, nick) ":" + serveur + " 305 " + nick + " :You are no longer marked as being away"
 # define RPL_NOWAWAY(serveur, nick) ":" + serveur + " 306 " + nick + " :You have been marked as being away"
@@ -28,12 +16,8 @@
 # define RPL_CHANNEL_MODE(serveur, nick, chan, mode) ":" + serveur + " 324 " + nick + " " + chan + " " + mode
 # define RPL_NOTOPIC(serveur, chan) ":" + serveur + " 331 " + chan + " :No topic is set"
 # define RPL_TOPIC(serveur, nick, chan, topic) ":" + serveur + " 332 " + nick + " " + chan + " :" + topic
-
-
 # define RPL_INVITING(serveur, sender, chan, target) ":" + serveur + " 341 " + sender + " " + chan + " " + target
 # define RPL_NAMREPLY(serveur, nick, chan, names) ":" + serveur + " 353 " + nick + " = " + chan + " :" + names
-
-
 # define RPL_ENDOFNAMES(serveur, nick, chan) ":" + serveur + " 366 " + nick + " " + chan + " :End of NAMES list"
 # define RPL_YOUREOPER(serveur, nick) ":" + serveur + " 381 " + nick + " :You are now an IRC operator"
 # define RPL_USERSSTART(serveur) ":" + serveur + " 392 :UserID Terminal Host"
@@ -79,7 +63,6 @@
 # define ERR_CHANOPRIVSNEEDED(serveur, sender, chan) ":" + serveur + " 482 " + sender + " " + chan + " :You're not channel operator"
 # define ERR_RESTRICTED(serveur, nick) ":" + serveur + " 484 " + nick + " :Your connection is restricted!"
 # define ERR_NOOPERHOST(serveur) ":" + serveur + " 491 :No O-lines for your host"
-
 # define ERR_UMODEUNKNOWNFLAG(pre, nick) ":" + pre + " " + nick + " : Unknown MODE flag"
 # define ERR_USERSDONTMATCH(serveur) ":" + serveur + " 502 :Cannot change mode for other users"
 

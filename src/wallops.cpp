@@ -3,11 +3,11 @@
 bool	server::_parse_wallops(t_IRCMessage cmd)
 {
     if (cmd.params.empty()) {					// Check if command takes parameters
-        std::cout << "ERROR : No parameter from WALLOPS" << std::endl;	
+        std::cerr << "ERROR : No parameter from WALLOPS" << std::endl;	
         return true;
 	}
     if (cmd.params[0][0] != ':') {				// Check if any target is specified
-        std::cout << "ERROR : No message starting with ':' from WALLOPS" << std::endl;	
+        std::cerr << "ERROR : No message starting with ':' from WALLOPS" << std::endl;	
         return true;
 	}
 	return false;
@@ -44,7 +44,7 @@ std::vector<int> server::_targetfds_creator_wallops(user *sender, std::vector<st
 		{
 			if (_list_channel.empty())
 			{
-                std::cout << "ERROR : There are no channels" << std::endl;
+                std::cerr << "ERROR : There are no channels" << std::endl;
                 continue;
 			}
 			else

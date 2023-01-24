@@ -46,21 +46,20 @@ server::~server() {
 
 int    server::_Init_server() {
     if (getaddrinfo(_node, _port, &_hints, &_addrinfo)) {
-        // std::cout << "Error: getaddrinfo" << std::endl;
+        std::cerr << "Error: getaddrinfo" << std::endl;
         return -1;
     }
 
     // SOCKET
     if ((_socket_serv = socket(_addrinfo->ai_family, _addrinfo->ai_socktype, _addrinfo->ai_protocol)) == -1) {
-        // std::cout << "Error: Creation socket:" << errno << std::endl;
+        std::cerr << "Error: Creation socket:" << errno << std::endl;
         freeaddrinfo(_addrinfo);
         return -2;
     }
-    // SOCKET OPTION
+
     // BIND
     if (bind(_socket_serv, _addrinfo->ai_addr, _addrinfo->ai_addrlen)) {
-        // std::cout << "Error: Bind socket:" << errno << std::endl;
-        // std::cout << EADDRINUSE << std::endl;
+        std::cerr << "Error: Bind socket:" << errno << std::endl;
         freeaddrinfo(_addrinfo);
         close (_socket_serv);
         return -3;
@@ -88,8 +87,9 @@ void    server::_Launch_server() {
     fcntl(_socket_serv, F_SETFL, O_NONBLOCK); // pour qu'accept ne soit pas bloquant
     _list_poll_fd.push_back(_serv_poll_fd);
     while (g_stop) {
-        _Print_user();
-        _Print_channel();
+        //  DEBUG
+        // _Print_user();
+        // _Print_channel();
 
         // poll(tab pollfd, size tab, timer)
         poll(_list_poll_fd.data(), _list_poll_fd.size(), -1);
@@ -135,8 +135,6 @@ void    server::_Launch_server() {
 /******************/
 
 void    server::_Add_user() {
-    std::cout << "*** _Add_User ***" << std::endl;
-
     int socket_cli = 0;
     struct addrinfo    addrinfo_cli;
     struct pollfd   pf;
@@ -147,26 +145,16 @@ void    server::_Add_user() {
     socket_cli = accept(_socket_serv, addrinfo_cli.ai_addr, &addrinfo_cli.ai_addrlen);
    
     if (socket_cli < 0) {
-        std::cout << "Accept FAIL" << std::endl;
-        if (errno == 11) {
-            std::cout << "Non bloquant no new connect" << std::endl;
-        }
-        else {
-            std::cout << "Error Accept in _Add_user:" << errno << std::endl;
-        }
+        std::cerr << "*** Invalid client ==> user rejected ***" << std::endl;
     }
     else {
-        std::cout << "Accept done" << std::endl;
         _list_user.push_back(new user(socket_cli, addrinfo_cli));
         pf.fd = socket_cli;
         pf.events = POLLIN;
         pf.revents = 0;
         _list_poll_fd.push_back(pf);
-
-
-        std::cout << "New User on socket: " << socket_cli << std::endl;
+        std::cout << "*** New User on socket: " << socket_cli << " ***" << std::endl;
     }
-    std::cout << "*** _Add_User END ***" << std::endl;
 };
 
 // REMOVE_USER

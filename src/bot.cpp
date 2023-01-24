@@ -1,15 +1,4 @@
 #include "../class/utils.hpp"
-# include <ctime>
-
-# define RED__ "\033[31m"
-# define GREEN "\033[32m"
-# define YELLO "\033[33m"
-# define BLUE_ "\033[34m"
-# define PURPL "\033[35m"
-# define CYAN_ "\033[36m"
-# define GREY_ "\033[37m"
-# define DEFAU "\033[0m"
-
 
 void    server::_Bot_main(user *sender, t_IRCMessage cmd) 
 {
