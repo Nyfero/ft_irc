@@ -5,11 +5,6 @@ int server::Check_command(user *user, std::string str) {
     t_IRCMessage msg = split_message(user, str);
     std::string list_command[19] = {"PASS", "USER", "NICK", "MODE", "QUIT", "JOIN", "PART", "NAMES", "INVITE", "KICK", "PRIVMSG", "NOTICE", "AWAY", "USERS", "wallops", "PING", "OPER", "TOPIC", "LIST"};
 
-    // a tej
-    for (size_t i = 0; i < msg.params.size(); i++) {
-        std::cout << "params[" << i << "] => " << msg.params[i] << std::endl;
-    }
-
     int i = 0;
     while (i < 19) {
         if (msg.command == list_command[i]) {
