@@ -444,7 +444,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
             if (!user->Get_mode()->Get_operator()) {
                 for (size_t i = 1; i < cmd.params[1].size(); i++) {
                     if (user->Get_mode()->Add_mode(cmd.params[1].at(i))) {
-                        _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0]));
+                        _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur, user->Get_nickname()));
                         return;
                     }
                 }
@@ -452,7 +452,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
             else {
                 for (size_t i = 1; i < cmd.params[1].size(); i++) {
                     if (_Get_user_by_nick(cmd.params[0])->Get_mode()->Oper_add_mode(cmd.params[1].at(i))) {
-                        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0]));
+                        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur, user->Get_nickname()));
                         return;
                     }
                 }
@@ -466,7 +466,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
             if (!user->Get_mode()->Get_operator()) {
                 for (size_t i = 1; i < cmd.params[1].size(); i++) {
                     if (user->Get_mode()->Remove_mode(cmd.params[1].at(i))) {
-                        _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0]));
+                        _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur, user->Get_nickname()));
                         return;
                     }
                 }
@@ -474,7 +474,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
             else {
                 for (size_t i = 1; i < cmd.params[1].size(); i++) {
                     if (_Get_user_by_nick(cmd.params[0])->Get_mode()->Oper_remove_mode(cmd.params[1].at(i))) {
-                        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0]));
+                        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur, user->Get_nickname()));
                         return;
                     }
                 }

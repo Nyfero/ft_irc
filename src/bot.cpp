@@ -16,8 +16,6 @@ void    server::_Bot_main(user *sender, struct s_IRCMessage cmd) {
     (void)cmd;
     (void)sender;
 
-    std::cout << "bot" << std::endl;
-
     cmd.params[1].erase(0);
     if (cmd.params[0] == "@heure")
     {
