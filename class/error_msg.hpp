@@ -80,7 +80,7 @@
 # define ERR_RESTRICTED(serveur, nick) ":" + serveur + " 484 " + nick + " :Your connection is restricted!"
 # define ERR_NOOPERHOST(serveur) ":" + serveur + " 491 :No O-lines for your host"
 
-# define ERR_UMODEUNKNOWNFLAG(pre, nick) pre + " " + nick + " : Unknown MODE flag"
+# define ERR_UMODEUNKNOWNFLAG(pre, nick) ":" + pre + " " + nick + " : Unknown MODE flag"
 # define ERR_USERSDONTMATCH(serveur) ":" + serveur + " 502 :Cannot change mode for other users"
 
 #define BOT_HELP_TEXT(nickname) "\033[1;36m@ " + nickname + ", here is a list of available commands:\n    - \033[1;32mheure\033[36m: displays the current time\n    - \033[1;32mliste\033[36m: displays the list of channels in this server\n    - \033[1;32mgreetings\033[36m: sends a greeting message\n    - \033[1;32mhelp\033[36m: displays this prompt\n"

@@ -421,54 +421,76 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
         _Output_client(user->Get_fd_client(), RPL_MYMODE(_name_serveur, user->Get_nickname(), user->Get_mode()->Print_mode()));
     }
     else {
-        int compt = 0;
+        size_t compt = 0;
         if (cmd.params[1].at(0) == '+') {
+            std::string mode = "+";
             if (!user->Get_mode()->Get_operator()) {
                 for (size_t i = 1; i < cmd.params[1].size(); i++) {
-                    compt += user->Get_mode()->Add_mode(cmd.params[1].at(i));
+                    if (user->Get_mode()->Add_mode(cmd.params[1].at(i))) {
+                        compt++;
+                    }
+                    else {
+                        mode = Create_aff_mode(mode, cmd.params[1].at(i));
+                    }
                 }
                 if (compt) {
                     _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur, user->Get_nickname()));
-                    return;
                 }
             }
             else {
                 for (size_t i = 1; i < cmd.params[1].size(); i++) {
-                    compt += _Get_user_by_nick(cmd.params[0])->Get_mode()->Oper_add_mode(cmd.params[1].at(i));
+                    if (_Get_user_by_nick(cmd.params[0])->Get_mode()->Oper_add_mode(cmd.params[1].at(i))) {
+                        compt++;
+                    }
+                    else {
+                        mode = Create_aff_mode(mode, cmd.params[1].at(i));
+                    }
                 }
                 if (compt) {
                     _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur, user->Get_nickname()));
-                    return;
                 }
-                if (user->Get_nickname() != cmd.params[0]) {
-                    _Output_client(user->Get_fd_client(), RPL_UMODEIS(_Get_user_by_nick(cmd.params[0])->Get_nickname(), cmd.params[0], cmd.params[1]));
+                if (user->Get_nickname() != cmd.params[0] && !compt) {
+                    _Output_client(user->Get_fd_client(), RPL_UMODEIS(_Get_user_by_nick(cmd.params[0])->Get_nickname(), cmd.params[0], mode));
                 }
             }
-            _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), RPL_UMODEIS(_Get_user_by_nick(cmd.params[0])->Get_nickname(), cmd.params[0], cmd.params[1]));
+            if (compt != cmd.params[1].size() - 1) {
+                _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), RPL_UMODEIS(_Get_user_by_nick(cmd.params[0])->Get_nickname(), cmd.params[0], mode));
+            }
         }
         else {
+            std::string mode = "-";
             if (!user->Get_mode()->Get_operator()) {
                 for (size_t i = 1; i < cmd.params[1].size(); i++) {
-                    compt += user->Get_mode()->Remove_mode(cmd.params[1].at(i));
+                    if (user->Get_mode()->Remove_mode(cmd.params[1].at(i))) {
+                        compt++;
+                    }
+                    else {
+                        mode = Create_aff_mode(mode, cmd.params[1].at(i));
+                    }
                 }
                 if (compt) {
                     _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur, user->Get_nickname()));
-                    return;
                 }
             }
             else {
                 for (size_t i = 1; i < cmd.params[1].size(); i++) {
-                    compt += _Get_user_by_nick(cmd.params[0])->Get_mode()->Oper_remove_mode(cmd.params[1].at(i));
+                    if (_Get_user_by_nick(cmd.params[0])->Get_mode()->Oper_remove_mode(cmd.params[1].at(i))) {
+                        compt++;
+                    }
+                    else {
+                        mode = Create_aff_mode(mode, cmd.params[1].at(i));
+                    }
                 }
                 if (compt) {
                     _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(_name_serveur, user->Get_nickname()));
-                    return;
                 }
-                if (user->Get_nickname() != cmd.params[0]) {
-                    _Output_client(user->Get_fd_client(), RPL_UMODEIS(_Get_user_by_nick(cmd.params[0])->Get_nickname(), cmd.params[0], cmd.params[1]));
+                if (user->Get_nickname() != cmd.params[0] && !compt) {
+                    _Output_client(user->Get_fd_client(), RPL_UMODEIS(_Get_user_by_nick(cmd.params[0])->Get_nickname(), cmd.params[0], mode));
                 }
             }
-            _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), RPL_UMODEIS(_Get_user_by_nick(cmd.params[0])->Get_nickname(), cmd.params[0], cmd.params[1]));
+            if (compt != cmd.params[1].size() - 1) {
+                _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), RPL_UMODEIS(_Get_user_by_nick(cmd.params[0])->Get_nickname(), cmd.params[0], mode));
+            }
         }
     }
 };

@@ -215,3 +215,15 @@ std::string Create_names_rpl(channel *chan) {
     }
     return names;
 };
+
+std::string Create_aff_mode(std::string str, char c) {
+    for (size_t j = 0; j < str.size(); j++) {
+        if (c == str[j]) {
+            break;
+        }
+        if (j + 1 == str.size()) {
+            str += c;
+        }
+    }
+    return str;
+};

@@ -48,4 +48,5 @@ std::vector<std::string>    Split(std::string str, char delimiter);
 std::string		            Join(std::vector<std::string> vec, size_t start, size_t end);
 bool                        isRestricted(user *sender);
 std::string                 Create_names_rpl(channel *chan);
+std::string                 Create_aff_mode(std::string str, char c);
 
