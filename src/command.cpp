@@ -389,6 +389,9 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                     }
                 }
             }
+            else if (cmd.params[1].at(1) == 'b') {
+                return;
+            }
             else {
                 _Output_client(user->Get_fd_client(), ERR_UNKNOWNMODE(cmd.prefix, cmd.params[1]));
             }
