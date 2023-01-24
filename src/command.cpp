@@ -198,7 +198,6 @@ void server::Nick_cmd(user *user, t_IRCMessage cmd) {
     }
 
     // Verifie si le user n'est pas restreind
-    std::cout << "isRestricted ==> " << isRestricted(user) << std::endl;
     if (isRestricted(user)) {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
         return ;
@@ -262,11 +261,6 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
         return;
     }
 
-    // Verifie les arguments de MODE
-    if (cmd.params.size() == 1) {
-        return;
-    }
-
     // check if chan
     if (cmd.params[0].at(0) == '!' || cmd.params[0].at(0) == '#' || cmd.params[0].at(0) == '&' || cmd.params[0].at(0) == '+') {
 
@@ -278,8 +272,8 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
         }
 
         // Verifie s'il y a un mode
-        if (cmd.params[1].empty()) {
-            _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "MODE"));
+        if (cmd.params.size() == 1) {
+            _Output_client(user->Get_fd_client(), RPL_CHANNEL_MODE(_name_serveur, user->Get_nickname(), chan->Get_channel_name(), chan->Print_mode()));
             return;
         }
 
@@ -293,7 +287,6 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                 if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
                     chan->Set_invite_only(true);
                     _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "+i"));
-                    return;
                 }
             }
             else if (cmd.params[1].at(1) == 't') {
@@ -304,7 +297,6 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                 if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
                     chan->Set_topic_settable(false);
                     _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "+t"));
-                    return;
                 }
             }
             else if (cmd.params[1].at(1) == 'o') {
@@ -347,7 +339,6 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
             }
             else {
                 _Output_client(user->Get_fd_client(), ERR_UNKNOWNMODE(cmd.prefix, cmd.params[1]));
-                return;
             }
         }
         else if (cmd.params[1].at(0) == '-') {
@@ -359,7 +350,6 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                 if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
                     chan->Set_invite_only(false);
                     _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "-i"));
-                    return;
                 }
             }
             else if (cmd.params[1].at(1) == 't') {
@@ -370,7 +360,6 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                 if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
                     chan->Set_topic_settable(true);
                     _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "-t"));
-                    return;
                 }
             }
             else if (cmd.params[1].at(1) == 'k') {
@@ -396,41 +385,35 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
             }
             else {
                 _Output_client(user->Get_fd_client(), ERR_UNKNOWNMODE(cmd.prefix, cmd.params[1]));
-                return;
             }
         }
         else {
             _Output_client(user->Get_fd_client(), ERR_UNKNOWNMODE(cmd.prefix, cmd.params[1]));
-            return;
         }
         return;
     }
 
     // Verifie que le premier parametre est le nickname ou le realname
     if (cmd.params[0] != user->Get_nickname() && cmd.params[0] != user->Get_realname().substr(0, user->Get_realname().find(' '))) {
-        if (!user->Get_mode()->Get_operator()) {
-            _Output_client(user->Get_fd_client(), ERR_USERSDONTMATCH(_name_serveur));
-            return;
-        }
-        else if (!_Get_user_by_nick(cmd.params[0])) {
+        if (!user->Get_mode()->Get_operator() || !_Get_user_by_nick(cmd.params[0])) {
             _Output_client(user->Get_fd_client(), ERR_USERSDONTMATCH(_name_serveur));
             return;
         }
     }
 
-    for (size_t i = 0; i < cmd.params.size(); i++) {
-        std::cout << "Parametre " << i << " : " << cmd.params[i] << std::endl;
-    }
     if (cmd.params.size() == 1) {
-        std::cout << "Mode de " << cmd.params[0] << " : " << _Get_user_by_nick(cmd.params[0])->Get_mode()->Print_mode() << std::endl;
-        _Output_client(user->Get_fd_client(), RPL_UMODEIS(user->Get_nickname(), cmd.params[0], _Get_user_by_nick(cmd.params[0])->Get_mode()->Print_mode()));
+        if (cmd.params[0] != user->Get_nickname()) {
+            _Output_client(user->Get_fd_client(), ERR_USERSDONTMATCH(_name_serveur));
+            return;
+        }
+        _Output_client(user->Get_fd_client(), RPL_PRINTMODE(_name_serveur, user->Get_nickname(), user->Get_mode()->Print_mode()));
     }
     else {
         if (cmd.params[1].at(0) == '+') {
             if (!user->Get_mode()->Get_operator()) {
                 for (size_t i = 1; i < cmd.params[1].size(); i++) {
                     if (user->Get_mode()->Add_mode(cmd.params[1].at(i))) {
-                        _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0]));
+                        _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0], cmd.params[1]));
                         return;
                     }
                 }
@@ -438,7 +421,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
             else {
                 for (size_t i = 1; i < cmd.params[1].size(); i++) {
                     if (_Get_user_by_nick(cmd.params[0])->Get_mode()->Oper_add_mode(cmd.params[1].at(i))) {
-                        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0]));
+                        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0], cmd.params[1]));
                         return;
                     }
                 }
@@ -452,7 +435,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
             if (!user->Get_mode()->Get_operator()) {
                 for (size_t i = 1; i < cmd.params[1].size(); i++) {
                     if (user->Get_mode()->Remove_mode(cmd.params[1].at(i))) {
-                        _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0]));
+                        _Output_client(_Get_user_by_nick(cmd.params[0])->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0], cmd.params[1]));
                         return;
                     }
                 }
@@ -460,7 +443,7 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
             else {
                 for (size_t i = 1; i < cmd.params[1].size(); i++) {
                     if (_Get_user_by_nick(cmd.params[0])->Get_mode()->Oper_remove_mode(cmd.params[1].at(i))) {
-                        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0]));
+                        _Output_client(user->Get_fd_client(), ERR_UMODEUNKNOWNFLAG(cmd.prefix, cmd.params[0], cmd.params[1]));
                         return;
                     }
                 }

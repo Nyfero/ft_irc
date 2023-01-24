@@ -170,6 +170,20 @@ bool channel::Get_channel_private() const {
     return _channel_private;
 };
 
+std::string channel::Print_mode() const {
+    std::string str = "+";
+    if (_invite_only) {
+        str += "i";
+    }
+    if (!_topic_settable) {
+        str += "t";
+    }
+    if (_channel_private) {
+        str += "k";
+    }
+    return str;
+}
+
 std::vector<user *> channel::Get_invited_user() const {
     return _list_invited_user;
 }
