@@ -679,10 +679,6 @@ void server::Kick_cmd(user *sender, t_IRCMessage cmd) {
     }
 };
 
-/* TODO :
-  - Check if /msg #chan,nick
-  - Check away message
-*/
 void server::Privmsg_cmd(user *sender, t_IRCMessage cmd) {
 
     // Verifie que le user est enregistre
@@ -817,6 +813,7 @@ void server::Users_cmd(user *user, t_IRCMessage cmd) {
     }
 };
 
+    
 void server::Wallops_cmd(user *sender, t_IRCMessage cmd) {
     
      // Verifie que le user est enregistre
@@ -824,22 +821,23 @@ void server::Wallops_cmd(user *sender, t_IRCMessage cmd) {
         _Output_client(sender->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
         return;
     }
-
     if (isRestricted(sender))
     {
         _Output_client(sender->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
         return ;
     }
     if (_parse_wallops(cmd))                                                 // Parse WALLOPS command
-        return;
-    if (!sender->Get_mode()->Get_operator())                                 // Check is user is an Operator
     {
-        _Output_client(sender->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur,sender->Get_nickname(), cmd.params[0]));
+        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, cmd.command));
         return;
     }
-    std::vector<std::string> target = _target_handle(cmd);                           // Create a vector of targets
-    std::vector<int> targets_fds = _targetfds_creator_wallops(sender, target);       // Check targets and put all target fds in a vector
-    std::string message = _create_msg(cmd);                                          // Merge all parameters in one Message String
+    if (!sender->Get_mode()->Get_operator())                                 // Check is user is an Operator
+    {
+        _Output_client(sender->Get_fd_client(), ERR_NOPRIVILEGES(_name_serveur,sender->Get_nickname()));
+        return;
+    }
+    std::vector<int> targets_fds = _targetfds_creator_wallops();       // Create a vector of targets_fds (all clients with flag -w)
+    std::string message = _create_msg(cmd);                                  // Merge all parameters in one Message String
 
     std::vector<int>::iterator dest;
     for (dest = targets_fds.begin(); dest != targets_fds.end(); dest++)
@@ -848,7 +846,7 @@ void server::Wallops_cmd(user *sender, t_IRCMessage cmd) {
         std::string success_msg = "Wallops sent to ";
         std::cout << success_msg << *dest << std::endl;
     }
-};
+}
 
 void server::Pong_cmd(user *user, t_IRCMessage cmd) {
 

@@ -30,7 +30,7 @@ channel *server::_chan_kick_creator(user *sender, std::string chan_to_kick)
 {
     if (Check_valid_channel(chan_to_kick) == false)									// Check if its a valid Channel name
     {
-        // _Output_client(sender->Get_fd_client(), ERR_BADCHANMASK(_name_serveur, chan_to_kick));
+        _Output_client(sender->Get_fd_client(), ERR_NOSUCHNICK(_name_serveur, sender->Get_nickname(), chan_to_kick));
         return NULL;
     }	
 	for (size_t i = 0; i < _list_channel.size(); i++)
