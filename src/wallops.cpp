@@ -1,5 +1,18 @@
 #include "../class/utils.hpp"
 
+bool	server::_parse_wallops(t_IRCMessage cmd)
+{
+    if (cmd.params.empty()) {					// Check if command takes parameters
+        std::cout << "ERROR : No parameter from WALLOPS" << std::endl;	
+        return true;
+	}
+    if (cmd.params[0][0] != ':') {				// Check if any target is specified
+        std::cout << "ERROR : No message starting with ':' from WALLOPS" << std::endl;	
+        return true;
+	}
+	return false;
+}
+
 bool	server::_add_channel_targetfds_wallops(user *sender, std::vector<int> *targets_fds, std::string target)
 {
 	for (size_t i = 0; i < _list_channel.size(); i++)

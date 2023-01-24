@@ -1,21 +1,21 @@
 #include "../class/utils.hpp"
 
-bool	server::_parse_notice_wallops(t_IRCMessage cmd)
+bool	server::_parse_notice(t_IRCMessage cmd)
 {
     if (cmd.params.empty()) {					// Check if command takes parameters
-        std::cout << "ERROR : No parameter from NOTICE/WALLOPS" << std::endl;	
+        std::cout << "ERROR : No parameter from NOTICE" << std::endl;	
         return true;
 	}
 	if (cmd.params.size() == 1)	{				// Check if I have minimum 2 parameters (target + message)
-        std::cout << "ERROR : Not enough from NOTICE/WALLOPS" << std::endl;	
+        std::cout << "ERROR : Not enough from NOTICE" << std::endl;	
         return true;
 	}
     if (cmd.params[0][0] == ':') {				// Check if any target is specified
-        std::cout << "ERROR : No targets from NOTICE/WALLOPS" << std::endl;	
+        std::cout << "ERROR : No targets from NOTICE" << std::endl;	
         return true;
 	}
     if (cmd.params[1][0] != ':') {				// Check message start with a ":"
-        std::cout << "ERROR : No message starting with ':' from NOTICE/WALLOPS" << std::endl;	
+        std::cout << "ERROR : No message starting with ':' from NOTICE" << std::endl;	
         return true;
 	}
 	return false;

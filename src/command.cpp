@@ -14,6 +14,10 @@ int server::Check_command(user *user, std::string str) {
     t_IRCMessage msg = split_message(user, str);
     std::string list_command[19] = {"PASS", "USER", "NICK", "MODE", "QUIT", "JOIN", "PART", "NAMES", "INVITE", "KICK", "PRIVMSG", "NOTICE", "AWAY", "USERS", "wallops", "PING", "OPER", "TOPIC", "LIST"};
 
+    for (size_t i = 0; i < msg.params.size(); i++) {
+        std::cout << "params[" << i << "] => " << msg.params[i] << std::endl;
+    }
+
     int i = 0;
     while (i < 19) {
         if (msg.command == list_command[i]) {
@@ -734,7 +738,7 @@ void server::Notice_cmd(user *sender, t_IRCMessage cmd) {
         _Output_client(sender->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
         return ;
     }
-    if (_parse_notice_wallops(cmd))                                                 // Parse PRIVMSG command
+    if (_parse_notice(cmd))                                                 // Parse PRIVMSG command
         return;
     std::vector<std::string> target = _target_handle(cmd);                          // Create a vector of targets
     std::vector<int> targets_fds = _targetfds_creator_notice(sender, target);       // Check targets and put all target fds in a vector
@@ -836,9 +840,9 @@ void server::Wallops_cmd(user *sender, t_IRCMessage cmd) {
         _Output_client(sender->Get_fd_client(), ERR_RESTRICTED(_name_serveur, sender->Get_nickname()));
         return ;
     }
-    if (_parse_notice_wallops(cmd))                                                 // Parse WALLOPS command
+    if (_parse_wallops(cmd))                                                 // Parse WALLOPS command
         return;
-    if (sender->Get_mode()->Get_operator() == false)                                 // Check is user is an Operator
+    if (!sender->Get_mode()->Get_operator())                                 // Check is user is an Operator
     {
         _Output_client(sender->Get_fd_client(), ERR_CHANOPRIVSNEEDED(_name_serveur,sender->Get_nickname(), cmd.params[0]));
         return;

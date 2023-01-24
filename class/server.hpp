@@ -96,11 +96,12 @@ class server
         bool                     _add_user_targetfds_privmsg(user *sender, std::vector<int> *targets_fds, std::string target);
         std::string              _create_msg(struct s_IRCMessage cmd);
                     /* Notice */
-        bool                     _parse_notice_wallops(struct s_IRCMessage cmd);
+        bool                     _parse_notice(struct s_IRCMessage cmd);
         std::vector<int>         _targetfds_creator_notice(user *sender, std::vector<std::string> target);
         bool	                 _add_channel_targetfds_notice(user *sender, std::vector<int> *targets_fds, std::string target);
         bool	                 _add_user_targetfds_notice(std::vector<int> *targets_fds, std::string target);
                     /* Wallops */
+        bool                     _parse_wallops(struct s_IRCMessage cmd);
         std::vector<int>         _targetfds_creator_wallops(user *sender, std::vector<std::string> target);
         bool	                 _add_channel_targetfds_wallops(user *sender, std::vector<int> *targets_fds, std::string target);
                     /* Invite */
