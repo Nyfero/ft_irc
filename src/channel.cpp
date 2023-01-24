@@ -119,6 +119,11 @@ void channel::Set_channel_private(bool b) {
 
 void    channel::Add_invited_user(user *use)
 {
+    for (size_t i = 0; i < _list_invited_user.size(); i++)
+    {
+        if (Compare_case_sensitive(use->Get_nickname(), _list_invited_user[i]->Get_nickname()))
+            return;
+    }
     _list_invited_user.push_back(use);
 };
 

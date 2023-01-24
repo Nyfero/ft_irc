@@ -60,6 +60,7 @@
 # define ERR_BADCHANNELKEY(serveur, nick, chan) ":" + serveur + " 475 " + nick + " " + chan + " :Cannot join channel (+k)"
 # define ERR_BADCHANMASK(serveur, nick, chan) ":" + serveur + " 476 " + chan + " :Bad Channel Mask"
 # define ERR_NOCHANMODES(serveur, chan) ":" + serveur + " 477 " + chan + " :Channel doesn't support modes"
+# define ERR_NOPRIVILEGES(serveur, sender) ":" + serveur + " 481 " + sender + " :Permission Denied, You do not have the correct irc operator privileges"
 # define ERR_CHANOPRIVSNEEDED(serveur, sender, chan) ":" + serveur + " 482 " + sender + " " + chan + " :You're not channel operator"
 # define ERR_RESTRICTED(serveur, nick) ":" + serveur + " 484 " + nick + " :Your connection is restricted!"
 # define ERR_NOOPERHOST(serveur) ":" + serveur + " 491 :No O-lines for your host"
