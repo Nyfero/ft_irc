@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   user.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:42:58 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/23 19:16:00 by egiacomi         ###   ########.fr       */
+/*   Updated: 2023/01/24 14:18:38 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ user::user(int  socket, addrinfo info)
 
 user::~user() {
     std::cout << "User destroy: " << _fd_poll_client.fd << std::endl;
+    delete _mode;
     close(_fd_poll_client.fd);
 };
 

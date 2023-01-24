@@ -233,6 +233,8 @@ void server::Nick_cmd(user *user, t_IRCMessage cmd) {
                 return;
             }
         }
+        // get fd de tout le monde
+        // envoyer ce message ci contre a tlm
         _Output_client(user->Get_fd_client(), ":" + user->Get_nickname() + " NICK :" + cmd.params[0]);
         user->Set_nickname(cmd.params[0]);
     }
@@ -464,7 +466,7 @@ int server::Quit_cmd(user *user, t_IRCMessage cmd) {
             msg += " ";
     }
     msg.insert(0, " ");
-   _Output_all_user_channel(user, msg);
+    _Output_all_user_channel(user, msg);
     return -2;
 };
 

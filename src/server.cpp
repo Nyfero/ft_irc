@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jgourlin <jgourlin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/20 23:42:54 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/23 05:41:24 by egiacomi         ###   ########.fr       */
+/*   Updated: 2023/01/24 15:24:43 by jgourlin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,21 +58,21 @@ server::~server() {
 
 int    server::_Init_server() {
     if (getaddrinfo(_node, _port, &_hints, &_addrinfo)) {
-        std::cout << "Error: getaddrinfo" << std::endl;
+        // std::cout << "Error: getaddrinfo" << std::endl;
         return -1;
     }
 
     // SOCKET
     if ((_socket_serv = socket(_addrinfo->ai_family, _addrinfo->ai_socktype, _addrinfo->ai_protocol)) == -1) {
-        std::cout << "Error: Creation socket:" << errno << std::endl;
+        // std::cout << "Error: Creation socket:" << errno << std::endl;
         freeaddrinfo(_addrinfo);
         return -2;
     }
     // SOCKET OPTION
     // BIND
     if (bind(_socket_serv, _addrinfo->ai_addr, _addrinfo->ai_addrlen)) {
-        std::cout << "Error: Bind socket:" << errno << std::endl;
-        std::cout << EADDRINUSE << std::endl;
+        // std::cout << "Error: Bind socket:" << errno << std::endl;
+        // std::cout << EADDRINUSE << std::endl;
         freeaddrinfo(_addrinfo);
         close (_socket_serv);
         return -3;
@@ -156,7 +156,6 @@ void    server::_Add_user() {
     addrinfo_cli.ai_addr = NULL;
     addrinfo_cli.ai_addrlen = 0;
 
-    std::cout << "elemt _user:" << _list_user.size() << std::endl;
     socket_cli = accept(_socket_serv, addrinfo_cli.ai_addr, &addrinfo_cli.ai_addrlen);
    
     if (socket_cli < 0) {
@@ -356,12 +355,10 @@ int     server::_Output_all_user_channel(user *user, std::string msg) {
         chan[i]->Remove_user(user);
         
         _Output_channel(chan[i], str);
-        if (chan[i]->Get_list_channel_user().empty())
-            _Remove_channel(chan[i]);
-        else if (chan[i]->Get_list_operator().empty())
-            chan[i]->Add_oper(user, chan[i]->Get_list_channel_user().front());
-        else
-            _Output_channel(chan[i], str);
+        if (chan[i]->Get_list_channel_user().empty())   // If channel empty
+            _Remove_channel(chan[i]);                   // Remove channel
+        else if (chan[i]->Get_list_operator().empty())  // If no oper but user
+            chan[i]->Add_oper(user, chan[i]->Get_list_channel_user().front());  // older user become oper
     }
     return 0;
 }
