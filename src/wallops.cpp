@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   wallops.cpp                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/01/20 23:43:03 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/23 19:07:57 by egiacomi         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "../class/utils.hpp"
 
 bool	server::_add_channel_targetfds_wallops(user *sender, std::vector<int> *targets_fds, std::string target)

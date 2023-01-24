@@ -15,6 +15,7 @@
 # define RPL_WELCOME(serveur, nick, use, host) ":" + serveur + " 001 " + nick + " :Welcome to the Internet Relay Network " + nick + "!" + use + "@" + host
 
 # define RPL_UMODEIS(nick, target, mode) ":" + nick + " MODE " + target + " :" + mode
+# define RPL_MYMODE(serveur, nick, mode) ":" + serveur + " 221 " + nick + " " + mode
 
 # define RPL_AWAY(serveur, nick, nick_dest, msg) ":" + serveur + " 301 " + nick + " " + nick_dest + " :" + msg
 # define RPL_UNAWAY(serveur, nick) ":" + serveur + " 305 " + nick + " :You are no longer marked as being away"
@@ -24,6 +25,7 @@
 # define RPL_LISTEND(serveur, nick) ":" + serveur + " 323 " + nick + " :End of /LIST"
 # define RPL_CHANNELNEWOP(pre, chan, mode, nick) ":" + pre + " MODE " + chan + " " + mode + " " + nick
 # define RPL_CHANNELMODEIS(pre, chan, mode) ":" + pre + " MODE " + chan + " " + mode
+# define RPL_CHANNEL_MODE(serveur, nick, chan, mode) ":" + serveur + " 324 " + nick + " " + chan + " " + mode
 # define RPL_NOTOPIC(serveur, chan) ":" + serveur + " 331 " + chan + " :No topic is set"
 # define RPL_TOPIC(serveur, nick, chan, topic) ":" + serveur + " 332 " + nick + " " + chan + " :" + topic
 

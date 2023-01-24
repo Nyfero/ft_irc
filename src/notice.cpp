@@ -1,16 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   notice.cpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/01/14 17:54:33 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/20 16:19:15 by egiacomi         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-#include "../class/server.hpp"
 #include "../class/utils.hpp"
 
 bool	server::_parse_notice_wallops(t_IRCMessage cmd)

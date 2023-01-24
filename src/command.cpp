@@ -204,7 +204,6 @@ void server::Nick_cmd(user *user, t_IRCMessage cmd) {
     }
 
     // Verifie si le user n'est pas restreind
-    std::cout << "isRestricted ==> " << isRestricted(user) << std::endl;
     if (isRestricted(user)) {
         _Output_client(user->Get_fd_client(), ERR_RESTRICTED(_name_serveur, user->Get_nickname()));
         return ;
@@ -240,7 +239,25 @@ void server::Nick_cmd(user *user, t_IRCMessage cmd) {
                 return;
             }
         }
-        _Output_client(user->Get_fd_client(), ":" + user->Get_nickname() + " NICK :" + cmd.params[0]);
+
+        std::vector<int>    v_fd;
+        v_fd.push_back(user->Get_fd_client());
+        for (size_t i = 0; i < user->Get_channel_register().size(); i++) {
+            for (size_t j = 0; j < user->Get_channel_register()[i]->Get_list_channel_user().size(); j++) {
+                int fd = user->Get_channel_register()[i]->Get_list_channel_user()[j]->Get_fd_client();
+                for (size_t k = 0; k < v_fd.size(); k++) {
+                    if (v_fd[k] == fd) {
+                        break;
+                    }
+                    if (k + 1 == v_fd.size()) {
+                        v_fd.push_back(fd);
+                    }
+                }
+            }
+        }
+        for (size_t i = 0; i < v_fd.size(); i++) {
+            _Output_client(v_fd[i], ":" + user->Get_nickname() + " NICK :" + cmd.params[0]);
+        }
         user->Set_nickname(cmd.params[0]);
     }
     else {
@@ -268,11 +285,6 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
         return;
     }
 
-    // Verifie les arguments de MODE
-    if (cmd.params.size() == 1) {
-        return;
-    }
-
     // check if chan
     if (cmd.params[0].at(0) == '!' || cmd.params[0].at(0) == '#' || cmd.params[0].at(0) == '&' || cmd.params[0].at(0) == '+') {
 
@@ -284,8 +296,8 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
         }
 
         // Verifie s'il y a un mode
-        if (cmd.params[1].empty()) {
-            _Output_client(user->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "MODE"));
+        if (cmd.params.size() == 1) {
+            _Output_client(user->Get_fd_client(), RPL_CHANNEL_MODE(_name_serveur, user->Get_nickname(), chan->Get_channel_name(), chan->Print_mode()));
             return;
         }
 
@@ -414,22 +426,18 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
 
     // Verifie que le premier parametre est le nickname ou le realname
     if (cmd.params[0] != user->Get_nickname() && cmd.params[0] != user->Get_realname().substr(0, user->Get_realname().find(' '))) {
-        if (!user->Get_mode()->Get_operator()) {
-            _Output_client(user->Get_fd_client(), ERR_USERSDONTMATCH(_name_serveur));
-            return;
-        }
-        else if (!_Get_user_by_nick(cmd.params[0])) {
+        if (!user->Get_mode()->Get_operator() || !_Get_user_by_nick(cmd.params[0])) {
             _Output_client(user->Get_fd_client(), ERR_USERSDONTMATCH(_name_serveur));
             return;
         }
     }
 
-    for (size_t i = 0; i < cmd.params.size(); i++) {
-        std::cout << "Parametre " << i << " : " << cmd.params[i] << std::endl;
-    }
     if (cmd.params.size() == 1) {
-        std::cout << "Mode de " << cmd.params[0] << " : " << _Get_user_by_nick(cmd.params[0])->Get_mode()->Print_mode() << std::endl;
-        _Output_client(user->Get_fd_client(), RPL_UMODEIS(user->Get_nickname(), cmd.params[0], _Get_user_by_nick(cmd.params[0])->Get_mode()->Print_mode()));
+        if (cmd.params[0] != user->Get_nickname()) {
+            _Output_client(user->Get_fd_client(), ERR_USERSDONTMATCH(_name_serveur));
+            return;
+        }
+        _Output_client(user->Get_fd_client(), RPL_MYMODE(_name_serveur, user->Get_nickname(), user->Get_mode()->Print_mode()));
     }
     else {
         if (cmd.params[1].at(0) == '+') {
@@ -835,11 +843,7 @@ void server::Wallops_cmd(user *sender, t_IRCMessage cmd) {
     }
 };
 
-/* Si ca bug c'est car le meme irssi est connecte sur plusieurs instances */
 void server::Pong_cmd(user *user, t_IRCMessage cmd) {
-
-    // exemple pong
-    // :bifrost.ca.us.dal.net PONG bifrost.ca.us.dal.net :nick42
 
     // Verifie que le user est enregistre
     if (user->Get_login_status() != 3) {
@@ -952,6 +956,7 @@ void server::List_cmd(user *user, t_IRCMessage cmd) {
         _Output_client(user->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
         return;
     }
+
     std::vector<channel *> channel_targeted;
     if (cmd.params.empty() == false) {             // Split targeted channel and put in vector channel target
         std::vector<std::string> target_splited = _split_channel_list(cmd.params[0]);

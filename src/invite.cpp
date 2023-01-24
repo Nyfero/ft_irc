@@ -1,27 +1,10 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   invite.cpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: egiacomi <egiacomi@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/01/20 23:42:29 by egiacomi          #+#    #+#             */
-/*   Updated: 2023/01/23 19:07:57 by egiacomi         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "../class/utils.hpp"
 
 bool server::_parse_invite(user *sender, t_IRCMessage cmd)
 {
-    if (cmd.params.empty())																				// Check if command takes parameters
+    if (cmd.params.empty() || cmd.params.size() < 2)												// Check if command takes parameters
     {
 		_Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "INVITE"));
-        return true;
-    }
-	if (cmd.params.size() < 2)																			// Check if I have minimum 2 parameters (target + channel)
-    {
-        _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "INVITE"));
         return true;
     }
     if (Check_valid_channel(cmd.params[1]) == false)													// Check if 2nd parameter is a Channel

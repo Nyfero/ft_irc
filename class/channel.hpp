@@ -74,6 +74,7 @@ class channel
         bool                    Get_invite_only() const;
         bool                    Get_topic_settable() const;
         bool                    Get_channel_private() const;
+        std::string             Print_mode() const;
         std::vector<user *>     Get_invited_user() const;
         
         bool                    _Is_invit(user *use) const;
