@@ -12,7 +12,7 @@
 int server::Check_command(user *user, std::string str) {
 
     t_IRCMessage msg = split_message(user, str);
-    std::string list_command[19] = {"PASS", "USER", "NICK", "MODE", "QUIT", "JOIN", "PART", "NAMES", "INVITE", "KICK", "PRIVMSG", "NOTICE", "AWAY", "USERS", "WALLOPS", "PING", "OPER", "TOPIC", "LIST"};
+    std::string list_command[19] = {"PASS", "USER", "NICK", "MODE", "QUIT", "JOIN", "PART", "NAMES", "INVITE", "KICK", "PRIVMSG", "NOTICE", "AWAY", "USERS", "wallops", "PING", "OPER", "TOPIC", "LIST"};
 
     int i = 0;
     while (i < 19) {
@@ -503,7 +503,7 @@ int server::Quit_cmd(user *user, t_IRCMessage cmd) {
             msg += " ";
     }
     msg.insert(0, " ");
-   _Output_all_user_channel(user, msg);
+    _Output_all_user_channel(user, msg);
     return -2;
 };
 

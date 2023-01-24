@@ -24,6 +24,7 @@ user::user(int  socket, addrinfo info)
 
 user::~user() {
     std::cout << "User destroy: " << _fd_poll_client.fd << std::endl;
+    delete _mode;
     close(_fd_poll_client.fd);
 };
 
