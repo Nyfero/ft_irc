@@ -345,6 +345,9 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                     _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "+k " + chan->Get_channel_key()));
                 }
             }
+            else if (cmd.params[1].at(1) == 'b') {
+                return;
+            }
             else {
                 _Output_client(user->Get_fd_client(), ERR_UNKNOWNMODE(cmd.prefix, cmd.params[1]));
             }
