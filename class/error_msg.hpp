@@ -80,5 +80,16 @@
 # define ERR_RESTRICTED(serveur, nick) ":" + serveur + " 484 " + nick + " :Your connection is restricted!"
 # define ERR_NOOPERHOST(serveur) ":" + serveur + " 491 :No O-lines for your host"
 
-# define ERR_UMODEUNKNOWNFLAG(serveur, nick) ":" + serveur + " 501 " + nick + " :Unknown MODE flag"
+# define ERR_UMODEUNKNOWNFLAG(pre, nick) pre + " " + nick + " : Unknown MODE flag"
 # define ERR_USERSDONTMATCH(serveur) ":" + serveur + " 502 :Cannot change mode for other users"
+
+#define BOT_HELP_TEXT(nickname) "\033[1;36m@ " + nickname + ", here is a list of available commands:\n    - \033[1;32mheure\033[36m: displays the current time\n    - \033[1;32mliste\033[36m: displays the list of channels in this server\n    - \033[1;32mgreetings\033[36m: sends a greeting message\n    - \033[1;32mhelp\033[36m: displays this prompt\n"
+#define BOT_NO_PARAMS "\033[35mAre you trying to speak with \033[1;31;1mBob the Bot\033[35m ? You can say \033[1;31;4m/msg help\033[35m to know more\033[0m"
+#define BOT_GREETING_TEXT "\033[1;32m" + greetings[rand() % 5] + "\033[0m"
+const std::string greetings[] = {
+    "Hello! How can I help you today?",
+    "Welcome! Is there anything I can assist you with?",
+    "Hi! What can I do for you?",
+    "Good day! How may I be of service?",
+    "Greetings! How can I help you?"
+};

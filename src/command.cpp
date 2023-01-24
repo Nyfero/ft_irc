@@ -2,10 +2,7 @@
 
 /* 
     TODO : 
-    - Check AWAY MESSAGE
     - Bot Jarod a modifier
-
-    - Mode RESTRICTED ne marche pas (a fix)
 
     - Tester list
     - Tester Kick/Invite
@@ -29,9 +26,6 @@ int server::Check_command(user *user, std::string str)
         }
         i++;
     }
-
-    if (i == 10)
-        _Bot_main(user, msg);
 
     switch (i) {
 
@@ -311,7 +305,6 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                 if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
                     chan->Set_invite_only(true);
                     _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "+i"));
-                    return;
                 }
             }
             else if (cmd.params[1].at(1) == 't') {
@@ -322,7 +315,6 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                 if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
                     chan->Set_topic_settable(false);
                     _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "+t"));
-                    return;
                 }
             }
             else if (cmd.params[1].at(1) == 'o') {
@@ -365,7 +357,6 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
             }
             else {
                 _Output_client(user->Get_fd_client(), ERR_UNKNOWNMODE(cmd.prefix, cmd.params[1]));
-                return;
             }
         }
         else if (cmd.params[1].at(0) == '-') {
@@ -377,7 +368,6 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                 if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
                     chan->Set_invite_only(false);
                     _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "-i"));
-                    return;
                 }
             }
             else if (cmd.params[1].at(1) == 't') {
@@ -388,7 +378,6 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
                 if (Compare_case_sensitive(chan->Get_channel_name(), cmd.params[0])) {
                     chan->Set_topic_settable(true);
                     _Output_channel(chan, RPL_CHANNELMODEIS(cmd.prefix, chan->Get_channel_name(), "-t"));
-                    return;
                 }
             }
             else if (cmd.params[1].at(1) == 'k') {
@@ -414,12 +403,10 @@ void server::Mode_cmd(user *user, t_IRCMessage cmd) {
             }
             else {
                 _Output_client(user->Get_fd_client(), ERR_UNKNOWNMODE(cmd.prefix, cmd.params[1]));
-                return;
             }
         }
         else {
             _Output_client(user->Get_fd_client(), ERR_UNKNOWNMODE(cmd.prefix, cmd.params[1]));
-            return;
         }
         return;
     }
@@ -696,6 +683,11 @@ void server::Privmsg_cmd(user *sender, t_IRCMessage cmd) {
     if (_parse_privmsg(sender, cmd))                                                // Parse PRIVMSG command
         return;
     std::vector<std::string> target = _target_handle(cmd);                          // Create a vector of targets
+    if (target.size() == 1 && Compare_case_sensitive(target.at(0), "@"))
+    {
+        _Bot_main(sender, cmd);
+        return;
+    }
     std::vector<int> targets_fds = _targetfds_creator_privmsg(sender, target);      // Check targets and put all target fds in a vector
     std::string message = _create_msg(cmd);                                         // Merge all parameters in one Message String
 

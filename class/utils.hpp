@@ -15,6 +15,7 @@
 # include <csignal>
 # include <algorithm>
 # include <cctype>
+# include <ctime>
 
 # include "channel.hpp"
 # include "error_msg.hpp"

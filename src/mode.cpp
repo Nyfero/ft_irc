@@ -162,8 +162,5 @@ std::string Mode::Print_mode() const {
     if (_operator == true) {
         str.append("o");
     }
-    if (str == "+") {
-        return "";
-    }
     return str;
 };

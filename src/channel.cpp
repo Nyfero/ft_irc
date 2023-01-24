@@ -170,10 +170,6 @@ bool channel::Get_channel_private() const {
     return _channel_private;
 };
 
-std::vector<user *> channel::Get_invited_user() const {
-    return _list_invited_user;
-}
-
 std::string channel::Print_mode() const {
     std::string str = "+";
     if (_invite_only) {
@@ -186,7 +182,11 @@ std::string channel::Print_mode() const {
         str += "k";
     }
     return str;
-}
+};
+
+std::vector<user *> channel::Get_invited_user() const {
+    return _list_invited_user;
+};
 
 bool    channel::_Is_invit(user *use) const {
     for (size_t i = 0; i < _list_invited_user.size(); i++)
