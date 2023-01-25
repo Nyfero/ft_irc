@@ -12,7 +12,7 @@
 # define RPL_LIST(serveur, nick, chan, nb_users, topic) ":" + serveur + " 322 " + nick + " " + chan + " " + nb_users + " :" + topic
 # define RPL_LISTEND(serveur, nick) ":" + serveur + " 323 " + nick + " :End of /LIST"
 # define RPL_CHANNELNEWOP(pre, chan, mode, nick) ":" + pre + " MODE " + chan + " " + mode + " " + nick
-# define RPL_CHANNELMODEIS(pre, chan, mode) ":" + pre + " MODE " + chan + " " + mode
+# define RPL_CHANNELMODEIS(pre, chan, mode) pre + " MODE " + chan + " " + mode
 # define RPL_CHANNEL_MODE(serveur, nick, chan, mode) ":" + serveur + " 324 " + nick + " " + chan + " " + mode
 # define RPL_NOTOPIC(serveur, chan) ":" + serveur + " 331 " + chan + " :No topic is set"
 # define RPL_TOPIC(serveur, nick, chan, topic) ":" + serveur + " 332 " + nick + " " + chan + " :" + topic

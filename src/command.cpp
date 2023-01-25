@@ -609,25 +609,21 @@ void server::Names_cmd(user *user, t_IRCMessage cmd) {
     // Verifie les arguments de NAMES
     if (cmd.params.empty()) {
         for (size_t i = 0; i < user->Get_channel_register().size(); i++) {
-            for (size_t j = 0; j < user->Get_channel_register().at(i)->Get_list_channel_user().size(); j++) {
-                if (user->Get_channel_register().at(i)->Get_list_channel_user().at(j)->Get_nickname() != user->Get_nickname()) {
-                    _Output_client(user->Get_fd_client(), RPL_NAMREPLY(_name_serveur, user->Get_nickname(),user->Get_channel_register().at(i)->Get_channel_name(), user->Get_channel_register().at(i)->Get_list_channel_user().at(j)->Get_nickname()));
-                }
-            }
+            std::string names = Create_names_rpl(user->Get_channel_register().at(i));
+            _Output_client(user->Get_fd_client(), RPL_NAMREPLY(_name_serveur, user->Get_nickname(),user->Get_channel_register().at(i)->Get_channel_name(), names));
             _Output_client(user->Get_fd_client(), RPL_ENDOFNAMES(_name_serveur, user->Get_nickname(), user->Get_channel_register().at(i)->Get_channel_name()));
         }
     }
     else {
         for (size_t i = 0; i < user->Get_channel_register().size(); i++) {
             if (cmd.params[0] == user->Get_channel_register().at(i)->Get_channel_name()) {
-                for (size_t j = 0; j < user->Get_channel_register().at(i)->Get_list_channel_user().size(); j++) {
-                    if (user->Get_channel_register().at(i)->Get_list_channel_user().at(j)->Get_nickname() != user->Get_nickname()) {
-                        _Output_client(user->Get_fd_client(), RPL_NAMREPLY(_name_serveur, user->Get_nickname(),user->Get_channel_register().at(i)->Get_channel_name(), user->Get_channel_register().at(i)->Get_list_channel_user().at(j)->Get_nickname()));
-                    }
+                std::string names = Create_names_rpl(user->Get_channel_register().at(i));
+                _Output_client(user->Get_fd_client(), RPL_NAMREPLY(_name_serveur, user->Get_nickname(),user->Get_channel_register().at(i)->Get_channel_name(), names));
                 _Output_client(user->Get_fd_client(), RPL_ENDOFNAMES(_name_serveur, user->Get_nickname(), user->Get_channel_register().at(i)->Get_channel_name()));
-                }
+                return;
             }
         }
+        _Output_client(user->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, user->Get_nickname(), cmd.params[0]));
     }
 };
 
