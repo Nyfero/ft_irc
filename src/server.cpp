@@ -20,6 +20,7 @@ server::server(char *port, char *password)
     _hints.ai_addr = NULL;
     _hints.ai_next = NULL;
 
+    std::cout << "STARTING SERVER" << std::endl;
     (void)_password;
     if ((res = _Init_server()) < 0 ) {
         ;

@@ -118,7 +118,6 @@ void server::Pass_cmd(user *user, t_IRCMessage cmd) {
     
     // Connecte le user et envoie un message de bienvenue
     user->Set_login_status(1);
-    std::cout << "New user connected on " << user->Get_fd_client() << std::endl;
     _Output_client(user->Get_fd_client(), "Welcome to the IRC server");
 
 };
@@ -126,7 +125,12 @@ void server::Pass_cmd(user *user, t_IRCMessage cmd) {
 void server::User_cmd(user *user, t_IRCMessage cmd) {
 
     // Verifie que le user a deja set son nickname
-    if (user->Get_login_status() != 2) {
+    if (user->Get_login_status() <= 1) {
+        _Output_client(user->Get_fd_client(), ERR_NOLOGIN(_name_serveur, ""));
+        return;
+    }
+
+    if (user->Get_login_status() == 3) {
         _Output_client(user->Get_fd_client(), ERR_ALREADYREGISTRED(_name_serveur));
         return;
     }
@@ -189,7 +193,7 @@ void server::Nick_cmd(user *user, t_IRCMessage cmd) {
     } 
 
     // Verifie les arguments de NICK
-    if (cmd.params[0].empty()) {
+    if (cmd.params.empty()) {
         _Output_client(user->Get_fd_client(), ERR_NONICKNAMEGIVEN(_name_serveur));
         return;
     }
@@ -251,7 +255,6 @@ void server::Nick_cmd(user *user, t_IRCMessage cmd) {
         }
         user->Set_login_status(2);
         user->Set_nickname(cmd.params[0]);
-        std::cout << "Introducing new " << cmd.params[0] << " user" << std::endl;
         _Output_client(user->Get_fd_client(), "Hello " + cmd.params[0] + " !");
     }
 };

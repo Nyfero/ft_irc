@@ -14,7 +14,7 @@ user::user(int  socket, addrinfo info)
     _fd_poll_client.fd = socket,
     _fd_poll_client.revents = 0,
     _fd_poll_client.events = POLLIN,
-    std::cout << "*** User create: " << _fd_poll_client.fd << " ***" << std::endl;
+    std::cout << "*** User create with fd: " << _fd_poll_client.fd << " ***" << std::endl;
 };
 
 /********************/
