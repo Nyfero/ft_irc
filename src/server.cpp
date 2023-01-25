@@ -169,11 +169,21 @@ void    server::_Remove_user(std::vector<user*>::iterator pos) {
             break;
         }
     }
+
+    // check list invit channel
+    std::vector<channel *>::iterator it2;    
+    for (it2 = _list_channel.begin(); it2 != _list_channel.end(); it2++) { // check all chan
+        channel *serv_chan = (*it2);
+
+        if (serv_chan->_Is_invit(tmp))
+            serv_chan->Remove_invited_user(tmp);
+    }
+
     // supprimer l'use de tous les channe la auxquel il appartient
     while (!tmp->Get_channel_register().empty()) {
         channel *chan = tmp->Get_channel_register().front();
         chan->Remove_user(tmp); // retirer l'user du hannel 
-        tmp->Remove_Channel(chan); // retirer channel du user 
+        tmp->Remove_Channel(chan); // retirer channel du user
         if (chan->Get_list_channel_user().empty()) // si channeldevient vide,le  delete
             _Remove_channel(chan);
         else if (chan->Get_list_operator().empty()) // sinon si l'user etait le dernier op on le remplace
@@ -196,11 +206,21 @@ void    server::_Remove_user(std::vector<pollfd>::iterator pos) {
 
     user *use = _Get_user_by_fd(pos->fd);
 
+    std::vector<channel *>::iterator it2;
+    for (it2 = _list_channel.begin(); it2 != _list_channel.end(); it2++) { // check all chan
+        channel *serv_chan = (*it2);
+
+        if (serv_chan->_Is_invit(use))
+            serv_chan->Remove_invited_user(use);
+    }
+
     // leave all channel
     std::vector<channel *> l_chan = use->Get_channel_register();
     for (size_t i = 0; i < l_chan.size(); i++) {
         l_chan[i]->Remove_user(use);
         use->Remove_Channel(l_chan[i]);
+
+        std::vector<user *>::iterator it2;
         if (l_chan[i]->Get_list_channel_user().empty())
             _Remove_channel(l_chan[i]);
         else if (l_chan[i]->Get_list_operator().empty())

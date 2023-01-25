@@ -94,7 +94,6 @@ bool user::Is_op_channel(channel *chan) const{
             return true;
 
     }
-    std::cout << "false" << std::endl;
     return false;
 }
 
