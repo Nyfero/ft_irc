@@ -2,6 +2,7 @@
 
 int server::Check_command(user *user, std::string str) {
 
+    std::cout << user->Get_fd_client() << " << " << str << std::endl;
     t_IRCMessage msg = split_message(user, str);
     std::string list_command[19] = {"PASS", "USER", "NICK", "MODE", "QUIT", "JOIN", "PART", "NAMES", "INVITE", "KICK", "PRIVMSG", "NOTICE", "AWAY", "USERS", "wallops", "PING", "OPER", "TOPIC", "LIST"};
 
@@ -532,7 +533,7 @@ void server::Join_cmd(user *user, t_IRCMessage cmd) {
         std::vector<channel*>    l_chan = user->Get_channel_register();
         while (!l_chan.empty())
         {
-            _Output_channel(l_chan[0],  ":" + cmd.prefix + " PART " + l_chan[0]->Get_channel_name());
+            _Output_channel(l_chan[0], cmd.prefix + " PART " + l_chan[0]->Get_channel_name());
             user->Remove_Channel(l_chan[0]);
             l_chan[0]->Remove_user(user);
             if (l_chan[0]->Get_list_channel_user().empty()) // si chan vide le retirer
@@ -919,7 +920,7 @@ void server::Topic_cmd(user *user, t_IRCMessage cmd) {
     }
     if (!(chan = _Channel_already_exist(cmd.params[0])))
     {
-        _Output_client(user->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, user->Get_nickname(), chan->Get_channel_name()));
+        _Output_client(user->Get_fd_client(), ERR_NOSUCHCHANNEL(_name_serveur, user->Get_nickname(), cmd.params[0]));
         return ;
     }
 
@@ -947,7 +948,8 @@ void server::Topic_cmd(user *user, t_IRCMessage cmd) {
             if (i + 1 < cmd.params.size())
                 new_topic += " ";
         }
-        new_topic.erase(new_topic.begin()); // delete ':' 
+        if (new_topic[0] == ':')
+            new_topic.erase(new_topic.begin()); // delete ':' s'il y a
         chan->Mod_topic(new_topic);
         if (new_topic.empty())
             _Output_channel(chan, cmd.prefix + " TOPIC " + chan->Get_channel_name() + " :");
