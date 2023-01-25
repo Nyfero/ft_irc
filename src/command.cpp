@@ -673,7 +673,8 @@ void server::Kick_cmd(user *sender, t_IRCMessage cmd) {
         return ;
     }
     if (_parse_kick(sender, cmd))                                                           // Parse KICK command
-        return; 
+        return;
+    
     user *target_nick = _check_nick_kick(sender, cmd);                                      // Check that the nickname parameter is correct
     if (target_nick == NULL)                                                                // Check that the param 1 : Nickname is correct
         return;

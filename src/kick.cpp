@@ -12,6 +12,12 @@ bool server::_parse_kick(user *sender, t_IRCMessage cmd)
         _Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "KICK"));
         return true;
     }
+	if (cmd.params.size() > 2) {
+		if (cmd.params[2].at(0) != ':') {
+			_Output_client(sender->Get_fd_client(), ERR_NEEDMOREPARAMS(_name_serveur, "KICK"));				// Check si le kick msg contient :
+        	return true;
+		}
+	}
 	return false;
 }
 
@@ -106,13 +112,13 @@ bool server::_kick_from_channel(user *target_nick, channel *channel_kick)
 void server::_kick_success_message(user *target_nick, channel *channel_kick, t_IRCMessage cmd)
 {
 	std::string kicked_message_channel = cmd.prefix + " " + cmd.command + " " + channel_kick->Get_channel_name() + " " + cmd.params[1];
-	if (cmd.params[2].empty())
+
+	if (cmd.params.size() < 2) {
 		kicked_message_channel.append(":" + cmd.prefix);
+	}
 	else
 	{
-		std::string note = cmd.params[2];
-		for (size_t i = 3; i < cmd.params.size(); i++) 
-        	note += " " + cmd.params[i];
+		std::string note = Join(cmd.params, 2, cmd.params.size());
 		kicked_message_channel.append(" " + note);
 	}
 	_Output_channel(channel_kick, kicked_message_channel);
